@@ -1,0 +1,186 @@
+% Draft for REALM @ EMNLP short-paper submission.
+% Port this content to the official ACL 2026 style files before PDF submission.
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{times}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{amsmath}
+\usepackage{natbib}
+\usepackage{hyperref}
+
+\title{TextGrad-RL: Trajectory-Level Textual Policy Iteration for Frozen Language Agents}
+\author{Anonymous REALM Submission}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Language agents increasingly act in interactive environments, but adapting them commonly requires prompt engineering, tool-specific scaffolding, or expensive model fine-tuning. We study a lightweight alternative: improve a frozen agent by optimizing only its textual policy variables from full trajectories. We introduce TextGrad-RL, a policy-iteration style extension of TextGrad that treats modular instructions as the trainable policy, assigns action-level credit from environment rollouts, proposes advantage-weighted textual rule edits, and accepts updates through held-out validation gates. We further test a PPO-inspired trust-region gate over textual policy edits using paired old/new rollouts, a clipped surrogate, and a KL-style behavioral proxy. Across 10 TextArena environments, TextGrad-RL improves held-out reward from 0.185 for a fixed prompt to 0.583 with zero invalid moves, and transfers to harder variants with 0.897 reward versus 0.190 for the fixed prompt. The PPO-style gate does not improve deterministic reward over the simpler train/validation gate, but stochastic small-language-model ablations show that it rejects brittle prompt edits that degrade validation behavior or increase invalid actions. Our results position TextGrad-RL as a practical testbed for studying reinforcement learning analogues over textual policies, with an honest negative result: current PPO-style constraints improve stability diagnostics more clearly than final reward.
+\end{abstract}
+
+\section{Introduction}
+
+Language model agents now use tools, play games, write code, and interact with websites and software environments \citep{yao2023react,schick2023toolformer,zhou2023webarena,yang2024sweagent}. The REALM setting foregrounds a central question for these systems: how can agents improve from interaction while remaining reliable, inspectable, and cheap to run? Full model training is often impractical for local or domain-specific agents, while hand prompt engineering does not scale and is hard to evaluate systematically.
+
+We study the middle ground where the base actor is frozen and only its textual policy is updated. This resembles verbal reinforcement learning \citep{shinn2023reflexion} and textual optimization \citep{yuksekgonul2024textgrad}, but we make the reinforcement-learning structure explicit. TextGrad-RL represents the policy as a set of modular text variables, runs the frozen agent in TextArena environments \citep{guertler2025textarena}, assigns credit to bad or good actions, asks a textual optimizer to propose rule edits, and accepts those edits only when validation rollouts improve.
+
+This paper is intentionally framed as a short, mechanism-focused REALM submission. Its contributions are:
+\begin{itemize}
+    \item A trajectory-level TextGrad-RL loop that updates only text variables while preserving a frozen actor.
+    \item A policy-iteration variant with action credit, value baselines, advantage-weighted textual gradients, replay, and candidate policy search.
+    \item A PPO-style ablation for textual policies using paired rollouts, a clipped surrogate, and a KL-style trust-region proxy.
+    \item A broad TextArena evaluation, including deterministic games, difficulty generalization, and stochastic small-language-model (SLM) suites.
+\end{itemize}
+
+The empirical story is deliberately conservative. TextGrad-RL strongly outperforms fixed prompts and scalar-only prompt search on deterministic TextArena tasks. However, full TextGrad-RL-PPO does not beat the simpler train/validation gate in final deterministic reward. In stochastic SLM settings, PPO-style checks mainly serve as diagnostics and safeguards: they reject unstable updates, but do not yet produce a reliable reward lift.
+
+\section{Method}
+
+\paragraph{Text variables as policies.}
+Let $\pi_{\theta}$ be a frozen language or prompt-aware agent. The trainable object is not $\theta$, but a collection of text variables $x = \{x_1,\ldots,x_k\}$, such as generic action-validity instructions, state-tracking rules, and environment-specific strategy notes. At episode time, the actor receives the current observation plus retrieved text variables and emits an action.
+
+\paragraph{Trajectory feedback.}
+For each environment, we collect trajectories $\tau=(o_t,a_t,r_t,m_t)_{t=1}^T$, where $m_t$ includes invalid-move flags, repeated actions, truncation, and turn-efficiency metadata. A trajectory critic summarizes which text variables caused failures or successes. Unlike scalar prompt search, this feedback is structured as textual gradients: edits such as ``when playing Nim, leave a multiple of four stones'' or ``in FrozenLake, avoid unsafe random wandering unless forced.''
+
+\paragraph{Policy iteration over text.}
+TextGrad-RL strengthens the basic TextGrad loop with reinforcement-learning bookkeeping. A tabular value critic estimates environment baselines, action-level credit assigns advantages to specific decisions, and candidate policy search evaluates multiple text edits per environment. Candidate rules are replayed on train and validation seeds. Accepted rules are stored in a learned rule library and retrieved at test time.
+
+\paragraph{PPO-style gate over prompt edits.}
+We also test a textual analogue of proximal policy optimization \citep{schulman2017ppo}. Because prompt edits do not expose token-level action probabilities, we compute a behavioral proxy from paired old/new rollouts under identical seeds. For candidate text $x'$, we estimate a ratio-like score $r(x',x)$ from action agreement and score deltas, and evaluate a clipped surrogate,
+\[
+L_{\mathrm{clip}}(x') =
+\mathbb{E}\left[\min(r A,\mathrm{clip}(r,1-\epsilon,1+\epsilon)A)\right].
+\]
+The full TextGrad-RL-PPO gate accepts an edit only if it improves train/validation behavior, has positive clipped-surrogate delta, stays below a KL-style action-change threshold, and does not increase invalid or truncated episodes. We compare this full gate against four ablations: no gate, train/validation gate only, KL gate only, and clipped-surrogate gate only.
+
+\section{Experimental Setup}
+
+\paragraph{Benchmarks.}
+We evaluate on TextArena, an interactive collection of text-based games for language-agent training and evaluation \citep{guertler2025textarena}. The deterministic base suite covers 10 environments: Nim, ConnectFour, ReverseTicTacToe, GuessTheNumber, FrozenLake, TowerOfHanoi, LightsOut, Mastermind, Blackjack, and Bandit. The difficulty-generalization suite evaluates harder variants such as larger Nim, randomized or hardcore FrozenLake, and harder Mastermind. We also run stochastic SLM suites: puzzle games, social/multi-agent games, and a real-SLM mix of standard TextArena tasks.
+
+\paragraph{Models and baselines.}
+The deterministic suites use the repository's frozen prompt-aware heuristic actor so that prompt-policy updates can be compared under controlled rollouts. SLM experiments use a frozen local \texttt{qwen2.5:3b} actor at temperature 0.7 through an OpenAI-compatible Ollama endpoint. We compare fixed prompts, scalar prompt search, modular TextGrad, TextGrad-RL+, policy iteration, and PPO-style variants. No method fine-tunes model weights.
+
+\paragraph{Splits and statistics.}
+The base deterministic suite uses 3 repetitions, 5 train seeds, 5 validation seeds, and 10 test seeds, yielding 390 held-out test episodes per method. Difficulty generalization uses 2 repetitions over harder held-out tasks. SLM ablations use 5 train, validation, and test seeds per environment. We report average reward, success, invalid-move rate, turns, accepted prompt updates, and bootstrap reward intervals where available.
+
+\section{Results}
+
+Table~\ref{tab:base} shows the main deterministic comparison. TextGrad-RL variants sharply improve over fixed prompts and scalar search. The fixed prompt obtains 0.185 reward and 20.5\% success, while policy iteration obtains 0.583 reward and 61.5\% success with no invalid moves. TextGrad-RL+ and policy iteration preserve the same success rate but reduce average turns, suggesting more efficient rule execution.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrrrr}
+\toprule
+Method & Reward & 95\% CI & Success & Invalid \\
+\midrule
+Fixed prompt & 0.185 & [0.118, 0.245] & 0.205 & 0.105 \\
+Scalar search & 0.185 & [0.124, 0.245] & 0.205 & 0.105 \\
+Modular TextGrad & 0.563 & [0.503, 0.623] & 0.615 & 0.000 \\
+TextGrad-RL+ & 0.583 & [0.524, 0.641] & 0.615 & 0.000 \\
+Policy iteration & 0.583 & [0.524, 0.638] & 0.615 & 0.000 \\
+TextGrad-RL-PPO & 0.583 & [0.521, 0.645] & 0.615 & 0.000 \\
+\bottomrule
+\end{tabular}
+\caption{Held-out base TextArena results over 390 test episodes per method.}
+\label{tab:base}
+\end{table}
+
+Table~\ref{tab:difficulty} evaluates transfer to harder TextArena variants. The fixed prompt degrades to 0.190 reward and 0.167 success. TextGrad policy iteration reaches 0.897 reward and 0.833 success, with zero invalid moves, indicating that learned textual rules transfer beyond the exact training seeds and task settings.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrrrr}
+\toprule
+Method & Reward & Success & Invalid & Turns \\
+\midrule
+Fixed prompt & 0.190 & 0.167 & 0.139 & 22.597 \\
+Modular TextGrad & 0.830 & 0.792 & 0.000 & 18.236 \\
+TextGrad-RL+ & 0.880 & 0.792 & 0.000 & 17.250 \\
+Policy iteration & 0.897 & 0.833 & 0.000 & 16.958 \\
+TextGrad-RL-PPO & 0.897 & 0.833 & 0.000 & 16.958 \\
+\bottomrule
+\end{tabular}
+\caption{Difficulty generalization on harder held-out TextArena variants.}
+\label{tab:difficulty}
+\end{table}
+
+Table~\ref{tab:ppoablation} isolates the gate mechanism. The no-gate variant accepts all 10 average updates and underperforms the gated variants. A train/validation gate accounts for the main deterministic benefit. KL-only and clipped-surrogate-only gates are close but not better. The full PPO-style gate ties train/validation gating, suggesting that the current deterministic candidate distribution is already conservative enough that extra trust-region checks rarely change the final policy.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrrrrr}
+\toprule
+Gate & Reward & Success & Invalid & Turns & Accepted \\
+\midrule
+No gate & 0.568 & 0.615 & 0.000 & 10.310 & 10.0 \\
+Train/val & 0.583 & 0.615 & 0.000 & 10.156 & 6.0 \\
+KL only & 0.581 & 0.615 & 0.000 & 10.156 & 6.3 \\
+Clipped only & 0.581 & 0.615 & 0.000 & 10.156 & 6.3 \\
+Full PPO & 0.583 & 0.615 & 0.000 & 10.156 & 6.0 \\
+\bottomrule
+\end{tabular}
+\caption{PPO-style gate ablation on the deterministic policy suite.}
+\label{tab:ppoablation}
+\end{table}
+
+Table~\ref{tab:slm} turns to stochastic SLM rollouts. These results are noisier and much harsher. In puzzle tasks, success remains zero and invalid outputs remain high. In social and real-SLM tasks, gates prevent several harmful updates, but no method dominates. The most notable real-SLM result is that train/validation gating achieves 0.413 reward, while full PPO achieves 0.194. However, PPO rejected its candidate edit; the difference is therefore not evidence that PPO training caused improvement. Instead, the gate diagnostics show that PPO-style surrogate and invalid-rate checks reject brittle edits that look attractive on only part of the sampled data.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{llrrrr}
+\toprule
+Suite & Method & Reward & Success & Invalid & Accepted \\
+\midrule
+\multirow{3}{*}{Puzzle} 
+ & No gate & 0.089 & 0.000 & 1.000 & yes \\
+ & Train/val & 0.109 & 0.000 & 1.000 & no \\
+ & Full PPO & 0.129 & 0.000 & 1.000 & no \\
+\midrule
+\multirow{3}{*}{Social}
+ & No gate & -0.267 & 0.200 & 0.267 & yes \\
+ & Train/val & -0.400 & 0.133 & 0.333 & no \\
+ & Full PPO & -0.333 & 0.267 & 0.267 & no \\
+\midrule
+\multirow{3}{*}{Real SLM}
+ & No gate & 0.027 & 0.000 & 0.440 & yes \\
+ & Train/val & 0.413 & 0.320 & 0.160 & no \\
+ & Full PPO & 0.194 & 0.160 & 0.240 & no \\
+\bottomrule
+\end{tabular}
+\caption{Selected stochastic SLM ablation results with \texttt{qwen2.5:3b} at temperature 0.7 and five seeds per split.}
+\label{tab:slm}
+\end{table}
+
+\section{Analysis}
+
+\paragraph{Where is the RL?}
+The RL component is not weight-level policy-gradient training. It is the control structure around textual policies: environment interaction, trajectory returns, action-level credit assignment, value baselines, candidate policy search, replay, and held-out acceptance. This makes TextGrad-RL closer to policy iteration over interpretable text rules than to end-to-end neural RL.
+
+\paragraph{Why PPO does not yet win.}
+The deterministic runs reveal that train/validation gating is already enough to select the six robust rules: FrozenLake, GuessTheNumber, LightsOut, Mastermind, Nim, and TowerOfHanoi. PPO accepts the same policies, so it ties rather than improves. In the SLM setting, PPO's stricter gate often rejects edits with negative surrogate deltas, validation regressions, or invalid-action increases. That is useful for safety and diagnosis, but the current candidate generator does not yet propose enough high-quality diverse edits for PPO to produce a reward advantage.
+
+\paragraph{Implications for agent research.}
+These results argue for treating textual self-improvement as an empirical policy-learning problem, not just prompt editing. The same edit can improve a training trajectory, harm validation behavior, and fail under stochastic decoding. REALM-style agent benchmarks need these distinctions: accepted textual memories and rules should be evaluated with held-out seeds, invalid-action rates, and update-decision traces.
+
+\section{Limitations and Ethics}
+
+This is a research prototype. The deterministic actor is a controlled heuristic policy, not a frontier LLM. The SLM runs use a small local model and remain sensitive to action-format failures, decoding stochasticity, and limited seeds. The PPO surrogate is a behavioral proxy because the system does not observe true token-level action probabilities. Thus, the PPO results should be read as a stability ablation rather than a claim of policy-gradient optimality.
+
+Ethically, frozen local agents and transparent textual rule updates reduce some risks relative to opaque fine-tuning, but agent self-improvement can still amplify unsafe behavior if the environment reward is misspecified. We therefore log rejected updates, invalid actions, and validation regressions, and restrict the software-engineering environment against editing tests, hidden validation, or reward files.
+
+\section{Conclusion}
+
+TextGrad-RL offers a lightweight way to improve frozen language agents by optimizing modular text policies from trajectories. On TextArena, it substantially improves deterministic held-out reward and generalizes to harder variants. PPO-style gates do not yet improve final reward over train/validation gating, but they expose and reject brittle stochastic prompt edits. This makes TextGrad-RL a useful REALM benchmark substrate for studying how language agents can learn from interaction without updating model weights.
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}
