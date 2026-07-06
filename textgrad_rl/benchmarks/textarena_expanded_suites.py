@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import csv
+import json
 import math
 import os
 import re
@@ -171,7 +173,16 @@ class SLMTextArenaRecord:
     reason: str
     actions: list[str]
     raw_outputs: list[str]
+    action_logprobs: list[float | None]
     runtime_seconds: float
+
+
+@dataclass
+class SLMCandidate:
+    candidate_id: str
+    source: str
+    description: str
+    variables: dict[str, TextVariable]
 
 
 class GenericTextArenaSLMAgent:
@@ -180,9 +191,9 @@ class GenericTextArenaSLMAgent:
         self.model = model
         self.variables = variables
 
-    def act(self, observation: str, player_id: int) -> tuple[str, str]:
-        raw = self.model.complete(self._prompt(observation, player_id))
-        return normalize_textarena_action(raw, self.env_id), raw
+    def act(self, observation: str, player_id: int) -> tuple[str, str, float | None]:
+        result = self.model.complete_with_metadata(self._prompt(observation, player_id))
+        return normalize_textarena_action(result.text, self.env_id), result.text, result.action_logprob
 
     def _prompt(self, observation: str, player_id: int) -> str:
         variable_text = "\n\n".join(
@@ -300,6 +311,7 @@ def run_slm_episode(
     agent = GenericTextArenaSLMAgent(env_id, model, variables)
     actions: list[str] = []
     raw_outputs: list[str] = []
+    action_logprobs: list[float | None] = []
     done = False
     truncated = False
     turns = 0
@@ -310,12 +322,14 @@ def run_slm_episode(
         if not isinstance(observation, str):
             observation = "\n".join(str(item) for item in observation)
         try:
-            action, raw = agent.act(observation, pid)
+            action, raw, action_logprob = agent.act(observation, pid)
         except Exception as exc:
             action = "[0]"
             raw = f"REQUEST_FAILED: {exc}"
+            action_logprob = None
         actions.append(f"p{pid}:{action}")
         raw_outputs.append(raw)
+        action_logprobs.append(action_logprob)
         done, _ = env.step(action)
         turns += 1
     if not done:
@@ -339,6 +353,7 @@ def run_slm_episode(
         reason=str(info.get("reason", "")),
         actions=actions,
         raw_outputs=raw_outputs,
+        action_logprobs=action_logprobs,
         runtime_seconds=time.perf_counter() - start,
     )
 
@@ -416,6 +431,7 @@ def slm_ppo_metrics(
     clipped_surrogates: list[float] = []
     score_deltas: list[float] = []
     action_changes: list[float] = []
+    generated_logprob_deltas: list[float] = []
     for old, new in paired:
         old_score = slm_record_score(old)
         new_score = slm_record_score(new)
@@ -428,6 +444,10 @@ def slm_ppo_metrics(
         clipped_surrogates.append(clipped_text_surrogate(advantage, ratio, config.clip_epsilon))
         score_deltas.append(new_score - old_score)
         action_changes.append(0.0 if old.actions == new.actions else 1.0)
+        old_logprob = slm_record_action_logprob(old)
+        new_logprob = slm_record_action_logprob(new)
+        if old_logprob is not None and new_logprob is not None:
+            generated_logprob_deltas.append(new_logprob - old_logprob)
 
     old_metrics = summarize_slm(old_records)
     new_metrics = summarize_slm(new_records)
@@ -443,6 +463,8 @@ def slm_ppo_metrics(
             "mean_score_delta": 0.0,
             "mean_ratio": 1.0,
             "action_change_rate": 0.0,
+            "generated_action_logprob_delta": 0.0,
+            "logprob_pairs": 0,
             "invalid_delta": new_metrics["invalid_move_rate"] - old_metrics["invalid_move_rate"],
             "truncation_delta": new_metrics["truncation_rate"] - old_metrics["truncation_rate"],
             "turn_delta": new_metrics["average_turns"] - old_metrics["average_turns"],
@@ -463,6 +485,10 @@ def slm_ppo_metrics(
         "mean_score_delta": sum(score_deltas) / n,
         "mean_ratio": sum(ratios) / n,
         "action_change_rate": sum(action_changes) / n,
+        "generated_action_logprob_delta": (
+            sum(generated_logprob_deltas) / len(generated_logprob_deltas) if generated_logprob_deltas else 0.0
+        ),
+        "logprob_pairs": len(generated_logprob_deltas),
         "invalid_delta": new_metrics["invalid_move_rate"] - old_metrics["invalid_move_rate"],
         "truncation_delta": new_metrics["truncation_rate"] - old_metrics["truncation_rate"],
         "turn_delta": new_metrics["average_turns"] - old_metrics["average_turns"],
@@ -478,6 +504,13 @@ def slm_ppo_objective(metrics: dict[str, Any], val_delta: float) -> float:
         - max(0.0, float(metrics["truncation_delta"]))
         - 0.005 * max(0.0, float(metrics["turn_delta"]))
     )
+
+
+def slm_record_action_logprob(record: SLMTextArenaRecord) -> float | None:
+    values = [value for value in record.action_logprobs if value is not None]
+    if not values:
+        return None
+    return sum(float(value) for value in values)
 
 
 def scalar_slm_update(
@@ -516,6 +549,204 @@ def build_slm_candidate(
         gradients,
         constraints=["Do not use hidden state", "Do not mutate TextArena environments"],
     )
+
+
+def append_rule_candidate(
+    variables: dict[str, TextVariable],
+    target_name: str,
+    rule: str,
+    history: str,
+) -> dict[str, TextVariable]:
+    updated = copy.deepcopy(variables)
+    variable = updated.get(target_name) or updated["general_textarena_slm_policy"]
+    if rule.lower() not in variable.value.lower():
+        if "Candidate rules:" not in variable.value:
+            variable.value = variable.value.rstrip() + "\n\nCandidate rules:"
+        variable.value += f"\n- {rule}"
+        variable.version += 1
+        variable.gradient_history.append(history)
+    return updated
+
+
+def slm_candidate_targets(records: list[SLMTextArenaRecord], gradients: list[TextualGradient]) -> list[str]:
+    targets = [gradient.target_variable_name for gradient in gradients]
+    if targets:
+        return list(dict.fromkeys(targets))
+    return [f"{slug_env(env_id)}_slm_policy" for env_id in sorted({record.env_id for record in records})]
+
+
+def heuristic_slm_candidate_rules(records: list[SLMTextArenaRecord]) -> list[tuple[str, str]]:
+    rules: list[tuple[str, str]] = [
+        (
+            "general_textarena_slm_policy",
+            "Before choosing, copy the legal action schema from the latest observation, then output only that schema with no prose.",
+        ),
+        (
+            "general_textarena_slm_policy",
+            "Track every action already attempted in the episode and never repeat an action after an invalid or no-progress response.",
+        ),
+        (
+            "general_textarena_slm_policy",
+            "When uncertain, choose the safest legal action explicitly supported by the observation instead of inventing a new format.",
+        ),
+    ]
+    for env_id in sorted({record.env_id for record in records}):
+        target = f"{slug_env(env_id)}_slm_policy"
+        group = [record for record in records if record.env_id == env_id]
+        invalid = sum(record.invalid_move for record in group)
+        truncated = sum(record.truncated for record in group)
+        repeated = sum(has_repeated_actions(record.actions) for record in group)
+        hint = SLM_HINTS.get(env_id, "choose one legal action")
+        rules.append((target, f"For {env_id}, use this task rule first: {hint}"))
+        if invalid:
+            rules.append((target, f"For {env_id}, inspect the observation for the exact legal action format before every move."))
+        if truncated or repeated:
+            rules.append((target, f"For {env_id}, maintain episode state, avoid repeated guesses or moves, and prefer progress over exploration."))
+    return rules
+
+
+def parse_model_candidate_rules(raw: str, valid_targets: set[str]) -> list[tuple[str, str]]:
+    try:
+        parsed = json.loads(raw)
+    except json.JSONDecodeError:
+        parsed = None
+    rules: list[tuple[str, str]] = []
+    if isinstance(parsed, list):
+        for item in parsed:
+            if not isinstance(item, dict):
+                continue
+            target = str(item.get("target", "general_textarena_slm_policy"))
+            rule = str(item.get("rule", "")).strip()
+            if rule:
+                rules.append((target if target in valid_targets else "general_textarena_slm_policy", rule))
+    if rules:
+        return rules
+    for line in raw.splitlines():
+        line = line.strip(" -\t")
+        if not line:
+            continue
+        target = "general_textarena_slm_policy"
+        if ":" in line:
+            maybe_target, maybe_rule = line.split(":", 1)
+            if maybe_target.strip() in valid_targets:
+                target = maybe_target.strip()
+                line = maybe_rule.strip()
+        if len(line) > 12:
+            rules.append((target, line))
+    return rules
+
+
+def model_generated_slm_candidate_rules(
+    candidate_model: OpenAICompatibleChatModel | None,
+    suite: str,
+    records: list[SLMTextArenaRecord],
+    gradients: list[TextualGradient],
+    max_rules: int,
+) -> list[tuple[str, str]]:
+    if candidate_model is None or max_rules <= 0:
+        return []
+    valid_targets = {"general_textarena_slm_policy"} | set(slm_candidate_targets(records, gradients))
+    failure_summary = []
+    for env_id in sorted({record.env_id for record in records}):
+        group = [record for record in records if record.env_id == env_id]
+        metrics = summarize_slm(group)
+        failure_summary.append(
+            f"{env_id}: reward={metrics['average_reward']:.3f}, success={metrics['success_rate']:.3f}, "
+            f"invalid={metrics['invalid_move_rate']:.3f}, trunc={metrics['truncation_rate']:.3f}"
+        )
+    gradient_summary = [
+        {
+            "target": gradient.target_variable_name,
+            "failure_mode": gradient.failure_mode,
+            "evidence": gradient.evidence_from_trajectory,
+            "suggested_edit": gradient.suggested_edit,
+        }
+        for gradient in gradients[:8]
+    ]
+    prompt = (
+        "You generate candidate prompt-policy rules for frozen TextArena language agents.\n"
+        f"Suite: {suite}\n"
+        f"Valid targets: {sorted(valid_targets)}\n"
+        "Failure summary:\n"
+        + "\n".join(failure_summary)
+        + "\n\nTextual gradients:\n"
+        + json.dumps(gradient_summary, indent=2)
+        + "\n\nReturn a JSON list of concise objects: "
+        '{"target": "<valid target>", "rule": "<one actionable rule>"}. '
+        "Do not mention hidden state, hardcoded answers, or environment mutation."
+    )
+    try:
+        raw = candidate_model.complete(prompt)
+    except Exception:
+        return []
+    return parse_model_candidate_rules(raw, valid_targets)[:max_rules]
+
+
+def build_slm_candidate_pool(
+    method: str,
+    suite: str,
+    variables: dict[str, TextVariable],
+    train_records: list[SLMTextArenaRecord],
+    gradients: list[TextualGradient],
+    candidate_count: int,
+    candidate_model: OpenAICompatibleChatModel | None = None,
+) -> list[SLMCandidate]:
+    candidate_count = max(1, candidate_count)
+    pool: list[SLMCandidate] = [
+        SLMCandidate(
+            candidate_id="candidate_000_textgrad",
+            source="textgrad_default",
+            description="Default TextGrad candidate from trajectory gradients.",
+            variables=build_slm_candidate(method, variables, train_records, gradients),
+        )
+    ]
+    seen_values = {json.dumps({name: var.value for name, var in pool[0].variables.items()}, sort_keys=True)}
+    rules = heuristic_slm_candidate_rules(train_records)
+    rules.extend(
+        model_generated_slm_candidate_rules(
+            candidate_model,
+            suite,
+            train_records,
+            gradients,
+            max_rules=max(0, candidate_count - len(pool)),
+        )
+    )
+    for target, rule in rules:
+        if len(pool) >= candidate_count:
+            break
+        candidate_variables = append_rule_candidate(
+            variables,
+            target,
+            rule,
+            history=f"candidate_pool:{method}:{target}",
+        )
+        signature = json.dumps({name: var.value for name, var in candidate_variables.items()}, sort_keys=True)
+        if signature in seen_values:
+            continue
+        seen_values.add(signature)
+        pool.append(
+            SLMCandidate(
+                candidate_id=f"candidate_{len(pool):03d}_{slug_env(target)}",
+                source="model_or_heuristic_rule" if candidate_model is not None else "heuristic_rule",
+                description=rule,
+                variables=candidate_variables,
+            )
+        )
+    return pool
+
+
+def rank_slm_decision(decision: dict[str, Any]) -> float:
+    val_delta = float(decision["new_score"]) - float(decision["old_score"])
+    train_delta = float(decision["train_new_score"]) - float(decision["train_old_score"])
+    ppo_objective = decision.get("ppo_objective")
+    metrics = decision.get("new_metrics", {})
+    old_metrics = decision.get("old_metrics", {})
+    invalid_delta = float(metrics.get("invalid_move_rate", 0.0)) - float(old_metrics.get("invalid_move_rate", 0.0))
+    trunc_delta = float(metrics.get("truncation_rate", 0.0)) - float(old_metrics.get("truncation_rate", 0.0))
+    score = val_delta + 0.25 * train_delta - max(0.0, invalid_delta) - max(0.0, trunc_delta)
+    if isinstance(ppo_objective, (int, float)):
+        score += 0.5 * float(ppo_objective)
+    return score
 
 
 def slm_update_accepted(
@@ -821,6 +1052,11 @@ def run_slm_suite(
     seed: int,
     timeout: int,
     methods: list[str] | None = None,
+    candidate_count: int = 1,
+    candidate_model_name: str = "",
+    candidate_temperature: float = 0.2,
+    request_logprobs: bool = False,
+    top_logprobs: int = 0,
 ) -> Path:
     methods = methods or SLM_METHODS
     unknown_methods = sorted(set(methods) - set(SLM_METHODS))
@@ -834,6 +1070,7 @@ def run_slm_suite(
         output_dir / "per_env_metrics.csv",
         output_dir / "summary.md",
         output_dir / "update_decisions.jsonl",
+        output_dir / "candidate_decisions.jsonl",
         output_dir / "accepted_updates.json",
         output_dir / "rejected_updates.json",
         output_dir / "gradients.json",
@@ -843,7 +1080,26 @@ def run_slm_suite(
             stale.unlink()
     for stale in games_dir.glob("*.jsonl"):
         stale.unlink()
-    model = OpenAICompatibleChatModel(base_url, model_name, temperature=temperature, max_tokens=64, timeout=timeout)
+    model = OpenAICompatibleChatModel(
+        base_url,
+        model_name,
+        temperature=temperature,
+        max_tokens=64,
+        timeout=timeout,
+        request_logprobs=request_logprobs,
+        top_logprobs=top_logprobs,
+    )
+    candidate_model = (
+        OpenAICompatibleChatModel(
+            base_url,
+            candidate_model_name,
+            temperature=candidate_temperature,
+            max_tokens=512,
+            timeout=timeout,
+        )
+        if candidate_count > 1 and candidate_model_name
+        else None
+    )
     write_json(
         output_dir / "config.json",
         {
@@ -857,6 +1113,11 @@ def run_slm_suite(
             "val_seeds": val_seeds,
             "test_seeds": test_seeds,
             "seed": seed,
+            "candidate_count": candidate_count,
+            "candidate_model": candidate_model_name or None,
+            "candidate_temperature": candidate_temperature,
+            "request_logprobs": request_logprobs,
+            "top_logprobs": top_logprobs,
         },
     )
     write_json(output_dir / "environment_info.json", environment_info())
@@ -894,18 +1155,6 @@ def run_slm_suite(
         )
         gradients = slm_gradients_from_records(train)
         write_json(output_dir / f"{method}_gradients.json", gradients)
-        candidate = build_slm_candidate(method, method_variables, train, gradients)
-        train_candidate = run_slm_records(
-            suite,
-            env_ids,
-            method,
-            "train_candidate",
-            train_seeds,
-            method_seed,
-            model,
-            candidate,
-            games_dir / f"{method}_train_candidate.jsonl",
-        )
         val_old = run_slm_records(
             suite,
             env_ids,
@@ -917,28 +1166,71 @@ def run_slm_suite(
             method_variables,
             games_dir / f"{method}_val_old.jsonl",
         )
-        val_candidate = run_slm_records(
+        candidate_pool = build_slm_candidate_pool(
+            method,
             suite,
-            env_ids,
-            method,
-            "val_candidate",
-            val_seeds,
-            method_seed + 1000,
-            model,
-            candidate,
-            games_dir / f"{method}_val_candidate.jsonl",
-        )
-        accepted, decision = slm_update_accepted(
-            method,
-            train,
-            train_candidate,
-            val_old,
-            val_candidate,
             method_variables,
-            candidate,
+            train,
+            gradients,
+            candidate_count=candidate_count,
+            candidate_model=candidate_model,
         )
+        candidate_results: list[tuple[SLMCandidate, list[SLMTextArenaRecord], list[SLMTextArenaRecord], dict[str, Any]]] = []
+        for candidate_info in candidate_pool:
+            candidate_split = f"{candidate_info.candidate_id}_candidate"
+            train_candidate = run_slm_records(
+                suite,
+                env_ids,
+                method,
+                f"train_{candidate_split}",
+                train_seeds,
+                method_seed,
+                model,
+                candidate_info.variables,
+                games_dir / f"{method}_{candidate_info.candidate_id}_train_candidate.jsonl",
+            )
+            val_candidate = run_slm_records(
+                suite,
+                env_ids,
+                method,
+                f"val_{candidate_split}",
+                val_seeds,
+                method_seed + 1000,
+                model,
+                candidate_info.variables,
+                games_dir / f"{method}_{candidate_info.candidate_id}_val_candidate.jsonl",
+            )
+            candidate_accepted, decision = slm_update_accepted(
+                method,
+                train,
+                train_candidate,
+                val_old,
+                val_candidate,
+                method_variables,
+                candidate_info.variables,
+            )
+            decision.update(
+                {
+                    "candidate_id": candidate_info.candidate_id,
+                    "candidate_source": candidate_info.source,
+                    "candidate_description": candidate_info.description,
+                    "candidate_count": len(candidate_pool),
+                    "candidate_rank_score": rank_slm_decision(decision),
+                    "selected": False,
+                }
+            )
+            append_jsonl(output_dir / "candidate_decisions.jsonl", decision)
+            candidate_results.append((candidate_info, train_candidate, val_candidate, decision))
+        accepted_results = [result for result in candidate_results if result[3]["accepted"]]
+        selectable = accepted_results or candidate_results
+        selected_candidate, train_candidate, val_candidate, decision = max(
+            selectable,
+            key=lambda result: (1 if result[3]["accepted"] else 0, result[3]["candidate_rank_score"]),
+        )
+        accepted = bool(decision["accepted"])
+        decision["selected"] = True
         if accepted:
-            method_variables = candidate
+            method_variables = selected_candidate.variables
         append_jsonl(output_dir / "update_decisions.jsonl", decision)
         write_json(output_dir / f"{method}_final_text_variables.json", method_variables)
         test = run_slm_records(
@@ -1068,6 +1360,11 @@ def run_all(args: argparse.Namespace) -> Path:
             args.seed + 10_000,
             args.timeout,
             slm_methods,
+            candidate_count=args.slm_candidate_count,
+            candidate_model_name=args.slm_candidate_model,
+            candidate_temperature=args.slm_candidate_temperature,
+            request_logprobs=args.slm_request_logprobs,
+            top_logprobs=args.slm_top_logprobs,
         )
     if "social" in selected:
         run_slm_suite(
@@ -1083,6 +1380,11 @@ def run_all(args: argparse.Namespace) -> Path:
             args.seed + 20_000,
             args.timeout,
             slm_methods,
+            candidate_count=args.slm_candidate_count,
+            candidate_model_name=args.slm_candidate_model,
+            candidate_temperature=args.slm_candidate_temperature,
+            request_logprobs=args.slm_request_logprobs,
+            top_logprobs=args.slm_top_logprobs,
         )
     if "real_slm" in selected:
         run_slm_suite(
@@ -1098,6 +1400,11 @@ def run_all(args: argparse.Namespace) -> Path:
             args.seed + 30_000,
             args.timeout,
             slm_methods,
+            candidate_count=args.slm_candidate_count,
+            candidate_model_name=args.slm_candidate_model,
+            candidate_temperature=args.slm_candidate_temperature,
+            request_logprobs=args.slm_request_logprobs,
+            top_logprobs=args.slm_top_logprobs,
         )
     write_index(output_dir, selected)
     return output_dir
@@ -1133,6 +1440,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--model", default=os.getenv("TEXTGRAD_RL_LLM_MODEL", "qwen2.5:3b"))
     parser.add_argument("--temperature", type=float, default=float(os.getenv("TEXTGRAD_RL_LLM_TEMPERATURE", "0.0")))
     parser.add_argument("--timeout", type=int, default=60)
+    parser.add_argument("--slm-candidate-count", type=int, default=1)
+    parser.add_argument("--slm-candidate-model", default=os.getenv("TEXTGRAD_RL_CANDIDATE_MODEL", ""))
+    parser.add_argument("--slm-candidate-temperature", type=float, default=0.2)
+    parser.add_argument("--slm-request-logprobs", action="store_true")
+    parser.add_argument("--slm-top-logprobs", type=int, default=0)
     parser.add_argument("--output-dir", default="runs/textarena_expanded_suites")
     return parser
 

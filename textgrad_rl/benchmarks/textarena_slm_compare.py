@@ -40,6 +40,67 @@ class SLMEpisodeRecord:
     runtime_seconds: float
 
 
+@dataclass
+class ChatCompletionResult:
+    text: str
+    token_logprobs: list[dict[str, Any]]
+    action_logprob: float | None
+
+
+def first_bracketed_span(text: str) -> tuple[int, int] | None:
+    match = re.search(r"\[[^\]]+\]", text)
+    if not match:
+        return None
+    return match.start(), match.end()
+
+
+def action_span_logprob(text: str, token_logprobs: list[dict[str, Any]]) -> float | None:
+    """Approximate generated action logprob from chat-completion token logprobs.
+
+    OpenAI-compatible servers expose generated-token logprobs but do not all expose
+    arbitrary continuation scoring. This sums logprobs for tokens overlapping the
+    first bracketed action span, which is exact for the generated action span when
+    the server returns token text and logprob fields.
+    """
+
+    span = first_bracketed_span(text)
+    if span is None or not token_logprobs:
+        return None
+    start, end = span
+    offset = 0
+    total = 0.0
+    used = False
+    for item in token_logprobs:
+        token = str(item.get("token", ""))
+        logprob = item.get("logprob")
+        token_start = offset
+        token_end = offset + len(token)
+        offset = token_end
+        if token_end <= start or token_start >= end:
+            continue
+        if isinstance(logprob, (int, float)):
+            total += float(logprob)
+            used = True
+    return total if used else None
+
+
+def extract_chat_token_logprobs(choice: dict[str, Any]) -> list[dict[str, Any]]:
+    content = choice.get("logprobs", {}).get("content") if isinstance(choice.get("logprobs"), dict) else None
+    if not isinstance(content, list):
+        return []
+    tokens: list[dict[str, Any]] = []
+    for item in content:
+        if not isinstance(item, dict):
+            continue
+        tokens.append(
+            {
+                "token": item.get("token", ""),
+                "logprob": item.get("logprob"),
+            }
+        )
+    return tokens
+
+
 class OpenAICompatibleChatModel:
     """Tiny OpenAI-compatible chat client for local SLM runtimes."""
 
@@ -50,15 +111,22 @@ class OpenAICompatibleChatModel:
         temperature: float,
         max_tokens: int,
         timeout: int,
+        request_logprobs: bool = False,
+        top_logprobs: int = 0,
     ) -> None:
         self.base_url = base_url.rstrip("/")
         self.model = model
         self.temperature = temperature
         self.max_tokens = max_tokens
         self.timeout = timeout
+        self.request_logprobs = request_logprobs
+        self.top_logprobs = top_logprobs
         self.api_key = os.getenv("TEXTGRAD_RL_LLM_API_KEY") or os.getenv("OPENAI_API_KEY") or "not-needed"
 
     def complete(self, prompt: str) -> str:
+        return self.complete_with_metadata(prompt).text
+
+    def complete_with_metadata(self, prompt: str) -> ChatCompletionResult:
         payload = {
             "model": self.model,
             "messages": [
@@ -74,6 +142,10 @@ class OpenAICompatibleChatModel:
             "temperature": self.temperature,
             "max_tokens": self.max_tokens,
         }
+        if self.request_logprobs:
+            payload["logprobs"] = True
+            if self.top_logprobs > 0:
+                payload["top_logprobs"] = self.top_logprobs
         request = urllib.request.Request(
             f"{self.base_url}/chat/completions",
             data=json.dumps(payload).encode("utf-8"),
@@ -85,7 +157,14 @@ class OpenAICompatibleChatModel:
                 data = json.loads(response.read().decode("utf-8"))
         except urllib.error.HTTPError as exc:
             raise RuntimeError(exc.read().decode("utf-8", errors="replace")) from exc
-        return str(data["choices"][0]["message"]["content"]).strip()
+        choice = data["choices"][0]
+        text = str(choice["message"]["content"]).strip()
+        token_logprobs = extract_chat_token_logprobs(choice)
+        return ChatCompletionResult(
+            text=text,
+            token_logprobs=token_logprobs,
+            action_logprob=action_span_logprob(text, token_logprobs),
+        )
 
 
 class SLMGuessTheNumberAgent:

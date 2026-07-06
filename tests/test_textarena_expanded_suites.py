@@ -1,13 +1,16 @@
 from textgrad_rl.benchmarks.textarena_expanded_suites import (
     SLM_METHODS,
     SLMTextArenaRecord,
+    build_slm_candidate_pool,
     normalize_textarena_action,
     slm_ppo_metrics,
     slm_update_accepted,
 )
+from textgrad_rl.benchmarks.action_probability import action_probability_ratio
 from textgrad_rl.benchmarks.textarena_multienv_compare import canonical_env_id, num_players_for_env, rule_for_env
 from textgrad_rl.benchmarks.textarena_paper_suite import initial_modular_variables
 from textgrad_rl.benchmarks.textarena_policy_iteration import TextPPOConfig
+from textgrad_rl.types import TextVariable
 
 
 def test_variant_envs_map_to_base_policy_family() -> None:
@@ -31,6 +34,7 @@ def _slm_record(
     invalid: bool,
     actions: list[str],
     variant: str = "old",
+    action_logprobs: list[float | None] | None = None,
 ) -> SLMTextArenaRecord:
     return SLMTextArenaRecord(
         suite="unit",
@@ -48,6 +52,7 @@ def _slm_record(
         reason="",
         actions=actions,
         raw_outputs=actions,
+        action_logprobs=action_logprobs or [None for _ in actions],
         runtime_seconds=0.0,
     )
 
@@ -65,13 +70,15 @@ def test_textgrad_ppo_slm_is_registered() -> None:
 
 
 def test_slm_ppo_metrics_reward_safe_candidate() -> None:
-    old = [_slm_record(-1.0, False, True, ["p0:[0]"])]
-    new = [_slm_record(1.0, True, False, ["p0:[0 3]"], variant="new")]
+    old = [_slm_record(-1.0, False, True, ["p0:[0]"], action_logprobs=[-3.0])]
+    new = [_slm_record(1.0, True, False, ["p0:[0 3]"], variant="new", action_logprobs=[-1.0])]
 
     metrics = slm_ppo_metrics(old, new, old, TextPPOConfig(score_scale=5.0))
 
     assert metrics["surrogate_delta"] > 0.0
     assert metrics["invalid_delta"] < 0.0
+    assert metrics["generated_action_logprob_delta"] == 2.0
+    assert metrics["logprob_pairs"] == 1
 
 
 def test_slm_update_accepts_textgrad_ppo_safe_improvement() -> None:
@@ -95,3 +102,48 @@ def test_slm_update_accepts_textgrad_ppo_safe_improvement() -> None:
 
     assert accepted
     assert decision["ppo_metrics"]["surrogate_delta"] > 0.0
+
+
+def test_build_slm_candidate_pool_respects_requested_count() -> None:
+    variables = {
+        "general_textarena_slm_policy": TextVariable(
+            name="general_textarena_slm_policy",
+            value="Return one legal bracketed action.",
+            role_description="General policy",
+            max_chars=1200,
+        ),
+        "nim_slm_policy": TextVariable(
+            name="nim_slm_policy",
+            value="For Nim-v0: use a legal move.",
+            role_description="Nim policy",
+            max_chars=1200,
+        ),
+    }
+    train = [_slm_record(0.0, False, True, ["p0:[0]"])]
+
+    pool = build_slm_candidate_pool(
+        "textgrad_rl_ppo_slm",
+        "unit",
+        variables,
+        train,
+        gradients=[],
+        candidate_count=3,
+    )
+
+    assert len(pool) == 3
+    assert pool[0].candidate_id == "candidate_000_textgrad"
+    assert any(candidate.variables["general_textarena_slm_policy"].value != variables["general_textarena_slm_policy"].value for candidate in pool)
+
+
+class _FakeActionScorer:
+    def logprob(self, prompt: str, action: str) -> float:
+        return -4.0 if "old" in prompt else -3.0
+
+
+def test_action_probability_ratio_uses_same_action_under_both_prompts() -> None:
+    ratio = action_probability_ratio(_FakeActionScorer(), "old prompt", "new prompt", "[1]")
+
+    assert ratio.old_logprob == -4.0
+    assert ratio.new_logprob == -3.0
+    assert ratio.ratio > 1.0
+    assert ratio.clipped_ratio == 1.2

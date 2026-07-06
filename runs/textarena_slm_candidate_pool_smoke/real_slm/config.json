@@ -1,0 +1,25 @@
+{
+  "base_url": "http://localhost:11434/v1",
+  "candidate_count": 2,
+  "candidate_model": null,
+  "candidate_temperature": 0.2,
+  "env_ids": [
+    "GuessTheNumber-v0",
+    "FrozenLake-v0",
+    "Blackjack-v0",
+    "Nim-v0",
+    "Mastermind-v0"
+  ],
+  "methods": [
+    "textgrad_rl_ppo_slm"
+  ],
+  "model": "qwen2.5:3b",
+  "request_logprobs": false,
+  "seed": 42001,
+  "suite": "real_slm",
+  "temperature": 0.7,
+  "test_seeds": 1,
+  "top_logprobs": 0,
+  "train_seeds": 1,
+  "val_seeds": 1
+}

@@ -1,0 +1,6 @@
+average_reward,average_score,average_turns,env_id,episodes,invalid_move_rate,method,success_rate,suite,truncation_rate
+0.0,-0.31,12.0,GuessTheNumber-v0,1,0.0,textgrad_rl_ppo_slm,0.0,real_slm,1.0
+0.5,0.485,3.0,FrozenLake-v0,1,0.0,textgrad_rl_ppo_slm,0.0,real_slm,0.0
+0.4,0.375,5.0,Blackjack-v0,1,0.0,textgrad_rl_ppo_slm,0.0,real_slm,0.0
+1.0,1.475,5.0,Nim-v0,1,0.0,textgrad_rl_ppo_slm,1.0,real_slm,0.0
+0.0,-0.31,12.0,Mastermind-v0,1,0.0,textgrad_rl_ppo_slm,0.0,real_slm,1.0
