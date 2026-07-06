@@ -1,0 +1,21 @@
+{
+  "textarena_strategy_prompt": {
+    "gradient_history": [
+      "Bandit-v0 train reward below solved/win threshold: The agent needs the environment-specific rule for Bandit-v0.",
+      "Blackjack-v0 train reward below solved/win threshold: The agent needs the environment-specific rule for Blackjack-v0.",
+      "ConnectFour-v0 train reward below solved/win threshold: The agent needs the environment-specific rule for ConnectFour-v0.",
+      "FrozenLake-v0 train reward below solved/win threshold: The agent needs the environment-specific rule for FrozenLake-v0.",
+      "LightsOut-v0 train reward below solved/win threshold: The agent needs the environment-specific rule for LightsOut-v0.",
+      "Mastermind-v0 train reward below solved/win threshold: The agent needs the environment-specific rule for Mastermind-v0.",
+      "Nim-v0 train reward below solved/win threshold: The agent needs the environment-specific rule for Nim-v0.",
+      "ReverseTicTacToe-v0 train reward below solved/win threshold: The agent needs the environment-specific rule for ReverseTicTacToe-v0.",
+      "TowerOfHanoi-v0 train reward below solved/win threshold: The agent needs the environment-specific rule for TowerOfHanoi-v0."
+    ],
+    "max_chars": 4000,
+    "name": "textarena_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Shared strategy text for offline TextArena games.",
+    "value": "Play valid TextArena actions. Prefer simple legal moves, center columns/cells, standing in Blackjack, and first available puzzle moves.\n\nLearned rules:\n- For Bandit, explore every button once, track empirical reward, then exploit the best observed button.\n- For Blackjack, use the basic threshold policy: hit below 17 and stand at 17 or higher.\n- For Connect Four, take an immediate winning column and otherwise block an opponent immediate connect-four.\n- For Frozen Lake, plan a shortest safe path to the goal while avoiding holes.\n- For Lights Out, solve the binary toggle system and press cells from a valid solution.\n- For Mastermind, maintain all candidate codes and eliminate candidates inconsistent with black/white feedback.\n- For Nim, use the xor strategy: move to a zero nim-sum when possible.\n- For Reverse Tic Tac Toe, avoid moves that immediately complete your own three-in-a-row.\n- For Tower of Hanoi, follow the recursive optimal disk-moving plan from A to C.",
+    "version": 1
+  }
+}

@@ -1,0 +1,13 @@
+[
+  {
+    "average_reward": 0.0,
+    "causal_factor": "repeated_action",
+    "env_id": "Nim-v0",
+    "evidence": "1/2 episodes failed or had invalid moves. mean_negative_advantage=-1.375. worst_action=p0:[0 1]. worst_evidence=Nim-v0 seed=9001 step=2 action=p0:[0 1] advantage=-1.500 final_reward=-1.000.",
+    "failure_count": 1,
+    "invalid_count": 0,
+    "mean_negative_advantage": -1.375,
+    "target_variable_name": "nim_strategy_prompt",
+    "worst_action": "p0:[0 1]"
+  }
+]

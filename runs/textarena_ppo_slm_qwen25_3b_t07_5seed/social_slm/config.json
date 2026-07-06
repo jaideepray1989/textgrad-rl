@@ -1,0 +1,20 @@
+{
+  "base_url": "http://localhost:11434/v1",
+  "env_ids": [
+    "KuhnPoker-v0-short",
+    "IteratedPrisonersDilemma-v0",
+    "SimpleNegotiation-v0-short"
+  ],
+  "methods": [
+    "fixed_prompt_slm",
+    "textgrad_policy_iteration_slm",
+    "textgrad_ppo_slm"
+  ],
+  "model": "qwen2.5:3b",
+  "seed": 32001,
+  "suite": "social",
+  "temperature": 0.7,
+  "test_seeds": 5,
+  "train_seeds": 5,
+  "val_seeds": 5
+}

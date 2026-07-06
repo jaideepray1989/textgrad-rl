@@ -1,0 +1,26 @@
+{
+  "env_ids": [
+    "GuessTheNumber-v0",
+    "Nim-v0"
+  ],
+  "max_ci_low_regression": 0.0,
+  "methods": [
+    "fixed_prompt",
+    "modular_textgrad",
+    "textgrad_rl_plus",
+    "textgrad_policy_iteration",
+    "textgrad_ppo"
+  ],
+  "min_mean_delta": 0.001,
+  "ppo_config": {
+    "clip_epsilon": 0.2,
+    "min_surrogate_delta": 0.001,
+    "score_scale": 5.0,
+    "target_kl": 0.2
+  },
+  "repetitions": 1,
+  "seed": 9001,
+  "test_seeds": 1,
+  "train_seeds": 1,
+  "val_seeds": 1
+}

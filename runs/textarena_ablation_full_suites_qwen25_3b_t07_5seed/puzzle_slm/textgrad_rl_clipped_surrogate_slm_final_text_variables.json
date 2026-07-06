@@ -1,0 +1,47 @@
+{
+  "general_textarena_slm_policy": {
+    "gradient_history": [],
+    "max_chars": 1800,
+    "name": "general_textarena_slm_policy",
+    "requires_grad": true,
+    "role_description": "General frozen-SLM TextArena policy.",
+    "value": "Follow the visible TextArena rules. Track state across observations, avoid repeating invalid actions, and output only one legal action.",
+    "version": 0
+  },
+  "hangman_slm_policy": {
+    "gradient_history": [],
+    "max_chars": 1800,
+    "name": "hangman_slm_policy",
+    "requires_grad": true,
+    "role_description": "Environment-specific frozen-SLM policy for Hangman-v0.",
+    "value": "For Hangman-v0: Guess common letters first. Return one bracketed letter unless you know the full word.",
+    "version": 0
+  },
+  "minesweeper_small_slm_policy": {
+    "gradient_history": [],
+    "max_chars": 1800,
+    "name": "minesweeper_small_slm_policy",
+    "requires_grad": true,
+    "role_description": "Environment-specific frozen-SLM policy for Minesweeper-v0-small.",
+    "value": "For Minesweeper-v0-small: Reveal safe-looking cells by row and column in brackets. Avoid repeating revealed cells.",
+    "version": 0
+  },
+  "sudoku_very_easy_slm_policy": {
+    "gradient_history": [],
+    "max_chars": 1800,
+    "name": "sudoku_very_easy_slm_policy",
+    "requires_grad": true,
+    "role_description": "Environment-specific frozen-SLM policy for Sudoku-v0-very-easy.",
+    "value": "For Sudoku-v0-very-easy: Return one legal placement in the requested coordinate/value format from the grid.",
+    "version": 0
+  },
+  "wordle_slm_policy": {
+    "gradient_history": [],
+    "max_chars": 1800,
+    "name": "wordle_slm_policy",
+    "requires_grad": true,
+    "role_description": "Environment-specific frozen-SLM policy for Wordle-v0.",
+    "value": "For Wordle-v0: Use feedback to eliminate letters. Return one lowercase 5-letter guess in brackets.",
+    "version": 0
+  }
+}

@@ -1,0 +1,67 @@
+[
+  {
+    "confidence": 0.75,
+    "evidence_from_trajectory": "5/5 episodes failed, were invalid, or hit the turn cap; 5 episodes repeated actions.",
+    "failure_mode": "Blackjack-v0 frozen-SLM trajectories had low return",
+    "forbidden_shortcuts": [
+      "hidden state",
+      "environment mutation",
+      "invalid action formats"
+    ],
+    "gradient_text": "Improve legal action selection and state tracking from trajectory feedback.",
+    "suggested_edit": "Add a rule: Track the latest observation, obey the exact action format, avoid repeated invalid/no-progress actions, and use this environment hint: Stand on 17 or higher; hit below 17 unless bust risk is obvious..",
+    "target_variable_name": "blackjack_slm_policy"
+  },
+  {
+    "confidence": 0.75,
+    "evidence_from_trajectory": "5/5 episodes failed, were invalid, or hit the turn cap; 4 episodes repeated actions.",
+    "failure_mode": "FrozenLake-v0 frozen-SLM trajectories had low return",
+    "forbidden_shortcuts": [
+      "hidden state",
+      "environment mutation",
+      "invalid action formats"
+    ],
+    "gradient_text": "Improve legal action selection and state tracking from trajectory feedback.",
+    "suggested_edit": "Add a rule: Track the latest observation, obey the exact action format, avoid repeated invalid/no-progress actions, and use this environment hint: Plan a safe path to G while avoiding H; output one bracketed direction..",
+    "target_variable_name": "frozenlake_slm_policy"
+  },
+  {
+    "confidence": 0.75,
+    "evidence_from_trajectory": "2/5 episodes failed, were invalid, or hit the turn cap; 2 episodes repeated actions.",
+    "failure_mode": "GuessTheNumber-v0 frozen-SLM trajectories had low return",
+    "forbidden_shortcuts": [
+      "hidden state",
+      "environment mutation",
+      "invalid action formats"
+    ],
+    "gradient_text": "Improve legal action selection and state tracking from trajectory feedback.",
+    "suggested_edit": "Add a rule: Track the latest observation, obey the exact action format, avoid repeated invalid/no-progress actions, and use this environment hint: Maintain lower and upper bounds from higher/lower hints and guess the midpoint..",
+    "target_variable_name": "guessthenumber_slm_policy"
+  },
+  {
+    "confidence": 0.75,
+    "evidence_from_trajectory": "5/5 episodes failed, were invalid, or hit the turn cap; 2 episodes repeated actions.",
+    "failure_mode": "Mastermind-v0 frozen-SLM trajectories had low return",
+    "forbidden_shortcuts": [
+      "hidden state",
+      "environment mutation",
+      "invalid action formats"
+    ],
+    "gradient_text": "Improve legal action selection and state tracking from trajectory feedback.",
+    "suggested_edit": "Add a rule: Track the latest observation, obey the exact action format, avoid repeated invalid/no-progress actions, and use this environment hint: Maintain candidate codes and eliminate guesses inconsistent with black/white feedback..",
+    "target_variable_name": "mastermind_slm_policy"
+  },
+  {
+    "confidence": 0.75,
+    "evidence_from_trajectory": "4/5 episodes failed, were invalid, or hit the turn cap; 3 episodes repeated actions.",
+    "failure_mode": "Nim-v0 frozen-SLM trajectories had low return",
+    "forbidden_shortcuts": [
+      "hidden state",
+      "environment mutation",
+      "invalid action formats"
+    ],
+    "gradient_text": "Improve legal action selection and state tracking from trajectory feedback.",
+    "suggested_edit": "Add a rule: Track the latest observation, obey the exact action format, avoid repeated invalid/no-progress actions, and use this environment hint: Use the xor strategy: move to a zero nim-sum when possible..",
+    "target_variable_name": "nim_slm_policy"
+  }
+]

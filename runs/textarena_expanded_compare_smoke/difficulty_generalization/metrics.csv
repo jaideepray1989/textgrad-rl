@@ -1,0 +1,5 @@
+average_reward,average_turns,episodes,invalid_move_rate,method,repetition,success_rate,suite
+0.187051021278261,22.5,12,0.08333333333333333,fixed_prompt,0,0.16666666666666666,difficulty_generalization
+0.7908163265306123,19.0,12,0.0,modular_textgrad,0,0.75,difficulty_generalization
+0.8537176879449278,17.583333333333332,12,0.0,textgrad_rl_plus,0,0.75,difficulty_generalization
+0.8537176879449278,17.583333333333332,12,0.0,textgrad_policy_iteration,0,0.75,difficulty_generalization

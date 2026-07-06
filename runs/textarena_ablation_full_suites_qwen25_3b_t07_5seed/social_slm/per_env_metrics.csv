@@ -1,0 +1,16 @@
+average_reward,average_score,average_turns,env_id,episodes,invalid_move_rate,method,success_rate,suite,truncation_rate
+-0.6,-0.9219999999999999,4.4,KuhnPoker-v0-short,5,0.8,textgrad_rl_no_gate_slm,0.2,social,0.0
+-0.2,-0.4,40.0,IteratedPrisonersDilemma-v0,5,0.0,textgrad_rl_no_gate_slm,0.0,social,0.0
+0.0,0.16400000000000003,7.2,SimpleNegotiation-v0-short,5,0.0,textgrad_rl_no_gate_slm,0.4,social,0.0
+-1.0,-1.515,3.0,KuhnPoker-v0-short,5,1.0,textgrad_rl_train_val_slm,0.0,social,0.0
+-0.6,-0.8,40.0,IteratedPrisonersDilemma-v0,5,0.0,textgrad_rl_train_val_slm,0.0,social,0.0
+0.4,0.5650000000000001,7.0,SimpleNegotiation-v0-short,5,0.0,textgrad_rl_train_val_slm,0.4,social,0.0
+-1.0,-1.515,3.0,KuhnPoker-v0-short,5,1.0,textgrad_rl_kl_gate_slm,0.0,social,0.0
+-0.6,-0.7,40.0,IteratedPrisonersDilemma-v0,5,0.0,textgrad_rl_kl_gate_slm,0.2,social,0.0
+0.8,1.1640000000000001,7.2,SimpleNegotiation-v0-short,5,0.0,textgrad_rl_kl_gate_slm,0.8,social,0.0
+-1.0,-1.5239999999999998,4.8,KuhnPoker-v0-short,5,1.0,textgrad_rl_clipped_surrogate_slm,0.0,social,0.0
+-0.4,-0.5,40.0,IteratedPrisonersDilemma-v0,5,0.0,textgrad_rl_clipped_surrogate_slm,0.2,social,0.0
+0.0,0.16400000000000006,7.2,SimpleNegotiation-v0-short,5,0.0,textgrad_rl_clipped_surrogate_slm,0.4,social,0.0
+-1.0,-1.422,4.4,KuhnPoker-v0-short,5,0.8,textgrad_rl_ppo_slm,0.0,social,0.0
+-0.6,-0.7,40.0,IteratedPrisonersDilemma-v0,5,0.0,textgrad_rl_ppo_slm,0.2,social,0.0
+0.6,0.865,7.0,SimpleNegotiation-v0-short,5,0.0,textgrad_rl_ppo_slm,0.6,social,0.0

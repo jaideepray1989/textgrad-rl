@@ -1,0 +1,7 @@
+accepted,average_reward,average_score,average_turns,episodes,invalid_move_rate,method,split,success_rate,suite,truncation_rate
+False,0.1273684210526316,-0.1566315789473684,6.8,5,0.4,fixed_prompt_slm,test,0.0,real_slm,0.2
+False,0.0873684210526316,-0.1966315789473684,6.8,5,0.4,textgrad_ppo_slm,train,0.0,real_slm,0.2
+True,0.54,0.663,5.4,5,0.0,textgrad_ppo_slm,train_candidate,0.4,real_slm,0.2
+False,0.19333333333333333,0.11433333333333333,5.8,5,0.2,textgrad_ppo_slm,val_old,0.2,real_slm,0.2
+True,0.5933333333333334,0.7173333333333334,5.2,5,0.0,textgrad_ppo_slm,val_candidate,0.4,real_slm,0.2
+True,0.14842105263157895,-0.13257894736842107,6.2,5,0.4,textgrad_ppo_slm,test,0.0,real_slm,0.2

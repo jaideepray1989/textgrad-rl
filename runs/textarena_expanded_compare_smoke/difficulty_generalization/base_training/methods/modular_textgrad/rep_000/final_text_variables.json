@@ -1,0 +1,119 @@
+{
+  "bandit_strategy_prompt": {
+    "gradient_history": [
+      "Bandit-v0 trajectory reward below target: The agent needs an environment-specific repair rule for Bandit-v0."
+    ],
+    "max_chars": 1600,
+    "name": "bandit_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Environment-specific strategy text for Bandit-v0.",
+    "value": "For Bandit-v0, start with a simple legal action policy.\n\nLearned rules:\n- For Bandit, explore every button once, track empirical reward, then exploit the best observed button.",
+    "version": 1
+  },
+  "blackjack_strategy_prompt": {
+    "gradient_history": [
+      "Blackjack-v0 trajectory reward below target: The agent needs an environment-specific repair rule for Blackjack-v0."
+    ],
+    "max_chars": 1600,
+    "name": "blackjack_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Environment-specific strategy text for Blackjack-v0.",
+    "value": "For Blackjack-v0, start with a simple legal action policy.\n\nLearned rules:\n- For Blackjack, use the basic threshold policy: hit below 17 and stand at 17 or higher.",
+    "version": 1
+  },
+  "connectfour_strategy_prompt": {
+    "gradient_history": [
+      "ConnectFour-v0 trajectory reward below target: The agent needs an environment-specific repair rule for ConnectFour-v0."
+    ],
+    "max_chars": 1600,
+    "name": "connectfour_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Environment-specific strategy text for ConnectFour-v0.",
+    "value": "For ConnectFour-v0, start with a simple legal action policy.\n\nLearned rules:\n- For Connect Four, take an immediate winning column and otherwise block an opponent immediate connect-four.",
+    "version": 1
+  },
+  "frozenlake_strategy_prompt": {
+    "gradient_history": [
+      "FrozenLake-v0 trajectory reward below target: The agent needs an environment-specific repair rule for FrozenLake-v0."
+    ],
+    "max_chars": 1600,
+    "name": "frozenlake_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Environment-specific strategy text for FrozenLake-v0.",
+    "value": "For FrozenLake-v0, start with a simple legal action policy.\n\nLearned rules:\n- For Frozen Lake, plan a shortest safe path to the goal while avoiding holes.",
+    "version": 1
+  },
+  "general_strategy_prompt": {
+    "gradient_history": [],
+    "max_chars": 2400,
+    "name": "general_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "General TextArena action-format and safety strategy.",
+    "value": "Play valid TextArena actions. Read the latest observation, choose legal moves, and avoid changing the environment rules.",
+    "version": 0
+  },
+  "guessthenumber_strategy_prompt": {
+    "gradient_history": [],
+    "max_chars": 1600,
+    "name": "guessthenumber_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Environment-specific strategy text for GuessTheNumber-v0.",
+    "value": "For GuessTheNumber-v0, start with a simple legal action policy.",
+    "version": 0
+  },
+  "lightsout_strategy_prompt": {
+    "gradient_history": [
+      "LightsOut-v0 trajectory reward below target: The agent needs an environment-specific repair rule for LightsOut-v0."
+    ],
+    "max_chars": 1600,
+    "name": "lightsout_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Environment-specific strategy text for LightsOut-v0.",
+    "value": "For LightsOut-v0, start with a simple legal action policy.\n\nLearned rules:\n- For Lights Out, solve the binary toggle system and press cells from a valid solution.",
+    "version": 1
+  },
+  "mastermind_strategy_prompt": {
+    "gradient_history": [
+      "Mastermind-v0 trajectory reward below target: The agent needs an environment-specific repair rule for Mastermind-v0."
+    ],
+    "max_chars": 1600,
+    "name": "mastermind_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Environment-specific strategy text for Mastermind-v0.",
+    "value": "For Mastermind-v0, start with a simple legal action policy.\n\nLearned rules:\n- For Mastermind, maintain all candidate codes and eliminate candidates inconsistent with black/white feedback.",
+    "version": 1
+  },
+  "nim_strategy_prompt": {
+    "gradient_history": [
+      "Nim-v0 trajectory reward below target: The agent needs an environment-specific repair rule for Nim-v0."
+    ],
+    "max_chars": 1600,
+    "name": "nim_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Environment-specific strategy text for Nim-v0.",
+    "value": "For Nim-v0, start with a simple legal action policy.\n\nLearned rules:\n- For Nim, use the xor strategy: move to a zero nim-sum when possible.",
+    "version": 1
+  },
+  "reversetictactoe_strategy_prompt": {
+    "gradient_history": [
+      "ReverseTicTacToe-v0 trajectory reward below target: The agent needs an environment-specific repair rule for ReverseTicTacToe-v0."
+    ],
+    "max_chars": 1600,
+    "name": "reversetictactoe_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Environment-specific strategy text for ReverseTicTacToe-v0.",
+    "value": "For ReverseTicTacToe-v0, start with a simple legal action policy.\n\nLearned rules:\n- For Reverse Tic Tac Toe, avoid moves that immediately complete your own three-in-a-row.",
+    "version": 1
+  },
+  "towerofhanoi_strategy_prompt": {
+    "gradient_history": [
+      "TowerOfHanoi-v0 trajectory reward below target: The agent needs an environment-specific repair rule for TowerOfHanoi-v0."
+    ],
+    "max_chars": 1600,
+    "name": "towerofhanoi_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Environment-specific strategy text for TowerOfHanoi-v0.",
+    "value": "For TowerOfHanoi-v0, start with a simple legal action policy.\n\nLearned rules:\n- For Tower of Hanoi, follow the recursive optimal disk-moving plan from A to C.",
+    "version": 1
+  }
+}

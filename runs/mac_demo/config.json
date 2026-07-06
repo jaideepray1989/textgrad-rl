@@ -1,0 +1,15 @@
+{
+  "agent": "heuristic",
+  "command_timeout_sec": 10,
+  "critic": "heuristic",
+  "iterations": 2,
+  "local_llm_base_url": null,
+  "local_llm_model": null,
+  "max_steps": 15,
+  "method": "modular_textgrad",
+  "output_dir": "runs/mac_demo",
+  "seed": 7,
+  "test_tasks": 4,
+  "train_tasks": 8,
+  "val_tasks": 4
+}

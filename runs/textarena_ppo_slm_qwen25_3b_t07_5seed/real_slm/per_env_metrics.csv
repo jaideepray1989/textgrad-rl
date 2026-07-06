@@ -1,0 +1,16 @@
+average_reward,average_score,average_turns,env_id,episodes,invalid_move_rate,method,success_rate,suite,truncation_rate
+0.6842105263157895,0.5882105263157895,9.2,GuessTheNumber-v0,5,0.4,fixed_prompt_slm,0.4,real_slm,0.2
+0.4666666666666667,0.24866666666666665,3.6,FrozenLake-v0,5,0.4,fixed_prompt_slm,0.0,real_slm,0.0
+0.4,0.375,5.0,Blackjack-v0,5,0.0,fixed_prompt_slm,0.0,real_slm,0.0
+0.2,0.269,6.2,Nim-v0,5,0.4,fixed_prompt_slm,0.6,real_slm,0.0
+0.15,-0.258,11.6,Mastermind-v0,5,0.4,fixed_prompt_slm,0.0,real_slm,0.6
+0.8842105263157893,0.9582105263157896,5.2,GuessTheNumber-v0,5,0.4,textgrad_policy_iteration_slm,0.6,real_slm,0.0
+0.4,0.175,5.0,FrozenLake-v0,5,0.4,textgrad_policy_iteration_slm,0.0,real_slm,0.0
+0.4,0.374,5.2,Blackjack-v0,5,0.0,textgrad_policy_iteration_slm,0.0,real_slm,0.0
+0.2,0.281,3.8,Nim-v0,5,0.4,textgrad_policy_iteration_slm,0.6,real_slm,0.0
+0.0,-0.31,12.0,Mastermind-v0,5,0.0,textgrad_policy_iteration_slm,0.0,real_slm,1.0
+1.0,1.473,5.4,GuessTheNumber-v0,5,0.0,textgrad_ppo_slm,1.0,real_slm,0.0
+0.4666666666666667,0.24866666666666665,3.6,FrozenLake-v0,5,0.4,textgrad_ppo_slm,0.0,real_slm,0.0
+0.4,0.375,5.0,Blackjack-v0,5,0.0,textgrad_ppo_slm,0.0,real_slm,0.0
+0.6,0.8760000000000001,4.8,Nim-v0,5,0.2,textgrad_ppo_slm,0.8,real_slm,0.0
+0.0,-0.31,12.0,Mastermind-v0,5,0.0,textgrad_ppo_slm,0.0,real_slm,1.0

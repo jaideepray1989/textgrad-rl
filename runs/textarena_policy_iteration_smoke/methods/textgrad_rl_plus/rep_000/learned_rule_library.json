@@ -1,0 +1,20 @@
+{
+  "accepted_rules": [
+    {
+      "candidate_name": "targeted_env_rule",
+      "ci_high": 2.191875,
+      "ci_low": 0.313125,
+      "env_id": "Nim-v0",
+      "mean_delta": 1.2525,
+      "rule": "For Nim, use the xor strategy: move to a zero nim-sum when possible.",
+      "target_variable_name": "nim_strategy_prompt"
+    }
+  ],
+  "rejected_rules": [
+    {
+      "env_id": "Blackjack-v0",
+      "reason": "no candidate passed replay-bootstrap gate",
+      "target_variable_name": "blackjack_strategy_prompt"
+    }
+  ]
+}

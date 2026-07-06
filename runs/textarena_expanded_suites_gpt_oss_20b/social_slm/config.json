@@ -1,0 +1,14 @@
+{
+  "base_url": "http://localhost:11434/v1",
+  "env_ids": [
+    "KuhnPoker-v0-short",
+    "IteratedPrisonersDilemma-v0",
+    "SimpleNegotiation-v0-short"
+  ],
+  "model": "gpt-oss:20b",
+  "seed": 32001,
+  "suite": "social",
+  "test_seeds": 1,
+  "train_seeds": 1,
+  "val_seeds": 1
+}

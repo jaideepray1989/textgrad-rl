@@ -1,0 +1,119 @@
+[
+  {
+    "confidence": 0.85,
+    "evidence_from_trajectory": "Training trajectories for Bandit-v0 included sub-solved reward or invalid moves.",
+    "failure_mode": "Bandit-v0 trajectory reward below target",
+    "forbidden_shortcuts": [
+      "hidden state",
+      "environment mutation",
+      "invalid action formats"
+    ],
+    "gradient_text": "The agent needs an environment-specific repair rule for Bandit-v0.",
+    "suggested_edit": "Add a rule: For Bandit, explore every button once, track empirical reward, then exploit the best observed button.",
+    "target_variable_name": "bandit_strategy_prompt"
+  },
+  {
+    "confidence": 0.85,
+    "evidence_from_trajectory": "Training trajectories for Blackjack-v0 included sub-solved reward or invalid moves.",
+    "failure_mode": "Blackjack-v0 trajectory reward below target",
+    "forbidden_shortcuts": [
+      "hidden state",
+      "environment mutation",
+      "invalid action formats"
+    ],
+    "gradient_text": "The agent needs an environment-specific repair rule for Blackjack-v0.",
+    "suggested_edit": "Add a rule: For Blackjack, use the basic threshold policy: hit below 17 and stand at 17 or higher.",
+    "target_variable_name": "blackjack_strategy_prompt"
+  },
+  {
+    "confidence": 0.85,
+    "evidence_from_trajectory": "Training trajectories for ConnectFour-v0 included sub-solved reward or invalid moves.",
+    "failure_mode": "ConnectFour-v0 trajectory reward below target",
+    "forbidden_shortcuts": [
+      "hidden state",
+      "environment mutation",
+      "invalid action formats"
+    ],
+    "gradient_text": "The agent needs an environment-specific repair rule for ConnectFour-v0.",
+    "suggested_edit": "Add a rule: For Connect Four, take an immediate winning column and otherwise block an opponent immediate connect-four.",
+    "target_variable_name": "connectfour_strategy_prompt"
+  },
+  {
+    "confidence": 0.85,
+    "evidence_from_trajectory": "Training trajectories for FrozenLake-v0 included sub-solved reward or invalid moves.",
+    "failure_mode": "FrozenLake-v0 trajectory reward below target",
+    "forbidden_shortcuts": [
+      "hidden state",
+      "environment mutation",
+      "invalid action formats"
+    ],
+    "gradient_text": "The agent needs an environment-specific repair rule for FrozenLake-v0.",
+    "suggested_edit": "Add a rule: For Frozen Lake, plan a shortest safe path to the goal while avoiding holes.",
+    "target_variable_name": "frozenlake_strategy_prompt"
+  },
+  {
+    "confidence": 0.85,
+    "evidence_from_trajectory": "Training trajectories for LightsOut-v0 included sub-solved reward or invalid moves.",
+    "failure_mode": "LightsOut-v0 trajectory reward below target",
+    "forbidden_shortcuts": [
+      "hidden state",
+      "environment mutation",
+      "invalid action formats"
+    ],
+    "gradient_text": "The agent needs an environment-specific repair rule for LightsOut-v0.",
+    "suggested_edit": "Add a rule: For Lights Out, solve the binary toggle system and press cells from a valid solution.",
+    "target_variable_name": "lightsout_strategy_prompt"
+  },
+  {
+    "confidence": 0.85,
+    "evidence_from_trajectory": "Training trajectories for Mastermind-v0 included sub-solved reward or invalid moves.",
+    "failure_mode": "Mastermind-v0 trajectory reward below target",
+    "forbidden_shortcuts": [
+      "hidden state",
+      "environment mutation",
+      "invalid action formats"
+    ],
+    "gradient_text": "The agent needs an environment-specific repair rule for Mastermind-v0.",
+    "suggested_edit": "Add a rule: For Mastermind, maintain all candidate codes and eliminate candidates inconsistent with black/white feedback.",
+    "target_variable_name": "mastermind_strategy_prompt"
+  },
+  {
+    "confidence": 0.85,
+    "evidence_from_trajectory": "Training trajectories for Nim-v0 included sub-solved reward or invalid moves.",
+    "failure_mode": "Nim-v0 trajectory reward below target",
+    "forbidden_shortcuts": [
+      "hidden state",
+      "environment mutation",
+      "invalid action formats"
+    ],
+    "gradient_text": "The agent needs an environment-specific repair rule for Nim-v0.",
+    "suggested_edit": "Add a rule: For Nim, use the xor strategy: move to a zero nim-sum when possible.",
+    "target_variable_name": "nim_strategy_prompt"
+  },
+  {
+    "confidence": 0.85,
+    "evidence_from_trajectory": "Training trajectories for ReverseTicTacToe-v0 included sub-solved reward or invalid moves.",
+    "failure_mode": "ReverseTicTacToe-v0 trajectory reward below target",
+    "forbidden_shortcuts": [
+      "hidden state",
+      "environment mutation",
+      "invalid action formats"
+    ],
+    "gradient_text": "The agent needs an environment-specific repair rule for ReverseTicTacToe-v0.",
+    "suggested_edit": "Add a rule: For Reverse Tic Tac Toe, avoid moves that immediately complete your own three-in-a-row.",
+    "target_variable_name": "reversetictactoe_strategy_prompt"
+  },
+  {
+    "confidence": 0.85,
+    "evidence_from_trajectory": "Training trajectories for TowerOfHanoi-v0 included sub-solved reward or invalid moves.",
+    "failure_mode": "TowerOfHanoi-v0 trajectory reward below target",
+    "forbidden_shortcuts": [
+      "hidden state",
+      "environment mutation",
+      "invalid action formats"
+    ],
+    "gradient_text": "The agent needs an environment-specific repair rule for TowerOfHanoi-v0.",
+    "suggested_edit": "Add a rule: For Tower of Hanoi, follow the recursive optimal disk-moving plan from A to C.",
+    "target_variable_name": "towerofhanoi_strategy_prompt"
+  }
+]

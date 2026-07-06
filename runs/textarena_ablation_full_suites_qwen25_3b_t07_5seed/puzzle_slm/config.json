@@ -1,0 +1,23 @@
+{
+  "base_url": "http://localhost:11434/v1",
+  "env_ids": [
+    "Wordle-v0",
+    "Hangman-v0",
+    "Minesweeper-v0-small",
+    "Sudoku-v0-very-easy"
+  ],
+  "methods": [
+    "textgrad_rl_no_gate_slm",
+    "textgrad_rl_train_val_slm",
+    "textgrad_rl_kl_gate_slm",
+    "textgrad_rl_clipped_surrogate_slm",
+    "textgrad_rl_ppo_slm"
+  ],
+  "model": "qwen2.5:3b",
+  "seed": 22001,
+  "suite": "puzzle",
+  "temperature": 0.7,
+  "test_seeds": 5,
+  "train_seeds": 5,
+  "val_seeds": 5
+}

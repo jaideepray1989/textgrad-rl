@@ -1,0 +1,80 @@
+{
+  "accepted_rules": [
+    {
+      "candidate_name": "targeted_env_rule",
+      "ci_high": 1.41,
+      "ci_low": 1.07,
+      "env_id": "FrozenLake-v0",
+      "mean_delta": 1.24,
+      "rule": "For Frozen Lake, plan a shortest safe path to the goal while avoiding holes.",
+      "target_variable_name": "frozenlake_strategy_prompt"
+    },
+    {
+      "candidate_name": "targeted_env_rule",
+      "ci_high": 0.7085526315789474,
+      "ci_low": 0.14425438596491227,
+      "env_id": "GuessTheNumber-v0",
+      "mean_delta": 0.4165789473684211,
+      "rule": "For Guess The Number, maintain lower and upper bounds from higher/lower hints and guess the midpoint.",
+      "target_variable_name": "guessthenumber_strategy_prompt"
+    },
+    {
+      "candidate_name": "targeted_env_rule",
+      "ci_high": 1.6230555555555555,
+      "ci_low": 1.4749242424242424,
+      "env_id": "LightsOut-v0",
+      "mean_delta": 1.564141414141414,
+      "rule": "For Lights Out, solve the binary toggle system and press cells from a valid solution.",
+      "target_variable_name": "lightsout_strategy_prompt"
+    },
+    {
+      "candidate_name": "targeted_env_rule",
+      "ci_high": 1.67,
+      "ci_low": 1.46,
+      "env_id": "Mastermind-v0",
+      "mean_delta": 1.5650000000000002,
+      "rule": "For Mastermind, maintain all candidate codes and eliminate candidates inconsistent with black/white feedback.",
+      "target_variable_name": "mastermind_strategy_prompt"
+    },
+    {
+      "candidate_name": "targeted_env_rule",
+      "ci_high": 2.0875,
+      "ci_low": 0.4175,
+      "env_id": "Nim-v0",
+      "mean_delta": 1.2525,
+      "rule": "For Nim, use the xor strategy: move to a zero nim-sum when possible.",
+      "target_variable_name": "nim_strategy_prompt"
+    },
+    {
+      "candidate_name": "targeted_env_rule",
+      "ci_high": 1.54,
+      "ci_low": 1.54,
+      "env_id": "TowerOfHanoi-v0",
+      "mean_delta": 1.54,
+      "rule": "For Tower of Hanoi, follow the recursive optimal disk-moving plan from A to C.",
+      "target_variable_name": "towerofhanoi_strategy_prompt"
+    }
+  ],
+  "rejected_rules": [
+    {
+      "env_id": "Bandit-v0",
+      "reason": "no candidate passed replay-bootstrap gate",
+      "target_variable_name": "bandit_strategy_prompt"
+    },
+    {
+      "env_id": "Blackjack-v0",
+      "reason": "no candidate passed replay-bootstrap gate",
+      "target_variable_name": "blackjack_strategy_prompt"
+    },
+    {
+      "env_id": "ConnectFour-v0",
+      "reason": "no candidate passed replay-bootstrap gate",
+      "target_variable_name": "connectfour_strategy_prompt"
+    },
+    {
+      "env_id": "ReverseTicTacToe-v0",
+      "reason": "no candidate passed replay-bootstrap gate",
+      "target_variable_name": "reversetictactoe_strategy_prompt"
+    }
+  ]
+}

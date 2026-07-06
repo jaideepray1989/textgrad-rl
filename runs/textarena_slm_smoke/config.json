@@ -1,0 +1,12 @@
+{
+  "base_url": "http://localhost:11434/v1",
+  "env_id": "GuessTheNumber-v0",
+  "max_tokens": 24,
+  "model": "qwen2.5:3b",
+  "seed": 7300,
+  "temperature": 0.0,
+  "test_seeds": 1,
+  "timeout": 60,
+  "train_seeds": 1,
+  "val_seeds": 1
+}

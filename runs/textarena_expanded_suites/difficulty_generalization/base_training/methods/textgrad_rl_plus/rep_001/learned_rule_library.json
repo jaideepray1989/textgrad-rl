@@ -1,0 +1,71 @@
+{
+  "accepted_rules": [
+    {
+      "candidate_name": "targeted_env_rule",
+      "ci_high": 1.3477777777777777,
+      "ci_low": 1.038888888888889,
+      "env_id": "FrozenLake-v0",
+      "mean_delta": 1.1777777777777778,
+      "rule": "For Frozen Lake, plan a shortest safe path to the goal while avoiding holes.",
+      "target_variable_name": "frozenlake_strategy_prompt"
+    },
+    {
+      "candidate_name": "targeted_env_rule",
+      "ci_high": 1.679337606837607,
+      "ci_low": 1.541025641025641,
+      "env_id": "LightsOut-v0",
+      "mean_delta": 1.6097649572649573,
+      "rule": "For Lights Out, solve the binary toggle system and press cells from a valid solution.",
+      "target_variable_name": "lightsout_strategy_prompt"
+    },
+    {
+      "candidate_name": "targeted_env_rule",
+      "ci_high": 1.675,
+      "ci_low": 0.7966666666666667,
+      "env_id": "Mastermind-v0",
+      "mean_delta": 1.36,
+      "rule": "For Mastermind, maintain all candidate codes and eliminate candidates inconsistent with black/white feedback.",
+      "target_variable_name": "mastermind_strategy_prompt"
+    },
+    {
+      "candidate_name": "targeted_env_rule",
+      "ci_high": 1.87875,
+      "ci_low": 0.62625,
+      "env_id": "Nim-v0",
+      "mean_delta": 1.2525,
+      "rule": "For Nim, use the xor strategy: move to a zero nim-sum when possible.",
+      "target_variable_name": "nim_strategy_prompt"
+    },
+    {
+      "candidate_name": "targeted_env_rule",
+      "ci_high": 1.54,
+      "ci_low": 1.54,
+      "env_id": "TowerOfHanoi-v0",
+      "mean_delta": 1.54,
+      "rule": "For Tower of Hanoi, follow the recursive optimal disk-moving plan from A to C.",
+      "target_variable_name": "towerofhanoi_strategy_prompt"
+    }
+  ],
+  "rejected_rules": [
+    {
+      "env_id": "Bandit-v0",
+      "reason": "no candidate passed replay-bootstrap gate",
+      "target_variable_name": "bandit_strategy_prompt"
+    },
+    {
+      "env_id": "Blackjack-v0",
+      "reason": "no candidate passed replay-bootstrap gate",
+      "target_variable_name": "blackjack_strategy_prompt"
+    },
+    {
+      "env_id": "ConnectFour-v0",
+      "reason": "no candidate passed replay-bootstrap gate",
+      "target_variable_name": "connectfour_strategy_prompt"
+    },
+    {
+      "env_id": "ReverseTicTacToe-v0",
+      "reason": "no candidate passed replay-bootstrap gate",
+      "target_variable_name": "reversetictactoe_strategy_prompt"
+    }
+  ]
+}

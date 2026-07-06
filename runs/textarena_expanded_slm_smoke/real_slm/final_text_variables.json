@@ -1,0 +1,64 @@
+{
+  "blackjack_slm_policy": {
+    "gradient_history": [
+      "Blackjack-v0 frozen-SLM trajectories had low return: Improve legal action selection and state tracking from trajectory feedback."
+    ],
+    "max_chars": 1800,
+    "name": "blackjack_slm_policy",
+    "requires_grad": true,
+    "role_description": "Environment-specific frozen-SLM policy for Blackjack-v0.",
+    "value": "For Blackjack-v0: Stand on 17 or higher; hit below 17 unless bust risk is obvious.\n\nLearned rules:\n- Track the latest observation, obey the exact action format, avoid repeated invalid/no-progress actions, and use this environment hint: Stand on 17 or higher; hit below 17 unless bust risk is obvious.",
+    "version": 1
+  },
+  "frozenlake_slm_policy": {
+    "gradient_history": [
+      "FrozenLake-v0 frozen-SLM trajectories had low return: Improve legal action selection and state tracking from trajectory feedback."
+    ],
+    "max_chars": 1800,
+    "name": "frozenlake_slm_policy",
+    "requires_grad": true,
+    "role_description": "Environment-specific frozen-SLM policy for FrozenLake-v0.",
+    "value": "For FrozenLake-v0: Plan a safe path to G while avoiding H; output one bracketed direction.\n\nLearned rules:\n- Track the latest observation, obey the exact action format, avoid repeated invalid/no-progress actions, and use this environment hint: Plan a safe path to G while avoiding H; output one bracketed direction.",
+    "version": 1
+  },
+  "general_textarena_slm_policy": {
+    "gradient_history": [],
+    "max_chars": 1800,
+    "name": "general_textarena_slm_policy",
+    "requires_grad": true,
+    "role_description": "General frozen-SLM TextArena policy.",
+    "value": "Follow the visible TextArena rules. Track state across observations, avoid repeating invalid actions, and output only one legal action.",
+    "version": 0
+  },
+  "guessthenumber_slm_policy": {
+    "gradient_history": [],
+    "max_chars": 1800,
+    "name": "guessthenumber_slm_policy",
+    "requires_grad": true,
+    "role_description": "Environment-specific frozen-SLM policy for GuessTheNumber-v0.",
+    "value": "For GuessTheNumber-v0: Maintain lower and upper bounds from higher/lower hints and guess the midpoint.",
+    "version": 0
+  },
+  "mastermind_slm_policy": {
+    "gradient_history": [
+      "Mastermind-v0 frozen-SLM trajectories had low return: Improve legal action selection and state tracking from trajectory feedback."
+    ],
+    "max_chars": 1800,
+    "name": "mastermind_slm_policy",
+    "requires_grad": true,
+    "role_description": "Environment-specific frozen-SLM policy for Mastermind-v0.",
+    "value": "For Mastermind-v0: Maintain candidate codes and eliminate guesses inconsistent with black/white feedback.\n\nLearned rules:\n- Track the latest observation, obey the exact action format, avoid repeated invalid/no-progress actions, and use this environment hint: Maintain candidate codes and eliminate guesses inconsistent with black/white feedback.",
+    "version": 1
+  },
+  "nim_slm_policy": {
+    "gradient_history": [
+      "Nim-v0 frozen-SLM trajectories had low return: Improve legal action selection and state tracking from trajectory feedback."
+    ],
+    "max_chars": 1800,
+    "name": "nim_slm_policy",
+    "requires_grad": true,
+    "role_description": "Environment-specific frozen-SLM policy for Nim-v0.",
+    "value": "For Nim-v0: Use the xor strategy: move to a zero nim-sum when possible.\n\nLearned rules:\n- Track the latest observation, obey the exact action format, avoid repeated invalid/no-progress actions, and use this environment hint: Use the xor strategy: move to a zero nim-sum when possible.",
+    "version": 1
+  }
+}

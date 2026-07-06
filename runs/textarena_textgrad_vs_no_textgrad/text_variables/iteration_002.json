@@ -1,0 +1,13 @@
+{
+  "game_strategy_prompt": {
+    "gradient_history": [
+      "Failed to block opponent immediate win: The agent should block a one-move opponent win before choosing positional moves."
+    ],
+    "max_chars": 1800,
+    "name": "game_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Choose legal TextArena TicTacToe actions from observations while improving win rate, non-loss rate, and invalid-move rate.",
+    "value": "Play legal TicTacToe moves. Prefer the center when available. Prefer corners before edges.\n\nLearned rules:\n- block opponent immediate winning moves before center or corner preferences.",
+    "version": 1
+  }
+}

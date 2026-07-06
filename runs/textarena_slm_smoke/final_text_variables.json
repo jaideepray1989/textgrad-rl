@@ -1,0 +1,11 @@
+{
+  "guess_the_number_strategy_prompt": {
+    "gradient_history": [],
+    "max_chars": 1400,
+    "name": "guess_the_number_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "TextArena GuessTheNumber action strategy for a frozen SLM.",
+    "value": "Return one legal bracketed number. If uncertain, make conservative guesses from low to high and avoid prose.",
+    "version": 0
+  }
+}

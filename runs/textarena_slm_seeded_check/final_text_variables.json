@@ -1,0 +1,13 @@
+{
+  "guess_the_number_strategy_prompt": {
+    "gradient_history": [
+      "GuessTheNumber SLM episodes wasted turns or repeated guesses: The prompt should force explicit interval tracking from higher/lower hints instead of unstructured guessing."
+    ],
+    "max_chars": 1400,
+    "name": "guess_the_number_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "TextArena GuessTheNumber action strategy for a frozen SLM.",
+    "value": "Return one legal bracketed number. If uncertain, make conservative guesses from low to high and avoid prose.\n\nLearned rules:\n- For Guess The Number, track the current lower and upper bounds from every higher/lower hint, never repeat a previous guess, and choose the midpoint of the remaining interval.",
+    "version": 1
+  }
+}

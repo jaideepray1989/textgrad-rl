@@ -1,0 +1,5 @@
+accepted,average_reward,average_turns,draws,games,gradient_count,invalid_move_rate,iteration,losses,non_loss_rate,split,variant,win_rate,wins
+,0.125,6.9375,4,16,,0.0,0,5,0.6875,test,no_textgrad,0.4375,7
+True,0.25,6.875,4,16,2,0.0,1,4,0.75,train,textgrad_rl,0.5,8
+True,0.75,6.75,4,16,2,0.0,1,0,1.0,val,textgrad_rl,0.75,12
+,0.75,6.75,4,16,,0.0,1,0,1.0,test,textgrad_rl,0.75,12

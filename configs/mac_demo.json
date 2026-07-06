@@ -1,0 +1,14 @@
+{
+  "agent": "heuristic",
+  "critic": "heuristic",
+  "method": "modular_textgrad",
+  "iterations": 2,
+  "train_tasks": 8,
+  "val_tasks": 4,
+  "test_tasks": 4,
+  "max_steps": 15,
+  "seed": 7,
+  "output_dir": "runs/mac_demo",
+  "command_timeout_sec": 10
+}
+

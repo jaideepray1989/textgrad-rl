@@ -1,0 +1,26 @@
+{
+  "env_ids": [
+    "Nim-v0",
+    "ConnectFour-v0",
+    "ReverseTicTacToe-v0",
+    "GuessTheNumber-v0",
+    "FrozenLake-v0",
+    "TowerOfHanoi-v0",
+    "LightsOut-v0",
+    "Mastermind-v0",
+    "Blackjack-v0",
+    "Bandit-v0"
+  ],
+  "methods": [
+    "fixed_prompt",
+    "scalar_prompt_search",
+    "monolithic_textgrad",
+    "modular_textgrad",
+    "no_acceptance_gate"
+  ],
+  "repetitions": 3,
+  "seed": 9001,
+  "test_seeds": 10,
+  "train_seeds": 5,
+  "val_seeds": 5
+}

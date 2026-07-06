@@ -1,0 +1,6 @@
+variant,split,accepted,episodes,average_reward,success_rate,invalid_move_rate,average_turns
+no_textgrad,test,False,5,0.9052631578947368,0.8,0.0,6.0
+textgrad_rl,train,False,3,0.8421052631578947,0.6666666666666666,0.0,7.0
+textgrad_rl,val_old,False,3,1.0,1.0,0.0,3.3333333333333335
+textgrad_rl,val_candidate,True,3,1.0,1.0,0.0,3.3333333333333335
+textgrad_rl,test,True,5,0.9157894736842106,0.8,0.0,5.8

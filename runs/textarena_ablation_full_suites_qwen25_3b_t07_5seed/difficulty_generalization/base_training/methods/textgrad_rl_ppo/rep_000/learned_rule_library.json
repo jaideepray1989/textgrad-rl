@@ -1,0 +1,131 @@
+{
+  "accepted_rules": [
+    {
+      "approx_kl": 0.0965894970834801,
+      "candidate_name": "advantage_weighted_env_rule",
+      "ci_high": 1.87875,
+      "ci_low": 0.4175,
+      "clip_fraction": 0.5,
+      "env_id": "Nim-v0",
+      "gate_mode": "ppo",
+      "mean_delta": 1.2525,
+      "ppo_objective": 0.38983025145825995,
+      "rule": "For Nim, use the xor strategy: move to a zero nim-sum when possible.",
+      "selection_objective": 0.38983025145825995,
+      "surrogate_delta": 0.125,
+      "target_variable_name": "nim_strategy_prompt",
+      "worst_action": "p0:[0 1]"
+    },
+    {
+      "approx_kl": 0.007678901775084321,
+      "candidate_name": "advantage_weighted_env_rule",
+      "ci_high": 0.7093859649122808,
+      "ci_low": 0.14175438596491227,
+      "clip_fraction": 0.0,
+      "env_id": "GuessTheNumber-v0",
+      "gate_mode": "ppo",
+      "mean_delta": 0.4165789473684211,
+      "ppo_objective": 0.14446329581208847,
+      "rule": "For Guess The Number, maintain lower and upper bounds from higher/lower hints and guess the midpoint.",
+      "selection_objective": 0.14446329581208847,
+      "surrogate_delta": 0.04415800985752537,
+      "target_variable_name": "guessthenumber_strategy_prompt",
+      "worst_action": "p0:[11]"
+    },
+    {
+      "approx_kl": 0.03731688644609763,
+      "candidate_name": "advantage_weighted_env_rule",
+      "ci_high": 1.41,
+      "ci_low": 1.07,
+      "clip_fraction": 0.5,
+      "env_id": "FrozenLake-v0",
+      "gate_mode": "ppo",
+      "mean_delta": 1.24,
+      "ppo_objective": 0.3314049403742222,
+      "rule": "For Frozen Lake, plan a shortest safe path to the goal while avoiding holes.",
+      "selection_objective": 0.3314049403742222,
+      "surrogate_delta": 0.05006338359727101,
+      "target_variable_name": "frozenlake_strategy_prompt",
+      "worst_action": "p0:[right]"
+    },
+    {
+      "approx_kl": 0.04680112218689303,
+      "candidate_name": "advantage_weighted_env_rule",
+      "ci_high": 1.6230555555555555,
+      "ci_low": 1.476590909090909,
+      "clip_fraction": 1.0,
+      "env_id": "LightsOut-v0",
+      "gate_mode": "ppo",
+      "mean_delta": 1.564141414141414,
+      "ppo_objective": 0.38110280590992046,
+      "rule": "For Lights Out, solve the binary toggle system and press cells from a valid solution.",
+      "selection_objective": 0.38110280590992046,
+      "surrogate_delta": 0.013468013468013459,
+      "target_variable_name": "lightsout_strategy_prompt",
+      "worst_action": "p0:[0 1]"
+    },
+    {
+      "approx_kl": 0.06290622571209048,
+      "candidate_name": "advantage_weighted_env_rule",
+      "ci_high": 1.54,
+      "ci_low": 1.54,
+      "clip_fraction": 1.0,
+      "env_id": "TowerOfHanoi-v0",
+      "gate_mode": "ppo",
+      "mean_delta": 1.54,
+      "ppo_objective": 0.4335468871439548,
+      "rule": "For Tower of Hanoi, follow the recursive optimal disk-moving plan from A to C.",
+      "selection_objective": 0.4335468871439548,
+      "surrogate_delta": 0.08000000000000002,
+      "target_variable_name": "towerofhanoi_strategy_prompt",
+      "worst_action": "p0:[C A]"
+    },
+    {
+      "approx_kl": 0.04921977131327495,
+      "candidate_name": "advantage_weighted_env_rule",
+      "ci_high": 1.67,
+      "ci_low": 1.46,
+      "clip_fraction": 1.0,
+      "env_id": "Mastermind-v0",
+      "gate_mode": "ppo",
+      "mean_delta": 1.5650000000000002,
+      "ppo_objective": 0.3930290032322515,
+      "rule": "For Mastermind, maintain all candidate codes and eliminate candidates inconsistent with black/white feedback.",
+      "selection_objective": 0.3930290032322515,
+      "surrogate_delta": 0.02638888888888889,
+      "target_variable_name": "mastermind_strategy_prompt",
+      "worst_action": "p0:[1 2 3 6]"
+    }
+  ],
+  "gate_mode": "ppo",
+  "rejected_rules": [
+    {
+      "env_id": "ConnectFour-v0",
+      "mean_negative_advantage": -1.4078947368421053,
+      "reason": "no candidate passed ppo gate",
+      "target_variable_name": "connectfour_strategy_prompt",
+      "worst_action": "p0:[col 3]"
+    },
+    {
+      "env_id": "Bandit-v0",
+      "mean_negative_advantage": -0.24385364835366263,
+      "reason": "no candidate passed ppo gate",
+      "target_variable_name": "bandit_strategy_prompt",
+      "worst_action": "p0:[red]"
+    },
+    {
+      "env_id": "Blackjack-v0",
+      "mean_negative_advantage": -0.22380952380952382,
+      "reason": "no candidate passed ppo gate",
+      "target_variable_name": "blackjack_strategy_prompt",
+      "worst_action": "p0:[Stand]"
+    },
+    {
+      "env_id": "ReverseTicTacToe-v0",
+      "mean_negative_advantage": 0.0,
+      "reason": "no candidate passed ppo gate",
+      "target_variable_name": "reversetictactoe_strategy_prompt",
+      "worst_action": "p0:[4]"
+    }
+  ]
+}

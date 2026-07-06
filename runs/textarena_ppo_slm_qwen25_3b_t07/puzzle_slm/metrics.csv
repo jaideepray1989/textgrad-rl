@@ -1,0 +1,12 @@
+accepted,average_reward,average_score,average_turns,episodes,invalid_move_rate,method,split,success_rate,suite,truncation_rate
+False,0.14642857142857144,-0.3723214285714286,3.75,4,1.0,fixed_prompt_slm,test,0.0,puzzle,0.0
+False,0.1,-0.415,3.0,4,1.0,textgrad_policy_iteration_slm,train,0.0,puzzle,0.0
+False,0.05,-0.46375,2.75,4,1.0,textgrad_policy_iteration_slm,train_candidate,0.0,puzzle,0.0
+False,0.17857142857142858,-0.3414285714285714,4.0,4,1.0,textgrad_policy_iteration_slm,val_old,0.0,puzzle,0.0
+False,0.20357142857142857,-0.3176785714285714,4.25,4,1.0,textgrad_policy_iteration_slm,val_candidate,0.0,puzzle,0.0
+False,0.12142857142857143,-0.3960714285714286,3.5,4,1.0,textgrad_policy_iteration_slm,test,0.0,puzzle,0.0
+False,0.09285714285714286,-0.4258928571428572,3.75,4,1.0,textgrad_ppo_slm,train,0.0,puzzle,0.0
+False,0.05,-0.465,3.0,4,1.0,textgrad_ppo_slm,train_candidate,0.0,puzzle,0.0
+False,0.11666666666666667,-0.3983333333333334,3.0,4,1.0,textgrad_ppo_slm,val_old,0.0,puzzle,0.0
+False,0.06666666666666667,-0.4470833333333334,2.75,4,1.0,textgrad_ppo_slm,val_candidate,0.0,puzzle,0.0
+False,0.14642857142857144,-0.3748214285714286,4.25,4,1.0,textgrad_ppo_slm,test,0.0,puzzle,0.0

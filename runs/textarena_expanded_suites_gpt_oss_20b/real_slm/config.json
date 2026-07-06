@@ -1,0 +1,16 @@
+{
+  "base_url": "http://localhost:11434/v1",
+  "env_ids": [
+    "GuessTheNumber-v0",
+    "FrozenLake-v0",
+    "Blackjack-v0",
+    "Nim-v0",
+    "Mastermind-v0"
+  ],
+  "model": "gpt-oss:20b",
+  "seed": 42001,
+  "suite": "real_slm",
+  "test_seeds": 1,
+  "train_seeds": 1,
+  "val_seeds": 1
+}

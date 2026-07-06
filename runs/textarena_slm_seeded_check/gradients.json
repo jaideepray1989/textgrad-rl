@@ -1,0 +1,15 @@
+[
+  {
+    "confidence": 0.9,
+    "evidence_from_trajectory": "1 of 1 training episodes were not solved cleanly; 1 took more than the five guesses needed by binary search; 0 episodes repeated at least one guess.",
+    "failure_mode": "GuessTheNumber SLM episodes wasted turns or repeated guesses",
+    "forbidden_shortcuts": [
+      "hardcode the hidden target",
+      "inspect hidden state",
+      "change game rules"
+    ],
+    "gradient_text": "The prompt should force explicit interval tracking from higher/lower hints instead of unstructured guessing.",
+    "suggested_edit": "Add a rule: For Guess The Number, track the current lower and upper bounds from every higher/lower hint, never repeat a previous guess, and choose the midpoint of the remaining interval.",
+    "target_variable_name": "guess_the_number_strategy_prompt"
+  }
+]

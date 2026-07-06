@@ -1,0 +1,9 @@
+average_reward,average_turns,env_id,episodes,invalid_move_rate,method,success_rate
+0.26666666666666666,5.0,Blackjack-v0,3,0.0,fixed_prompt,0.0
+0.0,12.0,Nim-v0,6,0.0,fixed_prompt,0.5
+0.13333333333333333,6.666666666666667,Blackjack-v0,3,0.0,modular_textgrad,0.0
+1.0,11.5,Nim-v0,6,0.0,modular_textgrad,1.0
+0.26666666666666666,5.0,Blackjack-v0,3,0.0,textgrad_policy_iteration,0.0
+1.0,11.5,Nim-v0,6,0.0,textgrad_policy_iteration,1.0
+0.26666666666666666,5.0,Blackjack-v0,3,0.0,textgrad_rl_plus,0.0
+1.0,11.5,Nim-v0,6,0.0,textgrad_rl_plus,1.0

@@ -1,0 +1,14 @@
+{
+  "accepted_rules": [
+    {
+      "candidate_name": "targeted_env_rule",
+      "ci_high": 2.505,
+      "ci_low": 0.0,
+      "env_id": "Nim-v0",
+      "mean_delta": 1.2525,
+      "rule": "For Nim, use the xor strategy: move to a zero nim-sum when possible.",
+      "target_variable_name": "nim_strategy_prompt"
+    }
+  ],
+  "rejected_rules": []
+}

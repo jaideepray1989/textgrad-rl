@@ -1,0 +1,4 @@
+average_reward,average_score,average_turns,env_id,episodes,invalid_move_rate,method,success_rate,suite,truncation_rate
+-1.0,-1.515,3.0,KuhnPoker-v0-short,1,1.0,textgrad_policy_iteration_slm,0.0,social,0.0
+-1.0,-1.2,40.0,IteratedPrisonersDilemma-v0,1,0.0,textgrad_policy_iteration_slm,0.0,social,0.0
+1.0,1.465,7.0,SimpleNegotiation-v0-short,1,0.0,textgrad_policy_iteration_slm,1.0,social,0.0

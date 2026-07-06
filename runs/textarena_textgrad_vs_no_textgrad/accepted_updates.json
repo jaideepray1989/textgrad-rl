@@ -1,0 +1,32 @@
+[
+  {
+    "accepted": true,
+    "changed": true,
+    "gradient_count": 2,
+    "iteration": 1,
+    "new_metrics": {
+      "average_reward": 0.725,
+      "average_turns": 6.8,
+      "draws": 42,
+      "games": 160,
+      "invalid_move_rate": 0.0,
+      "losses": 1,
+      "non_loss_rate": 0.99375,
+      "win_rate": 0.73125,
+      "wins": 117
+    },
+    "new_score": 4.89375,
+    "old_metrics": {
+      "average_reward": 0.10625,
+      "average_turns": 7.03125,
+      "draws": 41,
+      "games": 160,
+      "invalid_move_rate": 0.0,
+      "losses": 51,
+      "non_loss_rate": 0.68125,
+      "win_rate": 0.425,
+      "wins": 68
+    },
+    "old_score": 2.1062499999999997
+  }
+]

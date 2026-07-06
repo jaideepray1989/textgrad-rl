@@ -1,0 +1,80 @@
+{
+  "accepted_rules": [
+    {
+      "candidate_name": "targeted_env_rule",
+      "ci_high": 1.4228333333333332,
+      "ci_low": 1.2001666666666666,
+      "env_id": "FrozenLake-v0",
+      "mean_delta": 1.3183333333333334,
+      "rule": "For Frozen Lake, plan a shortest safe path to the goal while avoiding holes.",
+      "target_variable_name": "frozenlake_strategy_prompt"
+    },
+    {
+      "candidate_name": "targeted_env_rule",
+      "ci_high": 0.7638157894736842,
+      "ci_low": 0.3079736842105264,
+      "env_id": "GuessTheNumber-v0",
+      "mean_delta": 0.548421052631579,
+      "rule": "For Guess The Number, maintain lower and upper bounds from higher/lower hints and guess the midpoint.",
+      "target_variable_name": "guessthenumber_strategy_prompt"
+    },
+    {
+      "candidate_name": "targeted_env_rule",
+      "ci_high": 1.705,
+      "ci_low": 1.5612424242424243,
+      "env_id": "LightsOut-v0",
+      "mean_delta": 1.6216868686868686,
+      "rule": "For Lights Out, solve the binary toggle system and press cells from a valid solution.",
+      "target_variable_name": "lightsout_strategy_prompt"
+    },
+    {
+      "candidate_name": "targeted_env_rule",
+      "ci_high": 1.7075,
+      "ci_low": 1.571,
+      "env_id": "Mastermind-v0",
+      "mean_delta": 1.643,
+      "rule": "For Mastermind, maintain all candidate codes and eliminate candidates inconsistent with black/white feedback.",
+      "target_variable_name": "mastermind_strategy_prompt"
+    },
+    {
+      "candidate_name": "targeted_env_rule",
+      "ci_high": 1.7535,
+      "ci_low": 0.7515,
+      "env_id": "Nim-v0",
+      "mean_delta": 1.2525,
+      "rule": "For Nim, use the xor strategy: move to a zero nim-sum when possible.",
+      "target_variable_name": "nim_strategy_prompt"
+    },
+    {
+      "candidate_name": "targeted_env_rule",
+      "ci_high": 1.54,
+      "ci_low": 1.54,
+      "env_id": "TowerOfHanoi-v0",
+      "mean_delta": 1.54,
+      "rule": "For Tower of Hanoi, follow the recursive optimal disk-moving plan from A to C.",
+      "target_variable_name": "towerofhanoi_strategy_prompt"
+    }
+  ],
+  "rejected_rules": [
+    {
+      "env_id": "Bandit-v0",
+      "reason": "no candidate passed replay-bootstrap gate",
+      "target_variable_name": "bandit_strategy_prompt"
+    },
+    {
+      "env_id": "Blackjack-v0",
+      "reason": "no candidate passed replay-bootstrap gate",
+      "target_variable_name": "blackjack_strategy_prompt"
+    },
+    {
+      "env_id": "ConnectFour-v0",
+      "reason": "no candidate passed replay-bootstrap gate",
+      "target_variable_name": "connectfour_strategy_prompt"
+    },
+    {
+      "env_id": "ReverseTicTacToe-v0",
+      "reason": "no candidate passed replay-bootstrap gate",
+      "target_variable_name": "reversetictactoe_strategy_prompt"
+    }
+  ]
+}

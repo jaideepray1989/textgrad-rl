@@ -1,0 +1,101 @@
+{
+  "bandit_strategy_prompt": {
+    "gradient_history": [],
+    "max_chars": 1600,
+    "name": "bandit_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Environment-specific strategy text for Bandit-v0.",
+    "value": "For Bandit-v0, start with a simple legal action policy.",
+    "version": 0
+  },
+  "blackjack_strategy_prompt": {
+    "gradient_history": [],
+    "max_chars": 1600,
+    "name": "blackjack_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Environment-specific strategy text for Blackjack-v0.",
+    "value": "For Blackjack-v0, start with a simple legal action policy.",
+    "version": 0
+  },
+  "connectfour_strategy_prompt": {
+    "gradient_history": [],
+    "max_chars": 1600,
+    "name": "connectfour_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Environment-specific strategy text for ConnectFour-v0.",
+    "value": "For ConnectFour-v0, start with a simple legal action policy.",
+    "version": 0
+  },
+  "frozenlake_strategy_prompt": {
+    "gradient_history": [],
+    "max_chars": 1600,
+    "name": "frozenlake_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Environment-specific strategy text for FrozenLake-v0.",
+    "value": "For FrozenLake-v0, start with a simple legal action policy.",
+    "version": 0
+  },
+  "general_strategy_prompt": {
+    "gradient_history": [],
+    "max_chars": 2400,
+    "name": "general_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "General TextArena action-format and safety strategy.",
+    "value": "Play valid TextArena actions. Read the latest observation, choose legal moves, and avoid changing the environment rules.",
+    "version": 0
+  },
+  "guessthenumber_strategy_prompt": {
+    "gradient_history": [],
+    "max_chars": 1600,
+    "name": "guessthenumber_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Environment-specific strategy text for GuessTheNumber-v0.",
+    "value": "For GuessTheNumber-v0, start with a simple legal action policy.",
+    "version": 0
+  },
+  "lightsout_strategy_prompt": {
+    "gradient_history": [],
+    "max_chars": 1600,
+    "name": "lightsout_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Environment-specific strategy text for LightsOut-v0.",
+    "value": "For LightsOut-v0, start with a simple legal action policy.",
+    "version": 0
+  },
+  "mastermind_strategy_prompt": {
+    "gradient_history": [],
+    "max_chars": 1600,
+    "name": "mastermind_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Environment-specific strategy text for Mastermind-v0.",
+    "value": "For Mastermind-v0, start with a simple legal action policy.",
+    "version": 0
+  },
+  "nim_strategy_prompt": {
+    "gradient_history": [],
+    "max_chars": 1600,
+    "name": "nim_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Environment-specific strategy text for Nim-v0.",
+    "value": "For Nim-v0, start with a simple legal action policy.",
+    "version": 0
+  },
+  "reversetictactoe_strategy_prompt": {
+    "gradient_history": [],
+    "max_chars": 1600,
+    "name": "reversetictactoe_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Environment-specific strategy text for ReverseTicTacToe-v0.",
+    "value": "For ReverseTicTacToe-v0, start with a simple legal action policy.",
+    "version": 0
+  },
+  "towerofhanoi_strategy_prompt": {
+    "gradient_history": [],
+    "max_chars": 1600,
+    "name": "towerofhanoi_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Environment-specific strategy text for TowerOfHanoi-v0.",
+    "value": "For TowerOfHanoi-v0, start with a simple legal action policy.",
+    "version": 0
+  }
+}

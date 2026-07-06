@@ -1,0 +1,12 @@
+accepted,average_reward,average_score,average_turns,episodes,invalid_move_rate,method,split,success_rate,suite,truncation_rate
+False,0.3801754385964912,0.24457543859649125,7.12,25,0.32,fixed_prompt_slm,test,0.2,real_slm,0.16
+False,0.2967017543859649,0.14090175438596492,7.16,25,0.28,textgrad_policy_iteration_slm,train,0.16,real_slm,0.24
+False,0.25880701754385965,0.08620701754385966,6.52,25,0.32,textgrad_policy_iteration_slm,train_candidate,0.16,real_slm,0.24
+False,0.28526315789473683,0.16286315789473682,6.48,25,0.28,textgrad_policy_iteration_slm,val_old,0.2,real_slm,0.2
+False,0.44763157894736844,0.41843157894736843,5.84,25,0.24,textgrad_policy_iteration_slm,val_candidate,0.32,real_slm,0.16
+False,0.37684210526315787,0.29564210526315793,6.24,25,0.24,textgrad_policy_iteration_slm,test,0.24,real_slm,0.2
+False,0.16935087719298245,-0.0016491228070175364,6.2,25,0.36,textgrad_ppo_slm,train,0.16,real_slm,0.16
+False,0.2856666666666667,0.15426666666666666,6.28,25,0.32,textgrad_ppo_slm,train_candidate,0.2,real_slm,0.16
+False,0.28757894736842105,0.20777894736842106,5.96,25,0.24,textgrad_ppo_slm,val_old,0.24,real_slm,0.2
+False,0.24757894736842107,0.10837894736842106,5.84,25,0.28,textgrad_ppo_slm,val_candidate,0.16,real_slm,0.2
+False,0.49333333333333335,0.5325333333333334,6.16,25,0.12,textgrad_ppo_slm,test,0.36,real_slm,0.2

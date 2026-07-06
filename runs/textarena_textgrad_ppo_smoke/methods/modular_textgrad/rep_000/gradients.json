@@ -1,0 +1,15 @@
+[
+  {
+    "confidence": 0.85,
+    "evidence_from_trajectory": "Training trajectories for Nim-v0 included sub-solved reward or invalid moves.",
+    "failure_mode": "Nim-v0 trajectory reward below target",
+    "forbidden_shortcuts": [
+      "hidden state",
+      "environment mutation",
+      "invalid action formats"
+    ],
+    "gradient_text": "The agent needs an environment-specific repair rule for Nim-v0.",
+    "suggested_edit": "Add a rule: For Nim, use the xor strategy: move to a zero nim-sum when possible.",
+    "target_variable_name": "nim_strategy_prompt"
+  }
+]

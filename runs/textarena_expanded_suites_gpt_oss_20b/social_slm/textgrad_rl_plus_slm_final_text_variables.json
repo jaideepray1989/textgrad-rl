@@ -1,0 +1,38 @@
+{
+  "general_textarena_slm_policy": {
+    "gradient_history": [],
+    "max_chars": 1800,
+    "name": "general_textarena_slm_policy",
+    "requires_grad": true,
+    "role_description": "General frozen-SLM TextArena policy.",
+    "value": "Follow the visible TextArena rules. Track state across observations, avoid repeating invalid actions, and output only one legal action.",
+    "version": 0
+  },
+  "iteratedprisonersdilemma_slm_policy": {
+    "gradient_history": [],
+    "max_chars": 1800,
+    "name": "iteratedprisonersdilemma_slm_policy",
+    "requires_grad": true,
+    "role_description": "Environment-specific frozen-SLM policy for IteratedPrisonersDilemma-v0.",
+    "value": "For IteratedPrisonersDilemma-v0: Prefer cooperation unless the opponent defects repeatedly; use the exact decision token when asked.",
+    "version": 0
+  },
+  "kuhnpoker_short_slm_policy": {
+    "gradient_history": [],
+    "max_chars": 1800,
+    "name": "kuhnpoker_short_slm_policy",
+    "requires_grad": true,
+    "role_description": "Environment-specific frozen-SLM policy for KuhnPoker-v0-short.",
+    "value": "For KuhnPoker-v0-short: Use conservative Kuhn poker strategy: bet strong cards, check weak cards, call selectively.",
+    "version": 0
+  },
+  "simplenegotiation_short_slm_policy": {
+    "gradient_history": [],
+    "max_chars": 1800,
+    "name": "simplenegotiation_short_slm_policy",
+    "requires_grad": true,
+    "role_description": "Environment-specific frozen-SLM policy for SimpleNegotiation-v0-short.",
+    "value": "For SimpleNegotiation-v0-short: Make mutually beneficial offers using the required offer token format.",
+    "version": 0
+  }
+}

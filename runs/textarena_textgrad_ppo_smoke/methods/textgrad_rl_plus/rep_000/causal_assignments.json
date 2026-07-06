@@ -1,0 +1,11 @@
+[
+  {
+    "average_reward": 0.0,
+    "causal_factor": "environment_strategy",
+    "env_id": "Nim-v0",
+    "evidence": "1/2 Nim-v0 replay trajectories had reward < 1.0 or invalid moves; invalid_count=0.",
+    "failure_count": 1,
+    "invalid_count": 0,
+    "target_variable_name": "nim_strategy_prompt"
+  }
+]

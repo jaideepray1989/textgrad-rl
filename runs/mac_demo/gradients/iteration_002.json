@@ -1,0 +1,171 @@
+[
+  {
+    "confidence": 0.9,
+    "evidence_from_trajectory": "The failure mentioned a missing/stale column name.",
+    "failure_mode": "Schema mismatch not triaged through preprocessing",
+    "forbidden_shortcuts": [
+      "edit tests",
+      "change thresholds",
+      "hardcode outputs"
+    ],
+    "gradient_text": "Schema drift should cause the agent to inspect data columns and preprocessing aliases before model code.",
+    "suggested_edit": "Add a rule: for schema mismatch errors, inspect data columns and preprocessing assumptions before editing model code.",
+    "target_variable_name": "triage_prompt"
+  },
+  {
+    "confidence": 0.9,
+    "evidence_from_trajectory": "The trajectory contained nondeterminism or reproducibility evidence.",
+    "failure_mode": "Reproducibility failure needs explicit validation",
+    "forbidden_shortcuts": [
+      "edit tests",
+      "change thresholds",
+      "hardcode outputs"
+    ],
+    "gradient_text": "Validation should include repeated eval/tests when the task is about determinism.",
+    "suggested_edit": "Add a rule: for reproducibility tasks, set random_state consistently and rerun eval or tests before submit.",
+    "target_variable_name": "validation_prompt"
+  },
+  {
+    "confidence": 0.9,
+    "evidence_from_trajectory": "The trajectory mentioned runtime or latency failures.",
+    "failure_mode": "Latency regression from repeated inference work",
+    "forbidden_shortcuts": [
+      "edit tests",
+      "change thresholds",
+      "hardcode outputs"
+    ],
+    "gradient_text": "Latency fixes should cache invariant loading and vectorize batch prediction while preserving correctness.",
+    "suggested_edit": "Add a rule: for latency regressions, inspect inference hot paths for repeated loading and vectorize batch prediction.",
+    "target_variable_name": "patch_planning_prompt"
+  },
+  {
+    "confidence": 0.9,
+    "evidence_from_trajectory": "The failure mentioned a missing/stale column name.",
+    "failure_mode": "Schema mismatch not triaged through preprocessing",
+    "forbidden_shortcuts": [
+      "edit tests",
+      "change thresholds",
+      "hardcode outputs"
+    ],
+    "gradient_text": "Schema drift should cause the agent to inspect data columns and preprocessing aliases before model code.",
+    "suggested_edit": "Add a rule: for schema mismatch errors, inspect data columns and preprocessing assumptions before editing model code.",
+    "target_variable_name": "triage_prompt"
+  },
+  {
+    "confidence": 0.9,
+    "evidence_from_trajectory": "The trajectory contained nondeterminism or reproducibility evidence.",
+    "failure_mode": "Reproducibility failure needs explicit validation",
+    "forbidden_shortcuts": [
+      "edit tests",
+      "change thresholds",
+      "hardcode outputs"
+    ],
+    "gradient_text": "Validation should include repeated eval/tests when the task is about determinism.",
+    "suggested_edit": "Add a rule: for reproducibility tasks, set random_state consistently and rerun eval or tests before submit.",
+    "target_variable_name": "validation_prompt"
+  },
+  {
+    "confidence": 0.9,
+    "evidence_from_trajectory": "The trajectory contained nondeterminism or reproducibility evidence.",
+    "failure_mode": "Reproducibility failure needs explicit validation",
+    "forbidden_shortcuts": [
+      "edit tests",
+      "change thresholds",
+      "hardcode outputs"
+    ],
+    "gradient_text": "Validation should include repeated eval/tests when the task is about determinism.",
+    "suggested_edit": "Add a rule: for reproducibility tasks, set random_state consistently and rerun eval or tests before submit.",
+    "target_variable_name": "validation_prompt"
+  },
+  {
+    "confidence": 0.9,
+    "evidence_from_trajectory": "The trajectory contained nondeterminism or reproducibility evidence.",
+    "failure_mode": "Reproducibility failure needs explicit validation",
+    "forbidden_shortcuts": [
+      "edit tests",
+      "change thresholds",
+      "hardcode outputs"
+    ],
+    "gradient_text": "Validation should include repeated eval/tests when the task is about determinism.",
+    "suggested_edit": "Add a rule: for reproducibility tasks, set random_state consistently and rerun eval or tests before submit.",
+    "target_variable_name": "validation_prompt"
+  },
+  {
+    "confidence": 0.86,
+    "evidence_from_trajectory": "Eval metric was below threshold or metric tests failed.",
+    "failure_mode": "Metric regression requires source-level root-cause repair",
+    "forbidden_shortcuts": [
+      "edit tests",
+      "change thresholds",
+      "hardcode outputs"
+    ],
+    "gradient_text": "Metric failures should lead to checking label mapping, feature construction, and split logic without leaking validation labels.",
+    "suggested_edit": "Add a rule: for metric regressions, inspect feature construction and label mapping, and never leak validation/test labels into training.",
+    "target_variable_name": "patch_planning_prompt"
+  },
+  {
+    "confidence": 0.9,
+    "evidence_from_trajectory": "Trajectory output contained shape/dimension evidence.",
+    "failure_mode": "Shape mismatch not converted into targeted inspection",
+    "forbidden_shortcuts": [
+      "edit tests",
+      "change thresholds",
+      "hardcode outputs"
+    ],
+    "gradient_text": "Shape errors usually identify the file where feature dimensionality is assumed. Inspect that code before another full run.",
+    "suggested_edit": "Add a rule: for shape mismatch errors, inspect training/preprocessing feature dimensions before editing or rerunning full training.",
+    "target_variable_name": "log_interpretation_prompt"
+  },
+  {
+    "confidence": 0.9,
+    "evidence_from_trajectory": "The trajectory contained nondeterminism or reproducibility evidence.",
+    "failure_mode": "Reproducibility failure needs explicit validation",
+    "forbidden_shortcuts": [
+      "edit tests",
+      "change thresholds",
+      "hardcode outputs"
+    ],
+    "gradient_text": "Validation should include repeated eval/tests when the task is about determinism.",
+    "suggested_edit": "Add a rule: for reproducibility tasks, set random_state consistently and rerun eval or tests before submit.",
+    "target_variable_name": "validation_prompt"
+  },
+  {
+    "confidence": 0.9,
+    "evidence_from_trajectory": "Trajectory output contained shape/dimension evidence.",
+    "failure_mode": "Shape mismatch not converted into targeted inspection",
+    "forbidden_shortcuts": [
+      "edit tests",
+      "change thresholds",
+      "hardcode outputs"
+    ],
+    "gradient_text": "Shape errors usually identify the file where feature dimensionality is assumed. Inspect that code before another full run.",
+    "suggested_edit": "Add a rule: for shape mismatch errors, inspect training/preprocessing feature dimensions before editing or rerunning full training.",
+    "target_variable_name": "log_interpretation_prompt"
+  },
+  {
+    "confidence": 0.9,
+    "evidence_from_trajectory": "The trajectory contained nondeterminism or reproducibility evidence.",
+    "failure_mode": "Reproducibility failure needs explicit validation",
+    "forbidden_shortcuts": [
+      "edit tests",
+      "change thresholds",
+      "hardcode outputs"
+    ],
+    "gradient_text": "Validation should include repeated eval/tests when the task is about determinism.",
+    "suggested_edit": "Add a rule: for reproducibility tasks, set random_state consistently and rerun eval or tests before submit.",
+    "target_variable_name": "validation_prompt"
+  },
+  {
+    "confidence": 0.9,
+    "evidence_from_trajectory": "The trajectory contained nondeterminism or reproducibility evidence.",
+    "failure_mode": "Reproducibility failure needs explicit validation",
+    "forbidden_shortcuts": [
+      "edit tests",
+      "change thresholds",
+      "hardcode outputs"
+    ],
+    "gradient_text": "Validation should include repeated eval/tests when the task is about determinism.",
+    "suggested_edit": "Add a rule: for reproducibility tasks, set random_state consistently and rerun eval or tests before submit.",
+    "target_variable_name": "validation_prompt"
+  }
+]

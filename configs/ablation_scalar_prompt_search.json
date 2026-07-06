@@ -1,0 +1,14 @@
+{
+  "agent": "heuristic",
+  "critic": "heuristic",
+  "method": "scalar_prompt_search",
+  "iterations": 3,
+  "train_tasks": 15,
+  "val_tasks": 8,
+  "test_tasks": 8,
+  "max_steps": 15,
+  "seed": 21,
+  "output_dir": "runs/ablation_scalar_prompt_search",
+  "command_timeout_sec": 10
+}
+

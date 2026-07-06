@@ -1,0 +1,16 @@
+{
+  "candidate_values": {},
+  "env_baselines": {
+    "Bandit-v0": 0.13697701543701216,
+    "Blackjack-v0": 0.41500000000000004,
+    "ConnectFour-v0": 0.15500000000000003,
+    "FrozenLake-v0": 0.21633333333333332,
+    "GuessTheNumber-v0": 1.187315789473684,
+    "LightsOut-v0": -0.051519069166127994,
+    "Mastermind-v0": -0.15,
+    "Nim-v0": 0.18999999999999995,
+    "ReverseTicTacToe-v0": -0.045,
+    "TowerOfHanoi-v0": -0.075
+  },
+  "global_baseline": 0.1753159283906078
+}

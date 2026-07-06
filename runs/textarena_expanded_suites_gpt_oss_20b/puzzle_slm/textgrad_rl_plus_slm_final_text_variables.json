@@ -1,0 +1,55 @@
+{
+  "general_textarena_slm_policy": {
+    "gradient_history": [],
+    "max_chars": 1800,
+    "name": "general_textarena_slm_policy",
+    "requires_grad": true,
+    "role_description": "General frozen-SLM TextArena policy.",
+    "value": "Follow the visible TextArena rules. Track state across observations, avoid repeating invalid actions, and output only one legal action.",
+    "version": 0
+  },
+  "hangman_slm_policy": {
+    "gradient_history": [
+      "Hangman-v0 frozen-SLM trajectories had low return: Improve legal action selection and state tracking from trajectory feedback."
+    ],
+    "max_chars": 1800,
+    "name": "hangman_slm_policy",
+    "requires_grad": true,
+    "role_description": "Environment-specific frozen-SLM policy for Hangman-v0.",
+    "value": "For Hangman-v0: Guess common letters first. Return one bracketed letter unless you know the full word.\n\nLearned rules:\n- Track the latest observation, obey the exact action format, avoid repeated invalid/no-progress actions, and use this environment hint: Guess common letters first. Return one bracketed letter unless you know the full word.",
+    "version": 1
+  },
+  "minesweeper_small_slm_policy": {
+    "gradient_history": [
+      "Minesweeper-v0-small frozen-SLM trajectories had low return: Improve legal action selection and state tracking from trajectory feedback."
+    ],
+    "max_chars": 1800,
+    "name": "minesweeper_small_slm_policy",
+    "requires_grad": true,
+    "role_description": "Environment-specific frozen-SLM policy for Minesweeper-v0-small.",
+    "value": "For Minesweeper-v0-small: Reveal safe-looking cells by row and column in brackets. Avoid repeating revealed cells.\n\nLearned rules:\n- Track the latest observation, obey the exact action format, avoid repeated invalid/no-progress actions, and use this environment hint: Reveal safe-looking cells by row and column in brackets. Avoid repeating revealed cells.",
+    "version": 1
+  },
+  "sudoku_very_easy_slm_policy": {
+    "gradient_history": [
+      "Sudoku-v0-very-easy frozen-SLM trajectories had low return: Improve legal action selection and state tracking from trajectory feedback."
+    ],
+    "max_chars": 1800,
+    "name": "sudoku_very_easy_slm_policy",
+    "requires_grad": true,
+    "role_description": "Environment-specific frozen-SLM policy for Sudoku-v0-very-easy.",
+    "value": "For Sudoku-v0-very-easy: Return one legal placement in the requested coordinate/value format from the grid.\n\nLearned rules:\n- Track the latest observation, obey the exact action format, avoid repeated invalid/no-progress actions, and use this environment hint: Return one legal placement in the requested coordinate/value format from the grid.",
+    "version": 1
+  },
+  "wordle_slm_policy": {
+    "gradient_history": [
+      "Wordle-v0 frozen-SLM trajectories had low return: Improve legal action selection and state tracking from trajectory feedback."
+    ],
+    "max_chars": 1800,
+    "name": "wordle_slm_policy",
+    "requires_grad": true,
+    "role_description": "Environment-specific frozen-SLM policy for Wordle-v0.",
+    "value": "For Wordle-v0: Use feedback to eliminate letters. Return one lowercase 5-letter guess in brackets.\n\nLearned rules:\n- Track the latest observation, obey the exact action format, avoid repeated invalid/no-progress actions, and use this environment hint: Use feedback to eliminate letters. Return one lowercase 5-letter guess in brackets.",
+    "version": 1
+  }
+}

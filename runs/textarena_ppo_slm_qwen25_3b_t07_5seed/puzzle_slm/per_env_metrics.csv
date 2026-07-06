@@ -1,0 +1,13 @@
+average_reward,average_score,average_turns,env_id,episodes,invalid_move_rate,method,success_rate,suite,truncation_rate
+0.32,-0.201,4.2,Wordle-v0,5,1.0,fixed_prompt_slm,0.0,puzzle,0.0
+0.08,-0.43499999999999994,3.0,Hangman-v0,5,1.0,fixed_prompt_slm,0.0,puzzle,0.0
+0.02857142857142857,-0.48842857142857143,3.4,Minesweeper-v0-small,5,1.0,fixed_prompt_slm,0.0,puzzle,0.0
+0.0,-0.51,2.0,Sudoku-v0-very-easy,5,1.0,fixed_prompt_slm,0.0,puzzle,0.0
+0.13999999999999999,-0.385,5.0,Wordle-v0,5,1.0,textgrad_policy_iteration_slm,0.0,puzzle,0.0
+0.08,-0.434,2.8,Hangman-v0,5,1.0,textgrad_policy_iteration_slm,0.0,puzzle,0.0
+0.02857142857142857,-0.48842857142857143,3.4,Minesweeper-v0-small,5,1.0,textgrad_policy_iteration_slm,0.0,puzzle,0.0
+0.0,-0.51,2.0,Sudoku-v0-very-easy,5,1.0,textgrad_policy_iteration_slm,0.0,puzzle,0.0
+0.16,-0.36,4.0,Wordle-v0,5,1.0,textgrad_ppo_slm,0.0,puzzle,0.0
+0.04,-0.47300000000000003,2.6,Hangman-v0,5,1.0,textgrad_ppo_slm,0.0,puzzle,0.0
+0.014285714285714285,-0.5027142857142858,3.4,Minesweeper-v0-small,5,1.0,textgrad_ppo_slm,0.0,puzzle,0.0
+0.0,-0.51,2.0,Sudoku-v0-very-easy,5,1.0,textgrad_ppo_slm,0.0,puzzle,0.0

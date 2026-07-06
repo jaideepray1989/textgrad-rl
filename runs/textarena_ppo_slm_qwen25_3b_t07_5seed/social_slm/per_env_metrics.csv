@@ -1,0 +1,10 @@
+average_reward,average_score,average_turns,env_id,episodes,invalid_move_rate,method,success_rate,suite,truncation_rate
+-1.0,-1.422,4.4,KuhnPoker-v0-short,5,0.8,fixed_prompt_slm,0.0,social,0.0
+-0.8,-1.0,40.0,IteratedPrisonersDilemma-v0,5,0.0,fixed_prompt_slm,0.0,social,0.0
+0.4,0.664,7.2,SimpleNegotiation-v0-short,5,0.0,fixed_prompt_slm,0.6,social,0.0
+-1.0,-1.519,3.8,KuhnPoker-v0-short,5,1.0,textgrad_policy_iteration_slm,0.0,social,0.0
+-0.8,-1.0,40.0,IteratedPrisonersDilemma-v0,5,0.0,textgrad_policy_iteration_slm,0.0,social,0.0
+-0.4,-0.43599999999999994,7.2,SimpleNegotiation-v0-short,5,0.2,textgrad_policy_iteration_slm,0.2,social,0.0
+-0.6,-0.9209999999999999,4.2,KuhnPoker-v0-short,5,0.8,textgrad_ppo_slm,0.2,social,0.0
+-1.0,-1.2,40.0,IteratedPrisonersDilemma-v0,5,0.0,textgrad_ppo_slm,0.0,social,0.0
+-0.2,-0.23499999999999996,7.0,SimpleNegotiation-v0-short,5,0.0,textgrad_ppo_slm,0.0,social,0.0

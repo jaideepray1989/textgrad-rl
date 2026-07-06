@@ -1,0 +1,2 @@
+average_reward,average_turns,episodes,invalid_move_rate,method,repetition,success_rate,suite
+0.8537176879449278,17.583333333333332,12,0.0,textgrad_policy_iteration,0,0.75,difficulty_generalization

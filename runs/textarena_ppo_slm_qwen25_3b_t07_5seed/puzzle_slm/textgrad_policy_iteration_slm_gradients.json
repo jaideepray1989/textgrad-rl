@@ -1,0 +1,54 @@
+[
+  {
+    "confidence": 0.75,
+    "evidence_from_trajectory": "5/5 episodes failed, were invalid, or hit the turn cap; 5 episodes repeated actions.",
+    "failure_mode": "Hangman-v0 frozen-SLM trajectories had low return",
+    "forbidden_shortcuts": [
+      "hidden state",
+      "environment mutation",
+      "invalid action formats"
+    ],
+    "gradient_text": "Improve legal action selection and state tracking from trajectory feedback.",
+    "suggested_edit": "Add a rule: Track the latest observation, obey the exact action format, avoid repeated invalid/no-progress actions, and use this environment hint: Guess common letters first. Return one bracketed letter unless you know the full word..",
+    "target_variable_name": "hangman_slm_policy"
+  },
+  {
+    "confidence": 0.75,
+    "evidence_from_trajectory": "5/5 episodes failed, were invalid, or hit the turn cap; 2 episodes repeated actions.",
+    "failure_mode": "Minesweeper-v0-small frozen-SLM trajectories had low return",
+    "forbidden_shortcuts": [
+      "hidden state",
+      "environment mutation",
+      "invalid action formats"
+    ],
+    "gradient_text": "Improve legal action selection and state tracking from trajectory feedback.",
+    "suggested_edit": "Add a rule: Track the latest observation, obey the exact action format, avoid repeated invalid/no-progress actions, and use this environment hint: Reveal safe-looking cells by row and column in brackets. Avoid repeating revealed cells..",
+    "target_variable_name": "minesweeper_small_slm_policy"
+  },
+  {
+    "confidence": 0.75,
+    "evidence_from_trajectory": "5/5 episodes failed, were invalid, or hit the turn cap; 0 episodes repeated actions.",
+    "failure_mode": "Sudoku-v0-very-easy frozen-SLM trajectories had low return",
+    "forbidden_shortcuts": [
+      "hidden state",
+      "environment mutation",
+      "invalid action formats"
+    ],
+    "gradient_text": "Improve legal action selection and state tracking from trajectory feedback.",
+    "suggested_edit": "Add a rule: Track the latest observation, obey the exact action format, avoid repeated invalid/no-progress actions, and use this environment hint: Return one legal placement in the requested coordinate/value format from the grid..",
+    "target_variable_name": "sudoku_very_easy_slm_policy"
+  },
+  {
+    "confidence": 0.75,
+    "evidence_from_trajectory": "5/5 episodes failed, were invalid, or hit the turn cap; 5 episodes repeated actions.",
+    "failure_mode": "Wordle-v0 frozen-SLM trajectories had low return",
+    "forbidden_shortcuts": [
+      "hidden state",
+      "environment mutation",
+      "invalid action formats"
+    ],
+    "gradient_text": "Improve legal action selection and state tracking from trajectory feedback.",
+    "suggested_edit": "Add a rule: Track the latest observation, obey the exact action format, avoid repeated invalid/no-progress actions, and use this environment hint: Use feedback to eliminate letters. Return one lowercase 5-letter guess in brackets..",
+    "target_variable_name": "wordle_slm_policy"
+  }
+]

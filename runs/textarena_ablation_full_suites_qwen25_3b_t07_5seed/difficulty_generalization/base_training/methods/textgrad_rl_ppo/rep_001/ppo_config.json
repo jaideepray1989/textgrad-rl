@@ -1,0 +1,6 @@
+{
+  "clip_epsilon": 0.2,
+  "min_surrogate_delta": 0.001,
+  "score_scale": 5.0,
+  "target_kl": 0.2
+}

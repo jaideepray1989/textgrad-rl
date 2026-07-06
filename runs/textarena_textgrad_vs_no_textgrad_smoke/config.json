@@ -1,0 +1,14 @@
+{
+  "env_id": "TicTacToe-v0",
+  "iterations": 1,
+  "opponents": [
+    "first_available",
+    "center_first",
+    "random_legal",
+    "optimal_minimax"
+  ],
+  "seed": 2027,
+  "test_episodes_per_opponent_side": 2,
+  "train_episodes_per_opponent_side": 2,
+  "val_episodes_per_opponent_side": 2
+}

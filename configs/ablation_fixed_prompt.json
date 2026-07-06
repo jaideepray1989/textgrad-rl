@@ -1,0 +1,14 @@
+{
+  "agent": "heuristic",
+  "critic": "heuristic",
+  "method": "fixed_prompt",
+  "iterations": 1,
+  "train_tasks": 15,
+  "val_tasks": 8,
+  "test_tasks": 8,
+  "max_steps": 15,
+  "seed": 21,
+  "output_dir": "runs/ablation_fixed_prompt",
+  "command_timeout_sec": 10
+}
+

@@ -1,0 +1,41 @@
+[
+  {
+    "confidence": 0.75,
+    "evidence_from_trajectory": "5/5 episodes failed, were invalid, or hit the turn cap; 5 episodes repeated actions.",
+    "failure_mode": "IteratedPrisonersDilemma-v0 frozen-SLM trajectories had low return",
+    "forbidden_shortcuts": [
+      "hidden state",
+      "environment mutation",
+      "invalid action formats"
+    ],
+    "gradient_text": "Improve legal action selection and state tracking from trajectory feedback.",
+    "suggested_edit": "Add a rule: Track the latest observation, obey the exact action format, avoid repeated invalid/no-progress actions, and use this environment hint: Prefer cooperation unless the opponent defects repeatedly; use the exact decision token when asked..",
+    "target_variable_name": "iteratedprisonersdilemma_slm_policy"
+  },
+  {
+    "confidence": 0.75,
+    "evidence_from_trajectory": "5/5 episodes failed, were invalid, or hit the turn cap; 5 episodes repeated actions.",
+    "failure_mode": "KuhnPoker-v0-short frozen-SLM trajectories had low return",
+    "forbidden_shortcuts": [
+      "hidden state",
+      "environment mutation",
+      "invalid action formats"
+    ],
+    "gradient_text": "Improve legal action selection and state tracking from trajectory feedback.",
+    "suggested_edit": "Add a rule: Track the latest observation, obey the exact action format, avoid repeated invalid/no-progress actions, and use this environment hint: Use conservative Kuhn poker strategy: bet strong cards, check weak cards, call selectively..",
+    "target_variable_name": "kuhnpoker_short_slm_policy"
+  },
+  {
+    "confidence": 0.75,
+    "evidence_from_trajectory": "1/5 episodes failed, were invalid, or hit the turn cap; 5 episodes repeated actions.",
+    "failure_mode": "SimpleNegotiation-v0-short frozen-SLM trajectories had low return",
+    "forbidden_shortcuts": [
+      "hidden state",
+      "environment mutation",
+      "invalid action formats"
+    ],
+    "gradient_text": "Improve legal action selection and state tracking from trajectory feedback.",
+    "suggested_edit": "Add a rule: Track the latest observation, obey the exact action format, avoid repeated invalid/no-progress actions, and use this environment hint: Make mutually beneficial offers using the required offer token format..",
+    "target_variable_name": "simplenegotiation_short_slm_policy"
+  }
+]

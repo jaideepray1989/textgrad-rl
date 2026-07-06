@@ -1,0 +1,17 @@
+player0_agent,player1_agent,games,player0_wins,player1_wins,draws,player0_avg_reward,player1_avg_reward,average_turns
+center_first,center_first,1,0,0,1,0.0,0.0,9.0
+center_first,first_available,1,1,0,0,1.0,-1.0,5.0
+center_first,optimal_minimax,1,0,1,0,-1.0,1.0,6.0
+center_first,random_legal,1,1,0,0,1.0,-1.0,7.0
+first_available,center_first,1,0,1,0,-1.0,1.0,6.0
+first_available,first_available,1,1,0,0,1.0,-1.0,7.0
+first_available,optimal_minimax,1,0,1,0,-1.0,1.0,6.0
+first_available,random_legal,1,0,0,1,0.0,0.0,9.0
+optimal_minimax,center_first,1,1,0,0,1.0,-1.0,7.0
+optimal_minimax,first_available,1,1,0,0,1.0,-1.0,5.0
+optimal_minimax,optimal_minimax,1,0,0,1,0.0,0.0,9.0
+optimal_minimax,random_legal,1,1,0,0,1.0,-1.0,7.0
+random_legal,center_first,1,0,1,0,-1.0,1.0,6.0
+random_legal,first_available,1,1,0,0,1.0,-1.0,9.0
+random_legal,optimal_minimax,1,0,1,0,-1.0,1.0,6.0
+random_legal,random_legal,1,1,0,0,1.0,-1.0,7.0

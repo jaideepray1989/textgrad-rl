@@ -1,0 +1,11 @@
+average_reward,average_turns,episodes,invalid_move_rate,method,repetition,success_rate,suite
+0.8487001077719615,18.38888888888889,36,0.0,textgrad_rl_no_gate,0,0.8333333333333334,difficulty_generalization
+0.8838852929571466,17.02777777777778,36,0.0,textgrad_rl_train_val,0,0.8333333333333334,difficulty_generalization
+0.8838852929571466,17.02777777777778,36,0.0,textgrad_rl_kl_gate,0,0.8333333333333334,difficulty_generalization
+0.8838852929571466,17.02777777777778,36,0.0,textgrad_rl_clipped_surrogate,0,0.8333333333333334,difficulty_generalization
+0.8838852929571466,17.02777777777778,36,0.0,textgrad_rl_ppo,0,0.8333333333333334,difficulty_generalization
+0.87109866192388,17.5,36,0.0,textgrad_rl_no_gate,1,0.8333333333333334,difficulty_generalization
+0.9099875508127688,16.88888888888889,36,0.0,textgrad_rl_train_val,1,0.8333333333333334,difficulty_generalization
+0.9099875508127688,16.88888888888889,36,0.0,textgrad_rl_kl_gate,1,0.8333333333333334,difficulty_generalization
+0.9099875508127688,16.88888888888889,36,0.0,textgrad_rl_clipped_surrogate,1,0.8333333333333334,difficulty_generalization
+0.9099875508127688,16.88888888888889,36,0.0,textgrad_rl_ppo,1,0.8333333333333334,difficulty_generalization

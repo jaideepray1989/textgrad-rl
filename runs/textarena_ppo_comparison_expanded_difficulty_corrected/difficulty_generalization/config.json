@@ -1,0 +1,36 @@
+{
+  "methods": [
+    "fixed_prompt",
+    "textgrad_policy_iteration",
+    "textgrad_ppo"
+  ],
+  "repetitions": 2,
+  "seed": 12001,
+  "test_envs": [
+    "GuessTheNumber-v0-hardcore",
+    "FrozenLake-v0-random",
+    "FrozenLake-v0-hardcore",
+    "Nim-v0-medium",
+    "Nim-v0-large",
+    "TowerOfHanoi-v0-medium",
+    "TowerOfHanoi-v0-hard",
+    "Blackjack-v0-long",
+    "Bandit-v0-hard",
+    "Mastermind-v0-hard"
+  ],
+  "test_seeds": 3,
+  "train_envs": [
+    "Nim-v0",
+    "ConnectFour-v0",
+    "ReverseTicTacToe-v0",
+    "GuessTheNumber-v0",
+    "FrozenLake-v0",
+    "TowerOfHanoi-v0",
+    "LightsOut-v0",
+    "Mastermind-v0",
+    "Blackjack-v0",
+    "Bandit-v0"
+  ],
+  "train_seeds": 3,
+  "val_seeds": 3
+}

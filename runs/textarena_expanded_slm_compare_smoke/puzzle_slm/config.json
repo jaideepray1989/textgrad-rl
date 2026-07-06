@@ -1,0 +1,15 @@
+{
+  "base_url": "http://localhost:11434/v1",
+  "env_ids": [
+    "Wordle-v0",
+    "Hangman-v0",
+    "Minesweeper-v0-small",
+    "Sudoku-v0-very-easy"
+  ],
+  "model": "qwen2.5:3b",
+  "seed": 22001,
+  "suite": "puzzle",
+  "test_seeds": 1,
+  "train_seeds": 1,
+  "val_seeds": 1
+}

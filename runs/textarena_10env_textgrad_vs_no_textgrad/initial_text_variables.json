@@ -1,0 +1,11 @@
+{
+  "textarena_strategy_prompt": {
+    "gradient_history": [],
+    "max_chars": 4000,
+    "name": "textarena_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Shared strategy text for offline TextArena games.",
+    "value": "Play valid TextArena actions. Prefer simple legal moves, center columns/cells, standing in Blackjack, and first available puzzle moves.",
+    "version": 0
+  }
+}

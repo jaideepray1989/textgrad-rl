@@ -1,0 +1,5 @@
+agent,games,wins,draws,losses,win_rate,non_loss_rate,average_reward,invalid_moves,average_turns
+optimal_minimax,160,115,45,0,0.71875,1.0,0.71875,0,6.975
+center_first,160,71,40,49,0.44375,0.69375,0.1375,0,7.00625
+first_available,160,46,1,113,0.2875,0.29375,-0.41875,0,6.16875
+random_legal,160,38,14,108,0.2375,0.325,-0.4375,0,7.125

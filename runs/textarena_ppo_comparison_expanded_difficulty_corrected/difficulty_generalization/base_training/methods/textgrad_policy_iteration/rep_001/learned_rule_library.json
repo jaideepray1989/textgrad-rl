@@ -1,0 +1,106 @@
+{
+  "accepted_rules": [
+    {
+      "candidate_name": "advantage_weighted_env_rule",
+      "ci_high": 1.87875,
+      "ci_low": 0.62625,
+      "critic_advantage": 1.2525000000000002,
+      "env_id": "Nim-v0",
+      "mean_delta": 1.2525,
+      "policy_objective": 1.5193750000000001,
+      "rule": "For Nim, use the xor strategy: move to a zero nim-sum when possible.",
+      "target_variable_name": "nim_strategy_prompt",
+      "worst_action": "p0:[0 1]"
+    },
+    {
+      "candidate_name": "advantage_weighted_env_rule",
+      "ci_high": 1.6733333333333331,
+      "ci_low": 0.7966666666666667,
+      "critic_advantage": 1.0458333333333332,
+      "env_id": "Mastermind-v0",
+      "mean_delta": 1.36,
+      "policy_objective": 1.622666666666667,
+      "rule": "For Mastermind, maintain all candidate codes and eliminate candidates inconsistent with black/white feedback.",
+      "target_variable_name": "mastermind_strategy_prompt",
+      "worst_action": "p0:[1 2 3 6]"
+    },
+    {
+      "candidate_name": "advantage_weighted_env_rule",
+      "ci_high": 1.6792307692307693,
+      "ci_low": 1.5401923076923076,
+      "critic_advantage": 1.620448717948718,
+      "env_id": "LightsOut-v0",
+      "mean_delta": 1.6097649572649573,
+      "policy_objective": 1.9758981157731157,
+      "rule": "For Lights Out, solve the binary toggle system and press cells from a valid solution.",
+      "target_variable_name": "lightsout_strategy_prompt",
+      "worst_action": "p0:[0 1]"
+    },
+    {
+      "candidate_name": "advantage_weighted_env_rule",
+      "ci_high": 1.54,
+      "ci_low": 1.54,
+      "critic_advantage": 1.54,
+      "env_id": "TowerOfHanoi-v0",
+      "mean_delta": 1.54,
+      "policy_objective": 1.875,
+      "rule": "For Tower of Hanoi, follow the recursive optimal disk-moving plan from A to C.",
+      "target_variable_name": "towerofhanoi_strategy_prompt",
+      "worst_action": "p0:[C A]"
+    },
+    {
+      "candidate_name": "advantage_weighted_env_rule",
+      "ci_high": 1.3166666666666667,
+      "ci_low": 1.038888888888889,
+      "critic_advantage": 1.0927777777777778,
+      "env_id": "FrozenLake-v0",
+      "mean_delta": 1.1777777777777778,
+      "policy_objective": 1.3993055555555556,
+      "rule": "For Frozen Lake, plan a shortest safe path to the goal while avoiding holes.",
+      "target_variable_name": "frozenlake_strategy_prompt",
+      "worst_action": "p0:[right]"
+    },
+    {
+      "candidate_name": "advantage_weighted_env_rule",
+      "ci_high": 0.4278947368421053,
+      "ci_low": 0.0008333333333332785,
+      "critic_advantage": 0.0024999999999998725,
+      "env_id": "GuessTheNumber-v0",
+      "mean_delta": 0.1467982456140351,
+      "policy_objective": 0.1095065789473684,
+      "rule": "For Guess The Number, maintain lower and upper bounds from higher/lower hints and guess the midpoint.",
+      "target_variable_name": "guessthenumber_strategy_prompt",
+      "worst_action": "p0:[1]"
+    }
+  ],
+  "rejected_rules": [
+    {
+      "env_id": "ConnectFour-v0",
+      "mean_negative_advantage": -1.4078947368421053,
+      "reason": "no candidate passed advantage replay-bootstrap gate",
+      "target_variable_name": "connectfour_strategy_prompt",
+      "worst_action": "p0:[col 3]"
+    },
+    {
+      "env_id": "Bandit-v0",
+      "mean_negative_advantage": -0.24443980008877886,
+      "reason": "no candidate passed advantage replay-bootstrap gate",
+      "target_variable_name": "bandit_strategy_prompt",
+      "worst_action": "p0:[red]"
+    },
+    {
+      "env_id": "Blackjack-v0",
+      "mean_negative_advantage": -0.22380952380952382,
+      "reason": "no candidate passed advantage replay-bootstrap gate",
+      "target_variable_name": "blackjack_strategy_prompt",
+      "worst_action": "p0:[Stand]"
+    },
+    {
+      "env_id": "ReverseTicTacToe-v0",
+      "mean_negative_advantage": 0.0,
+      "reason": "no candidate passed advantage replay-bootstrap gate",
+      "target_variable_name": "reversetictactoe_strategy_prompt",
+      "worst_action": "p0:[4]"
+    }
+  ]
+}

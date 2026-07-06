@@ -1,0 +1,19 @@
+{
+  "env_ids": [
+    "Nim-v0",
+    "Blackjack-v0"
+  ],
+  "max_ci_low_regression": 0.0,
+  "methods": [
+    "fixed_prompt",
+    "scalar_prompt_search",
+    "modular_textgrad",
+    "textgrad_rl_plus"
+  ],
+  "min_mean_delta": 0.001,
+  "repetitions": 1,
+  "seed": 9001,
+  "test_seeds": 3,
+  "train_seeds": 2,
+  "val_seeds": 2
+}

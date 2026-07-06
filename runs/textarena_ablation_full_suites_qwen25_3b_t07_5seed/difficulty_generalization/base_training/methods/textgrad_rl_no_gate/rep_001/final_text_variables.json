@@ -1,0 +1,120 @@
+{
+  "bandit_strategy_prompt": {
+    "gradient_history": [],
+    "max_chars": 1600,
+    "name": "bandit_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Environment-specific strategy text for Bandit-v0.",
+    "value": "For Bandit-v0, start with a simple legal action policy.",
+    "version": 0
+  },
+  "blackjack_strategy_prompt": {
+    "gradient_history": [
+      "retrieved_from_rule_library:Blackjack-v0:advantage_weighted_env_rule"
+    ],
+    "max_chars": 1600,
+    "name": "blackjack_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Environment-specific strategy text for Blackjack-v0.",
+    "value": "For Blackjack-v0, start with a simple legal action policy.\n\nLearned rules:\n- For Blackjack, use the basic threshold policy: hit below 17 and stand at 17 or higher.",
+    "version": 1
+  },
+  "connectfour_strategy_prompt": {
+    "gradient_history": [],
+    "max_chars": 1600,
+    "name": "connectfour_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Environment-specific strategy text for ConnectFour-v0.",
+    "value": "For ConnectFour-v0, start with a simple legal action policy.",
+    "version": 0
+  },
+  "frozenlake_strategy_prompt": {
+    "gradient_history": [
+      "retrieved_from_rule_library:FrozenLake-v0:advantage_weighted_env_rule"
+    ],
+    "max_chars": 1600,
+    "name": "frozenlake_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Environment-specific strategy text for FrozenLake-v0.",
+    "value": "For FrozenLake-v0, start with a simple legal action policy.\n\nLearned rules:\n- For Frozen Lake, plan a shortest safe path to the goal while avoiding holes.",
+    "version": 1
+  },
+  "general_strategy_prompt": {
+    "gradient_history": [
+      "retrieved_from_rule_library:ConnectFour-v0:generic_validity",
+      "retrieved_from_rule_library:Bandit-v0:generic_state_tracking"
+    ],
+    "max_chars": 2400,
+    "name": "general_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "General TextArena action-format and safety strategy.",
+    "value": "Play valid TextArena actions. Read the latest observation, choose legal moves, and avoid changing the environment rules.\n\nLearned rules:\n- Use only legal bracketed actions from the current observation, and avoid actions that just produced invalid-move feedback.\n- Track the latest visible game state after every observation before choosing the next action.",
+    "version": 2
+  },
+  "guessthenumber_strategy_prompt": {
+    "gradient_history": [
+      "retrieved_from_rule_library:GuessTheNumber-v0:advantage_weighted_env_rule"
+    ],
+    "max_chars": 1600,
+    "name": "guessthenumber_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Environment-specific strategy text for GuessTheNumber-v0.",
+    "value": "For GuessTheNumber-v0, start with a simple legal action policy.\n\nLearned rules:\n- For Guess The Number, maintain lower and upper bounds from higher/lower hints and guess the midpoint.",
+    "version": 1
+  },
+  "lightsout_strategy_prompt": {
+    "gradient_history": [
+      "retrieved_from_rule_library:LightsOut-v0:advantage_weighted_env_rule"
+    ],
+    "max_chars": 1600,
+    "name": "lightsout_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Environment-specific strategy text for LightsOut-v0.",
+    "value": "For LightsOut-v0, start with a simple legal action policy.\n\nLearned rules:\n- For Lights Out, solve the binary toggle system and press cells from a valid solution.",
+    "version": 1
+  },
+  "mastermind_strategy_prompt": {
+    "gradient_history": [
+      "retrieved_from_rule_library:Mastermind-v0:advantage_weighted_env_rule"
+    ],
+    "max_chars": 1600,
+    "name": "mastermind_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Environment-specific strategy text for Mastermind-v0.",
+    "value": "For Mastermind-v0, start with a simple legal action policy.\n\nLearned rules:\n- For Mastermind, maintain all candidate codes and eliminate candidates inconsistent with black/white feedback.",
+    "version": 1
+  },
+  "nim_strategy_prompt": {
+    "gradient_history": [
+      "retrieved_from_rule_library:Nim-v0:advantage_weighted_env_rule"
+    ],
+    "max_chars": 1600,
+    "name": "nim_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Environment-specific strategy text for Nim-v0.",
+    "value": "For Nim-v0, start with a simple legal action policy.\n\nLearned rules:\n- For Nim, use the xor strategy: move to a zero nim-sum when possible.",
+    "version": 1
+  },
+  "reversetictactoe_strategy_prompt": {
+    "gradient_history": [
+      "retrieved_from_rule_library:ReverseTicTacToe-v0:advantage_weighted_env_rule"
+    ],
+    "max_chars": 1600,
+    "name": "reversetictactoe_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Environment-specific strategy text for ReverseTicTacToe-v0.",
+    "value": "For ReverseTicTacToe-v0, start with a simple legal action policy.\n\nLearned rules:\n- For Reverse Tic Tac Toe, avoid moves that immediately complete your own three-in-a-row.",
+    "version": 1
+  },
+  "towerofhanoi_strategy_prompt": {
+    "gradient_history": [
+      "retrieved_from_rule_library:TowerOfHanoi-v0:advantage_weighted_env_rule"
+    ],
+    "max_chars": 1600,
+    "name": "towerofhanoi_strategy_prompt",
+    "requires_grad": true,
+    "role_description": "Environment-specific strategy text for TowerOfHanoi-v0.",
+    "value": "For TowerOfHanoi-v0, start with a simple legal action policy.\n\nLearned rules:\n- For Tower of Hanoi, follow the recursive optimal disk-moving plan from A to C.",
+    "version": 1
+  }
+}

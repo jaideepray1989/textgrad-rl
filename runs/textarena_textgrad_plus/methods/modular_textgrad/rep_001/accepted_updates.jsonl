@@ -1,0 +1,1 @@
+{"accepted": true, "new_metrics": {"average_reward": 0.5504851106105038, "average_turns": 10.723076923076922, "episodes": 65, "invalid_move_rate": 0.0, "success_rate": 0.6153846153846154}, "old_metrics": {"average_reward": 0.16492955505494816, "average_turns": 11.907692307692308, "episodes": 65, "invalid_move_rate": 0.1076923076923077, "success_rate": 0.23076923076923078}}

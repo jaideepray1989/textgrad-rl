@@ -1,0 +1,14 @@
+{
+  "agent": "local_llm",
+  "critic": "heuristic",
+  "method": "modular_textgrad",
+  "iterations": 3,
+  "train_tasks": 10,
+  "val_tasks": 5,
+  "test_tasks": 5,
+  "max_steps": 20,
+  "seed": 13,
+  "output_dir": "runs/local_slm_actor",
+  "command_timeout_sec": 15
+}
+

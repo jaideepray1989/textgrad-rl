@@ -1,0 +1,12 @@
+{
+  "agents": [
+    "optimal_minimax",
+    "center_first",
+    "first_available",
+    "random_legal"
+  ],
+  "benchmark": "textarena_tictactoe_full_round_robin",
+  "env_id": "TicTacToe-v0",
+  "episodes_per_matchup": 1,
+  "seed": 123
+}

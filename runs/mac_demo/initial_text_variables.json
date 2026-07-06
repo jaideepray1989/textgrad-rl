@@ -1,0 +1,47 @@
+{
+  "experiment_planning_prompt": {
+    "gradient_history": [],
+    "max_chars": 2500,
+    "name": "experiment_planning_prompt",
+    "requires_grad": true,
+    "role_description": "Choose when to run unit tests, smoke tests, training, evaluation, or artifact inspection under a limited step/runtime budget.",
+    "value": "Use the limited step budget to alternate between tests, code inspection, and targeted edits. Avoid repeating the same failing command many times in a row.",
+    "version": 0
+  },
+  "log_interpretation_prompt": {
+    "gradient_history": [],
+    "max_chars": 2500,
+    "name": "log_interpretation_prompt",
+    "requires_grad": true,
+    "role_description": "Extract useful signal from stack traces, pytest output, schema errors, shape mismatches, metric regressions, profiler output, and runtime logs.",
+    "value": "Summarize the first concrete error in pytest, training, or eval output. Use tracebacks to connect a failure to a source file and line. Treat repeated failures as evidence that the next action should gather more information.",
+    "version": 0
+  },
+  "patch_planning_prompt": {
+    "gradient_history": [],
+    "max_chars": 2500,
+    "name": "patch_planning_prompt",
+    "requires_grad": true,
+    "role_description": "Choose minimal code/config edits that fix the root cause without hiding failures, changing tests, hardcoding outputs, or leaking labels.",
+    "value": "Make the smallest source-code change that addresses the observed root cause. Prefer fixes in preprocessing, training, feature, or inference code over broad rewrites. Re-run checks after editing.",
+    "version": 0
+  },
+  "triage_prompt": {
+    "gradient_history": [],
+    "max_chars": 2500,
+    "name": "triage_prompt",
+    "requires_grad": true,
+    "role_description": "Diagnose ML-engineering failures from task descriptions, logs, stack traces, test output, metrics, and file contents.",
+    "value": "Start from the observable failure and identify the likely subsystem. Prefer reading code near the reported traceback before broad edits. Keep notes about which files explain the failure.",
+    "version": 0
+  },
+  "validation_prompt": {
+    "gradient_history": [],
+    "max_chars": 2500,
+    "name": "validation_prompt",
+    "requires_grad": true,
+    "role_description": "Decide whether the patch is real, reproducible, non-leaky, and ready to submit.",
+    "value": "Before submitting, make sure the visible tests and the main training/eval path have completed successfully. Do not submit when the latest output is an error.",
+    "version": 0
+  }
+}
