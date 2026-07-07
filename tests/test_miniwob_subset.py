@@ -1,12 +1,15 @@
 from textgrad_rl.benchmarks.miniwob_subset import (
     FIFTY_TASK_ENVS,
+    MiniWobElement,
     PromptAwareMiniWobAgent,
     category_for_env,
     extract_elements,
     initial_miniwob_variables,
+    normalize_llm_action,
     prompt_has_submit_after_select_rule,
     resolve_env_suite,
     select_targets,
+    text_variables_changed,
 )
 
 
@@ -88,3 +91,25 @@ def test_resolve_50_task_suite_and_categories() -> None:
     assert len(envs) == 50
     assert envs == FIFTY_TASK_ENVS
     assert category_for_env("email-inbox") == "simulated_app"
+
+
+def test_normalize_llm_action_repairs_verbose_bid() -> None:
+    elements = [MiniWobElement(bid="13", role="button", name="Click Me", clickable=True)]
+
+    assert normalize_llm_action('click("13 button Click Me.")', elements) == 'click("13")'
+
+
+def test_normalize_llm_action_extracts_fill_call() -> None:
+    elements = [MiniWobElement(bid="14", role="textbox", name="", clickable=True)]
+
+    assert normalize_llm_action('Action: fill("14", "Myron")', elements) == 'fill("14", "Myron")'
+
+
+def test_text_variables_changed_requires_real_prompt_delta() -> None:
+    old = initial_miniwob_variables()
+    same = initial_miniwob_variables()
+    changed = initial_miniwob_variables()
+    changed["general_agent_policy"].value += "\n- New rule."
+
+    assert not text_variables_changed(old, same)
+    assert text_variables_changed(old, changed)

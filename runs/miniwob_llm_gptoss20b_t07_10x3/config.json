@@ -1,0 +1,57 @@
+{
+  "actor": {
+    "actor": "llm",
+    "base_url": "http://localhost:11434/v1",
+    "max_tokens": 256,
+    "model": "gpt-oss:20b",
+    "temperature": 0.7,
+    "timeout": 180
+  },
+  "benchmark": "browsergym_miniwob",
+  "env_categories": {
+    "choose-list": "selection",
+    "click-button": "clicking",
+    "click-checkboxes": "selection",
+    "click-dialog": "clicking",
+    "click-option": "selection",
+    "click-tab": "menu_navigation",
+    "click-test": "clicking",
+    "enter-text": "text_entry",
+    "focus-text": "text_entry",
+    "login-user": "forms"
+  },
+  "envs": [
+    "click-button",
+    "enter-text",
+    "focus-text",
+    "click-checkboxes",
+    "click-option",
+    "choose-list",
+    "click-test",
+    "click-dialog",
+    "click-tab",
+    "login-user"
+  ],
+  "max_steps": 5,
+  "methods": [
+    "fixed_actor",
+    "textgrad_rl",
+    "textgrad_rl_ppo"
+  ],
+  "miniwob_url": "file:///tmp/miniwob-plusplus/miniwob/html/miniwob/",
+  "test_seeds": [
+    0,
+    1,
+    2
+  ],
+  "train_envs": [
+    "click-button",
+    "enter-text",
+    "focus-text",
+    "click-checkboxes"
+  ],
+  "val_envs": [
+    "click-option",
+    "choose-list"
+  ]
+}

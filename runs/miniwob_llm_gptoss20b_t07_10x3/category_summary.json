@@ -1,0 +1,152 @@
+[
+  {
+    "avg_turns": 2.4444444444444446,
+    "category": "clicking",
+    "envs": 3,
+    "episodes": 9,
+    "invalid_browser_action_rate": 0.0,
+    "method": "fixed_actor",
+    "repeated_action_rate": 0.4444444444444444,
+    "task_success_rate": 0.8888888888888888
+  },
+  {
+    "avg_turns": 4.0,
+    "category": "forms",
+    "envs": 1,
+    "episodes": 3,
+    "invalid_browser_action_rate": 0.0,
+    "method": "fixed_actor",
+    "repeated_action_rate": 0.3333333333333333,
+    "task_success_rate": 1.0
+  },
+  {
+    "avg_turns": 1.3333333333333333,
+    "category": "menu_navigation",
+    "envs": 1,
+    "episodes": 3,
+    "invalid_browser_action_rate": 0.0,
+    "method": "fixed_actor",
+    "repeated_action_rate": 0.0,
+    "task_success_rate": 1.0
+  },
+  {
+    "avg_turns": 3.111111111111111,
+    "category": "selection",
+    "envs": 3,
+    "episodes": 9,
+    "invalid_browser_action_rate": 0.0,
+    "method": "fixed_actor",
+    "repeated_action_rate": 0.2222222222222222,
+    "task_success_rate": 0.8888888888888888
+  },
+  {
+    "avg_turns": 2.6666666666666665,
+    "category": "text_entry",
+    "envs": 2,
+    "episodes": 6,
+    "invalid_browser_action_rate": 0.0,
+    "method": "fixed_actor",
+    "repeated_action_rate": 0.5,
+    "task_success_rate": 1.0
+  },
+  {
+    "avg_turns": 2.111111111111111,
+    "category": "clicking",
+    "envs": 3,
+    "episodes": 9,
+    "invalid_browser_action_rate": 0.0,
+    "method": "textgrad_rl",
+    "repeated_action_rate": 0.3333333333333333,
+    "task_success_rate": 1.0
+  },
+  {
+    "avg_turns": 5.0,
+    "category": "forms",
+    "envs": 1,
+    "episodes": 3,
+    "invalid_browser_action_rate": 0.0,
+    "method": "textgrad_rl",
+    "repeated_action_rate": 1.0,
+    "task_success_rate": 0.6666666666666666
+  },
+  {
+    "avg_turns": 1.3333333333333333,
+    "category": "menu_navigation",
+    "envs": 1,
+    "episodes": 3,
+    "invalid_browser_action_rate": 0.0,
+    "method": "textgrad_rl",
+    "repeated_action_rate": 0.0,
+    "task_success_rate": 1.0
+  },
+  {
+    "avg_turns": 2.5555555555555554,
+    "category": "selection",
+    "envs": 3,
+    "episodes": 9,
+    "invalid_browser_action_rate": 0.0,
+    "method": "textgrad_rl",
+    "repeated_action_rate": 0.2222222222222222,
+    "task_success_rate": 0.8888888888888888
+  },
+  {
+    "avg_turns": 2.1666666666666665,
+    "category": "text_entry",
+    "envs": 2,
+    "episodes": 6,
+    "invalid_browser_action_rate": 0.0,
+    "method": "textgrad_rl",
+    "repeated_action_rate": 0.16666666666666666,
+    "task_success_rate": 1.0
+  },
+  {
+    "avg_turns": 2.2222222222222223,
+    "category": "clicking",
+    "envs": 3,
+    "episodes": 9,
+    "invalid_browser_action_rate": 0.0,
+    "method": "textgrad_rl_ppo",
+    "repeated_action_rate": 0.3333333333333333,
+    "task_success_rate": 0.8888888888888888
+  },
+  {
+    "avg_turns": 4.333333333333333,
+    "category": "forms",
+    "envs": 1,
+    "episodes": 3,
+    "invalid_browser_action_rate": 0.0,
+    "method": "textgrad_rl_ppo",
+    "repeated_action_rate": 0.3333333333333333,
+    "task_success_rate": 1.0
+  },
+  {
+    "avg_turns": 1.0,
+    "category": "menu_navigation",
+    "envs": 1,
+    "episodes": 3,
+    "invalid_browser_action_rate": 0.0,
+    "method": "textgrad_rl_ppo",
+    "repeated_action_rate": 0.0,
+    "task_success_rate": 1.0
+  },
+  {
+    "avg_turns": 3.6666666666666665,
+    "category": "selection",
+    "envs": 3,
+    "episodes": 9,
+    "invalid_browser_action_rate": 0.0,
+    "method": "textgrad_rl_ppo",
+    "repeated_action_rate": 0.4444444444444444,
+    "task_success_rate": 0.7777777777777778
+  },
+  {
+    "avg_turns": 2.6666666666666665,
+    "category": "text_entry",
+    "envs": 2,
+    "episodes": 6,
+    "invalid_browser_action_rate": 0.0,
+    "method": "textgrad_rl_ppo",
+    "repeated_action_rate": 0.5,
+    "task_success_rate": 1.0
+  }
+]

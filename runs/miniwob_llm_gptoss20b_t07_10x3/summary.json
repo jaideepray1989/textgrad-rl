@@ -1,0 +1,35 @@
+[
+  {
+    "avg_reward": 0.9333333333333333,
+    "avg_turns": 2.7333333333333334,
+    "episodes": 30,
+    "invalid_browser_action_rate": 0.0,
+    "method": "fixed_actor",
+    "rejected_prompt_updates": 0,
+    "repeated_action_rate": 0.3333333333333333,
+    "task_success_rate": 0.9333333333333333,
+    "validation_gated_prompt_updates": 0
+  },
+  {
+    "avg_reward": 0.9333333333333333,
+    "avg_turns": 2.466666666666667,
+    "episodes": 30,
+    "invalid_browser_action_rate": 0.0,
+    "method": "textgrad_rl",
+    "rejected_prompt_updates": 0,
+    "repeated_action_rate": 0.3,
+    "task_success_rate": 0.9333333333333333,
+    "validation_gated_prompt_updates": 0
+  },
+  {
+    "avg_reward": 0.9,
+    "avg_turns": 2.8333333333333335,
+    "episodes": 30,
+    "invalid_browser_action_rate": 0.0,
+    "method": "textgrad_rl_ppo",
+    "rejected_prompt_updates": 0,
+    "repeated_action_rate": 0.36666666666666664,
+    "task_success_rate": 0.9,
+    "validation_gated_prompt_updates": 0
+  }
+]

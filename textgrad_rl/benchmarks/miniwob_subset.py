@@ -13,6 +13,8 @@ import json
 import os
 import re
 import time
+import urllib.error
+import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -171,6 +173,10 @@ class MiniWobRecord:
     goal: str
     failure_reason: str
     runtime_seconds: float
+    actor: str = "heuristic"
+    model: str = ""
+    temperature: float | None = None
+    raw_outputs: list[str] | None = None
 
 
 @dataclass(frozen=True)
@@ -179,6 +185,16 @@ class MiniWobMethodConfig:
     validation_gate: bool
     ppo_clip_epsilon: float | None = None
     ppo_target_kl: float | None = None
+
+
+@dataclass(frozen=True)
+class MiniWobActorConfig:
+    actor: str
+    base_url: str
+    model: str
+    temperature: float
+    max_tokens: int
+    timeout: int
 
 
 def initial_miniwob_variables() -> dict[str, TextVariable]:
@@ -262,6 +278,57 @@ def prompt_has_submit_after_select_rule(variables: dict[str, TextVariable]) -> b
     return "after selecting" in text and "submit" in text
 
 
+class OpenAICompatibleMiniWobModel:
+    """Tiny OpenAI-compatible chat client for stochastic MiniWoB actors."""
+
+    def __init__(
+        self,
+        *,
+        base_url: str,
+        model: str,
+        temperature: float,
+        max_tokens: int,
+        timeout: int,
+    ) -> None:
+        self.base_url = base_url.rstrip("/")
+        self.model = model
+        self.temperature = temperature
+        self.max_tokens = max_tokens
+        self.timeout = timeout
+        self.api_key = os.getenv("TEXTGRAD_RL_LLM_API_KEY") or os.getenv("OPENAI_API_KEY") or "not-needed"
+
+    def complete(self, prompt: str) -> str:
+        payload = {
+            "model": self.model,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": (
+                        "You control BrowserGym MiniWoB. Return exactly one action call and no prose. "
+                        "Valid calls include click(\"bid\"), fill(\"bid\", \"text\"), "
+                        "select_option(\"bid\", \"text\"), and noop()."
+                    ),
+                },
+                {"role": "user", "content": prompt},
+            ],
+            "temperature": self.temperature,
+            "max_tokens": self.max_tokens,
+        }
+        request = urllib.request.Request(
+            f"{self.base_url}/chat/completions",
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json", "Authorization": f"Bearer {self.api_key}"},
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=self.timeout) as response:
+                data = json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            raise RuntimeError(exc.read().decode("utf-8", errors="replace")) from exc
+        message = data["choices"][0]["message"]
+        return str(message.get("content") or "").strip()
+
+
 class PromptAwareMiniWobAgent:
     """Small deterministic actor whose behavior is controlled by text rules."""
 
@@ -312,6 +379,117 @@ class PromptAwareMiniWobAgent:
                 return f'click("{element.bid}")'
 
         return "noop()"
+
+
+class LLMMiniWobAgent:
+    """Stochastic MiniWoB actor controlled by text variables and an LLM."""
+
+    def __init__(self, text_variables: dict[str, TextVariable], model: OpenAICompatibleMiniWobModel) -> None:
+        self.text_variables = text_variables
+        self.model = model
+
+    def act(self, obs: dict[str, Any], previous_actions: list[str]) -> tuple[str, str]:
+        elements = extract_elements(obs)
+        prompt = build_llm_action_prompt(
+            goal=str(obs.get("goal") or ""),
+            elements=elements,
+            previous_actions=previous_actions,
+            text_variables=self.text_variables,
+        )
+        raw = self.model.complete(prompt)
+        return normalize_llm_action(raw, elements), raw
+
+
+def build_llm_action_prompt(
+    *,
+    goal: str,
+    elements: list[MiniWobElement],
+    previous_actions: list[str],
+    text_variables: dict[str, TextVariable],
+) -> str:
+    variable_text = "\n\n".join(
+        f"{variable.name} ({variable.role_description}):\n{variable.clipped_value()}"
+        for variable in text_variables.values()
+    )
+    element_lines = "\n".join(
+        f'- bid="{element.bid}" role="{element.role}" name="{element.name}" clickable={element.clickable}'
+        for element in elements[:80]
+    )
+    previous = "\n".join(previous_actions[-6:]) if previous_actions else "<none>"
+    return (
+        f"TEXT VARIABLES:\n{variable_text}\n\n"
+        f"GOAL:\n{goal}\n\n"
+        f"VISIBLE ELEMENTS:\n{element_lines or '<none>'}\n\n"
+        f"PREVIOUS ACTIONS:\n{previous}\n\n"
+        "Return exactly one valid action call. Use only visible bids. "
+        "For buttons, links, checkboxes, radios, tabs, and menu items use click(\"bid\"). "
+        "For textboxes use fill(\"bid\", \"text\"). For select boxes use select_option(\"bid\", \"text\"). "
+        "If no action is possible, return noop()."
+    )
+
+
+def normalize_llm_action(raw_output: str, elements: list[MiniWobElement]) -> str:
+    text = raw_output.strip()
+    bids = {element.bid for element in elements}
+    patterns = [
+        r'(click\(\s*["\']([^"\']+)["\']\s*\))',
+        r'(fill\(\s*["\']([^"\']+)["\']\s*,\s*["\']([^"\']*)["\']\s*\))',
+        r'(select_option\(\s*["\']([^"\']+)["\']\s*,\s*["\']([^"\']*)["\']\s*\))',
+        r"(noop\(\s*\))",
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, text, flags=re.IGNORECASE | re.DOTALL)
+        if not match:
+            continue
+        call = match.group(1)
+        normalized = normalize_action_call(call, bids)
+        if normalized:
+            return normalized
+    quoted_bid = re.search(r'["\']([A-Za-z0-9]+)(?:\s|["\'])', text)
+    if quoted_bid and quoted_bid.group(1) in bids:
+        return f'click("{quoted_bid.group(1)}")'
+    bare_bid = re.search(r"\b(?:bid|id)\s*[:=]\s*([A-Za-z0-9]+)\b", text, flags=re.IGNORECASE)
+    if bare_bid and bare_bid.group(1) in bids:
+        return f'click("{bare_bid.group(1)}")'
+    return "noop()"
+
+
+def normalize_action_call(call: str, bids: set[str]) -> str | None:
+    if re.match(r"noop\(\s*\)", call, flags=re.IGNORECASE):
+        return "noop()"
+    match = re.match(r'click\(\s*["\']([^"\']+)["\']\s*\)', call, flags=re.IGNORECASE)
+    if match:
+        bid = extract_bid_from_text(match.group(1), bids)
+        return f'click("{bid}")' if bid else None
+    match = re.match(r'fill\(\s*["\']([^"\']+)["\']\s*,\s*["\']([^"\']*)["\']\s*\)', call, flags=re.IGNORECASE)
+    if match:
+        bid = extract_bid_from_text(match.group(1), bids)
+        if bid:
+            return f'fill("{bid}", "{escape_action_string(match.group(2))}")'
+        return None
+    match = re.match(
+        r'select_option\(\s*["\']([^"\']+)["\']\s*,\s*["\']([^"\']*)["\']\s*\)',
+        call,
+        flags=re.IGNORECASE,
+    )
+    if match:
+        bid = extract_bid_from_text(match.group(1), bids)
+        if bid:
+            return f'select_option("{bid}", "{escape_action_string(match.group(2))}")'
+    return None
+
+
+def extract_bid_from_text(text: str, bids: set[str]) -> str | None:
+    stripped = text.strip()
+    if stripped in bids:
+        return stripped
+    first = stripped.split()[0] if stripped.split() else ""
+    if first in bids:
+        return first
+    for bid in sorted(bids, key=len, reverse=True):
+        if re.search(rf"\b{re.escape(bid)}\b", stripped):
+            return bid
+    return None
 
 
 def first_role(elements: list[MiniWobElement], role: str) -> MiniWobElement | None:
@@ -428,14 +606,28 @@ def run_miniwob_episode(
     seed: int,
     text_variables: dict[str, TextVariable],
     max_steps: int,
+    actor_config: MiniWobActorConfig,
 ) -> MiniWobRecord:
     import gymnasium as gym
     import browsergym.miniwob  # noqa: F401
 
     started = time.time()
     env = gym.make(f"browsergym/miniwob.{env_name}")
-    agent = PromptAwareMiniWobAgent(text_variables)
+    if actor_config.actor == "llm":
+        agent: Any = LLMMiniWobAgent(
+            text_variables,
+            OpenAICompatibleMiniWobModel(
+                base_url=actor_config.base_url,
+                model=actor_config.model,
+                temperature=actor_config.temperature,
+                max_tokens=actor_config.max_tokens,
+                timeout=actor_config.timeout,
+            ),
+        )
+    else:
+        agent = PromptAwareMiniWobAgent(text_variables)
     actions: list[str] = []
+    raw_outputs: list[str] = []
     goal = ""
     reward = 0.0
     invalid = False
@@ -446,7 +638,18 @@ def run_miniwob_episode(
         terminated = False
         truncated = False
         for _ in range(max_steps):
-            action = normalize_action(agent.act(obs, actions))
+            try:
+                if actor_config.actor == "llm":
+                    action, raw_output = agent.act(obs, actions)
+                    raw_outputs.append(raw_output)
+                else:
+                    action = agent.act(obs, actions)
+            except Exception as exc:
+                action = "noop()"
+                raw_outputs.append("")
+                invalid = True
+                failure_reason = f"model_error: {exc}"
+            action = normalize_action(action)
             actions.append(action)
             obs, reward, terminated, truncated, _info = env.step(action)
             action_error = str(obs.get("last_action_error") or "")
@@ -483,6 +686,10 @@ def run_miniwob_episode(
         goal=goal,
         failure_reason=failure_reason,
         runtime_seconds=time.time() - started,
+        actor=actor_config.actor,
+        model=actor_config.model if actor_config.actor == "llm" else "",
+        temperature=actor_config.temperature if actor_config.actor == "llm" else None,
+        raw_outputs=raw_outputs if raw_outputs else None,
     )
 
 
@@ -557,6 +764,15 @@ def prompt_kl_proxy(old_variables: dict[str, TextVariable], new_variables: dict[
     return changed / max(1, len(old_text))
 
 
+def text_variables_changed(old_variables: dict[str, TextVariable], new_variables: dict[str, TextVariable]) -> bool:
+    return any(
+        name not in old_variables
+        or old_variables[name].value != variable.value
+        or old_variables[name].version != variable.version
+        for name, variable in new_variables.items()
+    )
+
+
 def ppo_gate_accepts(
     old_records: list[MiniWobRecord],
     new_records: list[MiniWobRecord],
@@ -595,6 +811,7 @@ def evaluate_records(
     variables: dict[str, TextVariable],
     max_steps: int,
     output_dir: Path,
+    actor_config: MiniWobActorConfig,
 ) -> list[MiniWobRecord]:
     records: list[MiniWobRecord] = []
     for env_name in envs:
@@ -606,6 +823,7 @@ def evaluate_records(
                 seed=seed,
                 text_variables=variables,
                 max_steps=max_steps,
+                actor_config=actor_config,
             )
             records.append(record)
             append_jsonl(output_dir / "episodes.jsonl", record)
@@ -654,7 +872,7 @@ def summarize_categories(records: list[MiniWobRecord]) -> list[dict[str, Any]]:
 def write_summary_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0].keys()) if rows else [])
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0].keys()) if rows else [], lineterminator="\n")
         if rows:
             writer.writeheader()
             writer.writerows(rows)
@@ -720,6 +938,14 @@ def run(args: argparse.Namespace) -> int:
     envs = resolve_env_suite(args.envs)
     methods = parse_csv(args.methods) or list(DEFAULT_METHODS)
     method_configs = build_method_configs(methods)
+    actor_config = MiniWobActorConfig(
+        actor=args.actor,
+        base_url=args.llm_base_url,
+        model=args.model,
+        temperature=args.temperature,
+        max_tokens=args.llm_max_tokens,
+        timeout=args.llm_timeout,
+    )
     train_envs = envs[: args.train_envs]
     val_envs = envs[args.train_envs : args.train_envs + args.val_envs]
     test_seeds = list(range(args.test_seeds))
@@ -737,6 +963,7 @@ def run(args: argparse.Namespace) -> int:
             "test_seeds": test_seeds,
             "max_steps": args.max_steps,
             "miniwob_url": os.getenv("MINIWOB_URL", ""),
+            "actor": actor_config,
         },
     )
 
@@ -756,6 +983,7 @@ def run(args: argparse.Namespace) -> int:
                 variables=variables,
                 max_steps=args.max_steps,
                 output_dir=output_dir,
+                actor_config=actor_config,
             )
             all_records.extend(train_records)
             gradients = gradients_from_miniwob_records(train_records)
@@ -764,37 +992,44 @@ def run(args: argparse.Namespace) -> int:
                 gradients,
                 constraints=["must not inspect hidden reward", "must not change benchmark HTML"],
             )
-            old_val = evaluate_records(
-                envs=val_envs,
-                seeds=[0],
-                method=config.method,
-                split="val_old",
-                variables=variables,
-                max_steps=args.max_steps,
-                output_dir=output_dir,
-            )
-            all_records.extend(old_val)
-            new_val = evaluate_records(
-                envs=val_envs,
-                seeds=[0],
-                method=config.method,
-                split="val_new",
-                variables=candidate,
-                max_steps=args.max_steps,
-                output_dir=output_dir,
-            )
-            all_records.extend(new_val)
-            if config.method == "textgrad_rl_ppo":
-                accepted, gate_details = ppo_gate_accepts(old_val, new_val, variables, candidate, config)
+            candidate_changed = text_variables_changed(variables, candidate)
+            if not candidate_changed:
+                accepted = False
+                gate_details = {"status": "no_prompt_change", "gradient_count": len(gradients)}
             else:
-                old_score = mean_record_score(old_val)
-                new_score = mean_record_score(new_val)
-                accepted = new_score >= old_score
-                gate_details = {"old_score": old_score, "new_score": new_score}
+                old_val = evaluate_records(
+                    envs=val_envs,
+                    seeds=[0],
+                    method=config.method,
+                    split="val_old",
+                    variables=variables,
+                    max_steps=args.max_steps,
+                    output_dir=output_dir,
+                    actor_config=actor_config,
+                )
+                all_records.extend(old_val)
+                new_val = evaluate_records(
+                    envs=val_envs,
+                    seeds=[0],
+                    method=config.method,
+                    split="val_new",
+                    variables=candidate,
+                    max_steps=args.max_steps,
+                    output_dir=output_dir,
+                    actor_config=actor_config,
+                )
+                all_records.extend(new_val)
+                if config.method == "textgrad_rl_ppo":
+                    accepted, gate_details = ppo_gate_accepts(old_val, new_val, variables, candidate, config)
+                else:
+                    old_score = mean_record_score(old_val)
+                    new_score = mean_record_score(new_val)
+                    accepted = new_score >= old_score
+                    gate_details = {"old_score": old_score, "new_score": new_score}
             if accepted:
                 variables = candidate
                 accepted_updates += 1
-            else:
+            elif candidate_changed:
                 rejected_updates += 1
             append_jsonl(
                 output_dir / "prompt_updates.jsonl",
@@ -827,6 +1062,7 @@ def run(args: argparse.Namespace) -> int:
             variables=variables,
             max_steps=args.max_steps,
             output_dir=output_dir,
+            actor_config=actor_config,
         )
         all_records.extend(test_records)
         summary_rows.append(summarize_method(config.method, test_records, accepted_updates, rejected_updates))
@@ -862,6 +1098,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--val-envs", type=int, default=2)
     parser.add_argument("--test-seeds", type=int, default=3)
     parser.add_argument("--max-steps", type=int, default=5)
+    parser.add_argument("--actor", choices=["heuristic", "llm"], default="heuristic")
+    parser.add_argument("--llm-base-url", default=os.getenv("TEXTGRAD_RL_LLM_BASE_URL", "http://localhost:11434/v1"))
+    parser.add_argument("--model", default=os.getenv("TEXTGRAD_RL_LLM_MODEL", "gpt-oss:20b"))
+    parser.add_argument("--temperature", type=float, default=float(os.getenv("TEXTGRAD_RL_TEMPERATURE", "0.7")))
+    parser.add_argument("--llm-max-tokens", type=int, default=int(os.getenv("MINIWOB_LLM_MAX_TOKENS", "256")))
+    parser.add_argument("--llm-timeout", type=int, default=int(os.getenv("MINIWOB_LLM_TIMEOUT", "180")))
     return parser
 
 

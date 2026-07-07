@@ -24,6 +24,15 @@ scripts/run_miniwob_subset.sh runs/miniwob_subset_10x3
 MINIWOB_ENVS=50 scripts/run_miniwob_subset.sh runs/miniwob_subset_50x3
 ```
 
+LLM actor temperature run:
+
+```bash
+MINIWOB_ACTOR=llm \
+TEXTGRAD_RL_LLM_MODEL=gpt-oss:20b \
+TEXTGRAD_RL_TEMPERATURE=0.7 \
+scripts/run_miniwob_subset.sh runs/miniwob_llm_gptoss20b_t07_10x3
+```
+
 ## 10-Task Smoke Suite
 
 10 MiniWoB++ tasks:
@@ -89,6 +98,46 @@ The larger suite covers 50 MiniWoB++ tasks: 8 clicking tasks, 9 selection tasks,
 | textgrad_rl_ppo | simulated_app | 8 | 24 | 0.000 | 0.000 | 1.000 | 5.00 |
 | textgrad_rl_ppo | text_entry | 10 | 30 | 0.367 | 0.000 | 0.500 | 3.30 |
 
+### 10 Tasks x 3 Seeds, LLM Actor at Temperature 0.7
+
+This run replaces the deterministic prompt-aware actor with `gpt-oss:20b` through an OpenAI-compatible local Ollama endpoint. The model is sampled at `temperature=0.7`, with `max_tokens=256` because shorter budgets sometimes produced empty content while the model spent tokens on internal reasoning.
+
+| Method | Episodes | Success | Invalid Action | Repeated Action | Avg Turns | Accepted Prompt Updates |
+|---|---:|---:|---:|---:|---:|---:|
+| fixed_actor | 30 | 0.933 | 0.000 | 0.333 | 2.73 | 0 |
+| textgrad_rl | 30 | 0.933 | 0.000 | 0.300 | 2.47 | 0 |
+| textgrad_rl_ppo | 30 | 0.900 | 0.000 | 0.367 | 2.83 | 0 |
+
+The adaptive methods did not produce a real prompt edit in this run. Their prompt-update records are marked `no_prompt_change` with `gradient_count=0`, so the small differences above come from stochastic LLM rollouts rather than learned prompt changes.
+
+Temperature mainly affects action consistency rather than BrowserGym action validity. Empty model outputs are normalized to `noop()`, which keeps invalid-action rate at zero but increases repeated-action and turn-budget failures:
+
+| Method | Empty Raw Output Rate | Noop Action Rate |
+|---|---:|---:|
+| fixed_actor | 0.390 | 0.390 |
+| textgrad_rl | 0.365 | 0.365 |
+| textgrad_rl_ppo | 0.412 | 0.435 |
+
+10-task LLM category breakdown:
+
+| Method | Category | Envs | Episodes | Success | Invalid Action | Repeated Action | Avg Turns |
+|---|---|---:|---:|---:|---:|---:|---:|
+| fixed_actor | clicking | 3 | 9 | 0.889 | 0.000 | 0.444 | 2.44 |
+| fixed_actor | forms | 1 | 3 | 1.000 | 0.000 | 0.333 | 4.00 |
+| fixed_actor | menu_navigation | 1 | 3 | 1.000 | 0.000 | 0.000 | 1.33 |
+| fixed_actor | selection | 3 | 9 | 0.889 | 0.000 | 0.222 | 3.11 |
+| fixed_actor | text_entry | 2 | 6 | 1.000 | 0.000 | 0.500 | 2.67 |
+| textgrad_rl | clicking | 3 | 9 | 1.000 | 0.000 | 0.333 | 2.11 |
+| textgrad_rl | forms | 1 | 3 | 0.667 | 0.000 | 1.000 | 5.00 |
+| textgrad_rl | menu_navigation | 1 | 3 | 1.000 | 0.000 | 0.000 | 1.33 |
+| textgrad_rl | selection | 3 | 9 | 0.889 | 0.000 | 0.222 | 2.56 |
+| textgrad_rl | text_entry | 2 | 6 | 1.000 | 0.000 | 0.167 | 2.17 |
+| textgrad_rl_ppo | clicking | 3 | 9 | 0.889 | 0.000 | 0.333 | 2.22 |
+| textgrad_rl_ppo | forms | 1 | 3 | 1.000 | 0.000 | 0.333 | 4.33 |
+| textgrad_rl_ppo | menu_navigation | 1 | 3 | 1.000 | 0.000 | 0.000 | 1.00 |
+| textgrad_rl_ppo | selection | 3 | 9 | 0.778 | 0.000 | 0.444 | 3.67 |
+| textgrad_rl_ppo | text_entry | 2 | 6 | 1.000 | 0.000 | 0.500 | 2.67 |
+
 ## Interpretation
 
 The fixed actor solves direct click and text-entry tasks but fails selection tasks such as `click-checkboxes`, `click-option`, and `choose-list`: it selects the right option and then repeats that action instead of clicking Submit.
@@ -119,6 +168,8 @@ In the 50-task run, PPO rejected the candidate on a validation tie:
 
 This is a useful diagnostic: MiniWoB++ confirms TextGrad-RL can improve browser-control behavior with much less infrastructure than WebArena, but also shows that the current PPO-style KL proxy can be too conservative for short prompts and too dependent on a small validation slice.
 
+The `gpt-oss:20b` temperature run answers a separate question: temperature does matter once the actor is an LLM. At `t=0.7`, the actor solves most easy MiniWoB tasks but sometimes emits empty strings or non-action text, causing `noop()` cascades. Because the train split was already solved, TextGrad-RL had no failures to convert into gradients, and PPO had no candidate edit to gate. A stronger temperature study should compare `t=0.0` vs `t=0.7` with identical LLM actor settings and more seeds, then report confidence intervals over success and noop rates.
+
 ## Artifacts
 
 - `runs/miniwob_subset_10x3/episodes.jsonl`
@@ -134,3 +185,11 @@ This is a useful diagnostic: MiniWoB++ confirms TextGrad-RL can improve browser-
 - `runs/miniwob_subset_50x3/category_summary.csv`
 - `runs/miniwob_subset_50x3/category_summary.json`
 - `runs/miniwob_subset_50x3/category_summary.md`
+- `runs/miniwob_llm_gptoss20b_t07_10x3/episodes.jsonl`
+- `runs/miniwob_llm_gptoss20b_t07_10x3/prompt_updates.jsonl`
+- `runs/miniwob_llm_gptoss20b_t07_10x3/summary.csv`
+- `runs/miniwob_llm_gptoss20b_t07_10x3/summary.json`
+- `runs/miniwob_llm_gptoss20b_t07_10x3/summary.md`
+- `runs/miniwob_llm_gptoss20b_t07_10x3/category_summary.csv`
+- `runs/miniwob_llm_gptoss20b_t07_10x3/category_summary.json`
+- `runs/miniwob_llm_gptoss20b_t07_10x3/category_summary.md`
