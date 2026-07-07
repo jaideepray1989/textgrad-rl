@@ -1,0 +1,30 @@
+[
+  {
+    "accepted_updates": 0,
+    "avg_reward": 0.325,
+    "avg_turns": 10.666666666666666,
+    "episodes": 6,
+    "external_score": -0.09366666666666668,
+    "invalid_action_rate": 0.8333333333333334,
+    "method": "fixed_policy",
+    "repeated_action_rate": 0.0,
+    "source": "tau-retail",
+    "success_rate": 0.0,
+    "suite": "tau_transfer",
+    "target": "tau-airline+tau-banking"
+  },
+  {
+    "accepted_updates": 1,
+    "avg_reward": 0.9666666666666667,
+    "avg_turns": 6.333333333333333,
+    "episodes": 6,
+    "external_score": 1.3813333333333333,
+    "invalid_action_rate": 0.0,
+    "method": "textgrad_rl",
+    "repeated_action_rate": 0.0,
+    "source": "tau-retail",
+    "success_rate": 0.8333333333333334,
+    "suite": "tau_transfer",
+    "target": "tau-airline+tau-banking"
+  }
+]

@@ -1,0 +1,32 @@
+{
+  "swe_bench": {
+    "docker_available": false,
+    "note": "Official SWE-bench scoring applies generated patches in Docker and runs repository tests.",
+    "swebench_package_available": false
+  },
+  "tau_bench": {
+    "has_llm_api_key": false,
+    "note": "Official tau2/tau3 evaluation usually requires an LLM user simulator or provider key."
+  },
+  "webarena": {
+    "can_run_official_backend": false,
+    "missing_url_vars": [
+      "SHOPPING",
+      "SHOPPING_ADMIN",
+      "REDDIT",
+      "GITLAB",
+      "MAP",
+      "WIKIPEDIA",
+      "HOMEPAGE"
+    ]
+  },
+  "workarena": {
+    "browsergym_workarena_installed": false,
+    "has_servicenow_instance": false,
+    "missing_instance_vars": [
+      "SNOW_INSTANCE_URL",
+      "SERVICENOW_INSTANCE_URL",
+      "WORKARENA_INSTANCE_URL"
+    ]
+  }
+}

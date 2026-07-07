@@ -1,0 +1,3 @@
+suite,method,source,target,episodes,success_rate,avg_reward,invalid_action_rate,repeated_action_rate,avg_turns,external_score,accepted_updates
+browser_transfer,fixed_policy,MiniWoB,WebArena+WorkArena,6,0.0,0.25,1.0,0.16666666666666666,10.166666666666666,-0.252,0
+browser_transfer,textgrad_rl,MiniWoB,WebArena+WorkArena,6,0.8333333333333334,0.9444444444444445,0.0,0.0,6.833333333333333,1.3591111111111112,1

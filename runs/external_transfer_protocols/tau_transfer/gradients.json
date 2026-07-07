@@ -1,0 +1,67 @@
+[
+  {
+    "confidence": 0.82,
+    "evidence_from_trajectory": "retail_train_cancel_order failed on tau-retail; missing check_policy; matched=['lookup_before_mutation']",
+    "failure_mode": "tau_transfer:retail:check_policy",
+    "forbidden_shortcuts": [
+      "inspect hidden labels",
+      "mutate benchmark data",
+      "edit tests to pass"
+    ],
+    "gradient_text": "Transfer source-domain failure into a reusable rule: Check domain policy and eligibility before irreversible customer-service actions.",
+    "suggested_edit": "Add a rule: Check domain policy and eligibility before irreversible customer-service actions.",
+    "target_variable_name": "tool_policy"
+  },
+  {
+    "confidence": 0.82,
+    "evidence_from_trajectory": "retail_train_refund_item failed on tau-retail; missing verify_identity; matched=['lookup_before_mutation']",
+    "failure_mode": "tau_transfer:retail:verify_identity",
+    "forbidden_shortcuts": [
+      "inspect hidden labels",
+      "mutate benchmark data",
+      "edit tests to pass"
+    ],
+    "gradient_text": "Transfer source-domain failure into a reusable rule: Verify the customer, account, order, or reservation identity before any tool mutation.",
+    "suggested_edit": "Add a rule: Verify the customer, account, order, or reservation identity before any tool mutation.",
+    "target_variable_name": "tool_policy"
+  },
+  {
+    "confidence": 0.82,
+    "evidence_from_trajectory": "retail_train_refund_item failed on tau-retail; missing check_policy; matched=['lookup_before_mutation']",
+    "failure_mode": "tau_transfer:retail:check_policy",
+    "forbidden_shortcuts": [
+      "inspect hidden labels",
+      "mutate benchmark data",
+      "edit tests to pass"
+    ],
+    "gradient_text": "Transfer source-domain failure into a reusable rule: Check domain policy and eligibility before irreversible customer-service actions.",
+    "suggested_edit": "Add a rule: Check domain policy and eligibility before irreversible customer-service actions.",
+    "target_variable_name": "tool_policy"
+  },
+  {
+    "confidence": 0.82,
+    "evidence_from_trajectory": "retail_train_update_address failed on tau-retail; missing verify_identity; matched=['lookup_before_mutation']",
+    "failure_mode": "tau_transfer:retail:verify_identity",
+    "forbidden_shortcuts": [
+      "inspect hidden labels",
+      "mutate benchmark data",
+      "edit tests to pass"
+    ],
+    "gradient_text": "Transfer source-domain failure into a reusable rule: Verify the customer, account, order, or reservation identity before any tool mutation.",
+    "suggested_edit": "Add a rule: Verify the customer, account, order, or reservation identity before any tool mutation.",
+    "target_variable_name": "tool_policy"
+  },
+  {
+    "confidence": 0.82,
+    "evidence_from_trajectory": "retail_train_update_address failed on tau-retail; missing confirm_final_state; matched=['lookup_before_mutation']",
+    "failure_mode": "tau_transfer:retail:confirm_final_state",
+    "forbidden_shortcuts": [
+      "inspect hidden labels",
+      "mutate benchmark data",
+      "edit tests to pass"
+    ],
+    "gradient_text": "Transfer source-domain failure into a reusable rule: After tool updates, confirm the final state against the user's requested goal before responding.",
+    "suggested_edit": "Add a rule: After tool updates, confirm the final state against the user's requested goal before responding.",
+    "target_variable_name": "tool_policy"
+  }
+]

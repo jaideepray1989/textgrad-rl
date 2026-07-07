@@ -1,0 +1,30 @@
+[
+  {
+    "accepted_updates": 0,
+    "avg_reward": 0.2733333333333333,
+    "avg_turns": 9.4,
+    "episodes": 5,
+    "external_score": 0.07133333333333333,
+    "invalid_action_rate": 0.4,
+    "method": "fixed_policy",
+    "repeated_action_rate": 0.0,
+    "source": "SWE-bench-dev",
+    "success_rate": 0.0,
+    "suite": "swe_transfer",
+    "target": "SWE-bench-Lite"
+  },
+  {
+    "accepted_updates": 1,
+    "avg_reward": 0.96,
+    "avg_turns": 5.4,
+    "episodes": 5,
+    "external_score": 1.358,
+    "invalid_action_rate": 0.0,
+    "method": "textgrad_rl",
+    "repeated_action_rate": 0.0,
+    "source": "SWE-bench-dev",
+    "success_rate": 0.8,
+    "suite": "swe_transfer",
+    "target": "SWE-bench-Lite"
+  }
+]

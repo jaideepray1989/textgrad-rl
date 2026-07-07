@@ -1,0 +1,11 @@
+{
+  "browser_policy": {
+    "gradient_history": [],
+    "max_chars": 2400,
+    "name": "browser_policy",
+    "requires_grad": true,
+    "role_description": "browser_transfer transfer policy.",
+    "value": "Follow visible instructions, use only allowed actions, and avoid hidden benchmark answers.\n\nSeed rules:\n- Fill all required fields before submitting or saving a browser form.",
+    "version": 0
+  }
+}

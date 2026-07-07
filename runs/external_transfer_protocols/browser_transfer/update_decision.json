@@ -1,0 +1,11 @@
+{
+  "accepted": true,
+  "gradient_count": 3,
+  "learned_rule_ids": [
+    "avoid_repeated_browser_action",
+    "search_before_detail",
+    "select_then_submit"
+  ],
+  "new_train_score": 1.4649999999999999,
+  "old_train_score": 0.11999999999999998
+}

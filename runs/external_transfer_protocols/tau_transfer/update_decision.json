@@ -1,0 +1,11 @@
+{
+  "accepted": true,
+  "gradient_count": 5,
+  "learned_rule_ids": [
+    "check_policy",
+    "confirm_final_state",
+    "verify_identity"
+  ],
+  "new_train_score": 1.4533333333333331,
+  "old_train_score": -0.09111111111111114
+}

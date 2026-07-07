@@ -1,0 +1,15 @@
+{
+  "tool_policy": {
+    "gradient_history": [
+      "tau_transfer:retail:check_policy: Transfer source-domain failure into a reusable rule: Check domain policy and eligibility before irreversible customer-service actions.",
+      "tau_transfer:retail:verify_identity: Transfer source-domain failure into a reusable rule: Verify the customer, account, order, or reservation identity before any tool mutation.",
+      "tau_transfer:retail:confirm_final_state: Transfer source-domain failure into a reusable rule: After tool updates, confirm the final state against the user's requested goal before responding."
+    ],
+    "max_chars": 2400,
+    "name": "tool_policy",
+    "requires_grad": true,
+    "role_description": "tau_transfer transfer policy.",
+    "value": "Follow visible instructions, use only allowed actions, and avoid hidden benchmark answers.\n\nSeed rules:\n- Look up the current database record and relevant constraints before calling update, cancel, refund, or transfer tools.\n\nLearned rules:\n- Check domain policy and eligibility before irreversible customer-service actions.\n- Verify the customer, account, order, or reservation identity before any tool mutation.\n- After tool updates, confirm the final state against the user's requested goal before responding.",
+    "version": 1
+  }
+}

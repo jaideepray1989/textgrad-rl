@@ -1,0 +1,80 @@
+[
+  {
+    "confidence": 0.82,
+    "evidence_from_trajectory": "dev_traceback_type_error failed on SWE-bench-dev; missing reproduce_failure; matched=['minimal_patch']",
+    "failure_mode": "swe_transfer:dev:reproduce_failure",
+    "forbidden_shortcuts": [
+      "inspect hidden labels",
+      "mutate benchmark data",
+      "edit tests to pass"
+    ],
+    "gradient_text": "Transfer source-domain failure into a reusable rule: Reproduce or inspect the failing test, traceback, or issue condition before editing code.",
+    "suggested_edit": "Add a rule: Reproduce or inspect the failing test, traceback, or issue condition before editing code.",
+    "target_variable_name": "coding_policy"
+  },
+  {
+    "confidence": 0.82,
+    "evidence_from_trajectory": "dev_traceback_type_error failed on SWE-bench-dev; missing targeted_tests; matched=['minimal_patch']",
+    "failure_mode": "swe_transfer:dev:targeted_tests",
+    "forbidden_shortcuts": [
+      "inspect hidden labels",
+      "mutate benchmark data",
+      "edit tests to pass"
+    ],
+    "gradient_text": "Transfer source-domain failure into a reusable rule: Run targeted regression tests for the changed behavior after patching.",
+    "suggested_edit": "Add a rule: Run targeted regression tests for the changed behavior after patching.",
+    "target_variable_name": "coding_policy"
+  },
+  {
+    "confidence": 0.82,
+    "evidence_from_trajectory": "dev_api_regression failed on SWE-bench-dev; missing preserve_api; matched=['minimal_patch']",
+    "failure_mode": "swe_transfer:dev:preserve_api",
+    "forbidden_shortcuts": [
+      "inspect hidden labels",
+      "mutate benchmark data",
+      "edit tests to pass"
+    ],
+    "gradient_text": "Transfer source-domain failure into a reusable rule: Preserve public APIs and backward compatibility unless the issue explicitly asks for a breaking change.",
+    "suggested_edit": "Add a rule: Preserve public APIs and backward compatibility unless the issue explicitly asks for a breaking change.",
+    "target_variable_name": "coding_policy"
+  },
+  {
+    "confidence": 0.82,
+    "evidence_from_trajectory": "dev_api_regression failed on SWE-bench-dev; missing targeted_tests; matched=['minimal_patch']",
+    "failure_mode": "swe_transfer:dev:targeted_tests",
+    "forbidden_shortcuts": [
+      "inspect hidden labels",
+      "mutate benchmark data",
+      "edit tests to pass"
+    ],
+    "gradient_text": "Transfer source-domain failure into a reusable rule: Run targeted regression tests for the changed behavior after patching.",
+    "suggested_edit": "Add a rule: Run targeted regression tests for the changed behavior after patching.",
+    "target_variable_name": "coding_policy"
+  },
+  {
+    "confidence": 0.82,
+    "evidence_from_trajectory": "dev_cross_file_bug failed on SWE-bench-dev; missing reproduce_failure; matched=['minimal_patch']",
+    "failure_mode": "swe_transfer:dev:reproduce_failure",
+    "forbidden_shortcuts": [
+      "inspect hidden labels",
+      "mutate benchmark data",
+      "edit tests to pass"
+    ],
+    "gradient_text": "Transfer source-domain failure into a reusable rule: Reproduce or inspect the failing test, traceback, or issue condition before editing code.",
+    "suggested_edit": "Add a rule: Reproduce or inspect the failing test, traceback, or issue condition before editing code.",
+    "target_variable_name": "coding_policy"
+  },
+  {
+    "confidence": 0.82,
+    "evidence_from_trajectory": "dev_cross_file_bug failed on SWE-bench-dev; missing trace_cross_file_flow; matched=['minimal_patch']",
+    "failure_mode": "swe_transfer:dev:trace_cross_file_flow",
+    "forbidden_shortcuts": [
+      "inspect hidden labels",
+      "mutate benchmark data",
+      "edit tests to pass"
+    ],
+    "gradient_text": "Transfer source-domain failure into a reusable rule: For multi-file bugs, trace the data flow across callers and callees before patching.",
+    "suggested_edit": "Add a rule: For multi-file bugs, trace the data flow across callers and callees before patching.",
+    "target_variable_name": "coding_policy"
+  }
+]

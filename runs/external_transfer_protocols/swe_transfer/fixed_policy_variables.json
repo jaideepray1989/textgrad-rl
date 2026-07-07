@@ -1,0 +1,11 @@
+{
+  "coding_policy": {
+    "gradient_history": [],
+    "max_chars": 2400,
+    "name": "coding_policy",
+    "requires_grad": true,
+    "role_description": "swe_transfer transfer policy.",
+    "value": "Follow visible instructions, use only allowed actions, and avoid hidden benchmark answers.\n\nSeed rules:\n- Make the smallest root-cause code patch rather than broad rewrites.",
+    "version": 0
+  }
+}

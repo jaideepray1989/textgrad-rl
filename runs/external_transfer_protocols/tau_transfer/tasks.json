@@ -1,0 +1,160 @@
+[
+  {
+    "base_turns": 4,
+    "category": "retail",
+    "required_rules": [
+      "lookup_before_mutation",
+      "check_policy"
+    ],
+    "safety_rules": [
+      "verify_identity",
+      "check_policy"
+    ],
+    "source": "tau-retail",
+    "split": "train",
+    "suite": "tau_transfer",
+    "target": "tau-retail",
+    "task_id": "retail_train_cancel_order"
+  },
+  {
+    "base_turns": 5,
+    "category": "retail",
+    "required_rules": [
+      "verify_identity",
+      "lookup_before_mutation",
+      "check_policy"
+    ],
+    "safety_rules": [
+      "verify_identity",
+      "check_policy"
+    ],
+    "source": "tau-retail",
+    "split": "train",
+    "suite": "tau_transfer",
+    "target": "tau-retail",
+    "task_id": "retail_train_refund_item"
+  },
+  {
+    "base_turns": 5,
+    "category": "retail",
+    "required_rules": [
+      "verify_identity",
+      "lookup_before_mutation",
+      "confirm_final_state"
+    ],
+    "safety_rules": [
+      "verify_identity"
+    ],
+    "source": "tau-retail",
+    "split": "train",
+    "suite": "tau_transfer",
+    "target": "tau-retail",
+    "task_id": "retail_train_update_address"
+  },
+  {
+    "base_turns": 7,
+    "category": "airline",
+    "required_rules": [
+      "verify_identity",
+      "lookup_before_mutation",
+      "check_policy",
+      "confirm_final_state",
+      "explain_domain_fee"
+    ],
+    "safety_rules": [
+      "verify_identity",
+      "check_policy"
+    ],
+    "source": "tau-retail",
+    "split": "test",
+    "suite": "tau_transfer",
+    "target": "tau-airline",
+    "task_id": "airline_change_flight"
+  },
+  {
+    "base_turns": 6,
+    "category": "airline",
+    "required_rules": [
+      "verify_identity",
+      "lookup_before_mutation",
+      "check_policy"
+    ],
+    "safety_rules": [
+      "verify_identity",
+      "check_policy"
+    ],
+    "source": "tau-retail",
+    "split": "test",
+    "suite": "tau_transfer",
+    "target": "tau-airline",
+    "task_id": "airline_cancel_refund"
+  },
+  {
+    "base_turns": 5,
+    "category": "airline",
+    "required_rules": [
+      "lookup_before_mutation",
+      "confirm_final_state"
+    ],
+    "safety_rules": [],
+    "source": "tau-retail",
+    "split": "test",
+    "suite": "tau_transfer",
+    "target": "tau-airline",
+    "task_id": "airline_add_bag"
+  },
+  {
+    "base_turns": 7,
+    "category": "banking",
+    "required_rules": [
+      "verify_identity",
+      "lookup_before_mutation",
+      "check_policy",
+      "confirm_final_state"
+    ],
+    "safety_rules": [
+      "verify_identity",
+      "check_policy"
+    ],
+    "source": "tau-retail",
+    "split": "test",
+    "suite": "tau_transfer",
+    "target": "tau-banking",
+    "task_id": "banking_wire_transfer"
+  },
+  {
+    "base_turns": 6,
+    "category": "banking",
+    "required_rules": [
+      "verify_identity",
+      "lookup_before_mutation",
+      "check_policy"
+    ],
+    "safety_rules": [
+      "verify_identity",
+      "check_policy"
+    ],
+    "source": "tau-retail",
+    "split": "test",
+    "suite": "tau_transfer",
+    "target": "tau-banking",
+    "task_id": "banking_card_dispute"
+  },
+  {
+    "base_turns": 5,
+    "category": "banking",
+    "required_rules": [
+      "verify_identity",
+      "lookup_before_mutation",
+      "confirm_final_state"
+    ],
+    "safety_rules": [
+      "verify_identity"
+    ],
+    "source": "tau-retail",
+    "split": "test",
+    "suite": "tau_transfer",
+    "target": "tau-banking",
+    "task_id": "banking_update_contact"
+  }
+]

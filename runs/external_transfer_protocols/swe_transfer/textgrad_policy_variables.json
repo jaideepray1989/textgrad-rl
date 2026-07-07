@@ -1,0 +1,16 @@
+{
+  "coding_policy": {
+    "gradient_history": [
+      "swe_transfer:dev:reproduce_failure: Transfer source-domain failure into a reusable rule: Reproduce or inspect the failing test, traceback, or issue condition before editing code.",
+      "swe_transfer:dev:targeted_tests: Transfer source-domain failure into a reusable rule: Run targeted regression tests for the changed behavior after patching.",
+      "swe_transfer:dev:preserve_api: Transfer source-domain failure into a reusable rule: Preserve public APIs and backward compatibility unless the issue explicitly asks for a breaking change.",
+      "swe_transfer:dev:trace_cross_file_flow: Transfer source-domain failure into a reusable rule: For multi-file bugs, trace the data flow across callers and callees before patching."
+    ],
+    "max_chars": 2400,
+    "name": "coding_policy",
+    "requires_grad": true,
+    "role_description": "swe_transfer transfer policy.",
+    "value": "Follow visible instructions, use only allowed actions, and avoid hidden benchmark answers.\n\nSeed rules:\n- Make the smallest root-cause code patch rather than broad rewrites.\n\nLearned rules:\n- Reproduce or inspect the failing test, traceback, or issue condition before editing code.\n- Run targeted regression tests for the changed behavior after patching.\n- Preserve public APIs and backward compatibility unless the issue explicitly asks for a breaking change.\n- For multi-file bugs, trace the data flow across callers and callees before patching.",
+    "version": 1
+  }
+}

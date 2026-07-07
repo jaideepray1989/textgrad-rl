@@ -1,0 +1,15 @@
+{
+  "browser_policy": {
+    "gradient_history": [
+      "browser_transfer:selection:select_then_submit: Transfer source-domain failure into a reusable rule: After selecting required checkbox, radio, filter, or list options, click the final Submit, Save, Apply, or Checkout control exactly once.",
+      "browser_transfer:search:search_before_detail: Transfer source-domain failure into a reusable rule: Use search or filtering controls to locate the target item before opening or editing its detail page.",
+      "browser_transfer:recovery:avoid_repeated_browser_action: Transfer source-domain failure into a reusable rule: Avoid repeating the same browser action after it fails or stops changing the page; choose the next required control instead."
+    ],
+    "max_chars": 2400,
+    "name": "browser_policy",
+    "requires_grad": true,
+    "role_description": "browser_transfer transfer policy.",
+    "value": "Follow visible instructions, use only allowed actions, and avoid hidden benchmark answers.\n\nSeed rules:\n- Fill all required fields before submitting or saving a browser form.\n\nLearned rules:\n- After selecting required checkbox, radio, filter, or list options, click the final Submit, Save, Apply, or Checkout control exactly once.\n- Use search or filtering controls to locate the target item before opening or editing its detail page.\n- Avoid repeating the same browser action after it fails or stops changing the page; choose the next required control instead.",
+    "version": 1
+  }
+}

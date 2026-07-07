@@ -1,0 +1,128 @@
+[
+  {
+    "base_turns": 5,
+    "category": "dev",
+    "required_rules": [
+      "reproduce_failure",
+      "minimal_patch",
+      "targeted_tests"
+    ],
+    "safety_rules": [],
+    "source": "SWE-bench-dev",
+    "split": "train",
+    "suite": "swe_transfer",
+    "target": "SWE-bench-dev",
+    "task_id": "dev_traceback_type_error"
+  },
+  {
+    "base_turns": 5,
+    "category": "dev",
+    "required_rules": [
+      "minimal_patch",
+      "preserve_api",
+      "targeted_tests"
+    ],
+    "safety_rules": [
+      "preserve_api"
+    ],
+    "source": "SWE-bench-dev",
+    "split": "train",
+    "suite": "swe_transfer",
+    "target": "SWE-bench-dev",
+    "task_id": "dev_api_regression"
+  },
+  {
+    "base_turns": 6,
+    "category": "dev",
+    "required_rules": [
+      "reproduce_failure",
+      "trace_cross_file_flow",
+      "minimal_patch"
+    ],
+    "safety_rules": [],
+    "source": "SWE-bench-dev",
+    "split": "train",
+    "suite": "swe_transfer",
+    "target": "SWE-bench-dev",
+    "task_id": "dev_cross_file_bug"
+  },
+  {
+    "base_turns": 5,
+    "category": "lite",
+    "required_rules": [
+      "reproduce_failure",
+      "minimal_patch",
+      "targeted_tests"
+    ],
+    "safety_rules": [],
+    "source": "SWE-bench-dev",
+    "split": "test",
+    "suite": "swe_transfer",
+    "target": "SWE-bench-Lite",
+    "task_id": "lite_datetime_parser"
+  },
+  {
+    "base_turns": 5,
+    "category": "lite",
+    "required_rules": [
+      "minimal_patch",
+      "preserve_api",
+      "targeted_tests"
+    ],
+    "safety_rules": [
+      "preserve_api"
+    ],
+    "source": "SWE-bench-dev",
+    "split": "test",
+    "suite": "swe_transfer",
+    "target": "SWE-bench-Lite",
+    "task_id": "lite_public_api_alias"
+  },
+  {
+    "base_turns": 7,
+    "category": "lite",
+    "required_rules": [
+      "reproduce_failure",
+      "trace_cross_file_flow",
+      "minimal_patch",
+      "targeted_tests",
+      "dependency_edge_case"
+    ],
+    "safety_rules": [],
+    "source": "SWE-bench-dev",
+    "split": "test",
+    "suite": "swe_transfer",
+    "target": "SWE-bench-Lite",
+    "task_id": "lite_multi_file_cache"
+  },
+  {
+    "base_turns": 4,
+    "category": "lite",
+    "required_rules": [
+      "reproduce_failure",
+      "targeted_tests"
+    ],
+    "safety_rules": [],
+    "source": "SWE-bench-dev",
+    "split": "test",
+    "suite": "swe_transfer",
+    "target": "SWE-bench-Lite",
+    "task_id": "lite_test_selection"
+  },
+  {
+    "base_turns": 4,
+    "category": "lite",
+    "required_rules": [
+      "minimal_patch",
+      "preserve_api"
+    ],
+    "safety_rules": [
+      "preserve_api"
+    ],
+    "source": "SWE-bench-dev",
+    "split": "test",
+    "suite": "swe_transfer",
+    "target": "SWE-bench-Lite",
+    "task_id": "lite_backward_compat"
+  }
+]

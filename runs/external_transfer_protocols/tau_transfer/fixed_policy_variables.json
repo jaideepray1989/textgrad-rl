@@ -1,0 +1,11 @@
+{
+  "tool_policy": {
+    "gradient_history": [],
+    "max_chars": 2400,
+    "name": "tool_policy",
+    "requires_grad": true,
+    "role_description": "tau_transfer transfer policy.",
+    "value": "Follow visible instructions, use only allowed actions, and avoid hidden benchmark answers.\n\nSeed rules:\n- Look up the current database record and relevant constraints before calling update, cancel, refund, or transfer tools.",
+    "version": 0
+  }
+}

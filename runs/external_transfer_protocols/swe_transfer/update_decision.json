@@ -1,0 +1,12 @@
+{
+  "accepted": true,
+  "gradient_count": 6,
+  "learned_rule_ids": [
+    "preserve_api",
+    "reproduce_failure",
+    "targeted_tests",
+    "trace_cross_file_flow"
+  ],
+  "new_train_score": 1.4466666666666665,
+  "old_train_score": 0.10666666666666665
+}

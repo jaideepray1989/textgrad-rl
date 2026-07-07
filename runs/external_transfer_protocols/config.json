@@ -1,0 +1,8 @@
+{
+  "seed": 23001,
+  "suites": [
+    "browser_transfer",
+    "tau_transfer",
+    "swe_transfer"
+  ]
+}

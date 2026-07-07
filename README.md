@@ -190,6 +190,13 @@ To run the broad offline TextArena 50-environment transfer suite:
   --turn-budget 80
 ```
 
+To run local source-to-target transfer protocol probes for MiniWoB -> WebArena/WorkArena-style browser tasks, tau-retail -> tau-airline/banking-style tool tasks, and SWE-bench-dev -> SWE-bench-Lite-style coding tasks:
+
+```bash
+.venv/bin/python -m textgrad_rl.benchmarks.transfer_protocol_suites \
+  --output-dir runs/external_transfer_protocols
+```
+
 To run the expanded TextArena benchmark set covering difficulty generalization, puzzle SLM games, social SLM games, and a real frozen-SLM TextArena suite:
 
 ```bash
