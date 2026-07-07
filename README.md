@@ -178,6 +178,18 @@ This suite also includes `textgrad_ppo`, a PPO-style trust-region method over Te
   --output-dir runs/textarena_policy_iteration_with_ppo
 ```
 
+To run the broad offline TextArena 50-environment transfer suite:
+
+```bash
+.venv/bin/python -m textgrad_rl.benchmarks.textarena_broad_suite \
+  --output-dir runs/textarena_broad_50 \
+  --test-seeds 3 \
+  --train-seeds 3 \
+  --val-seeds 3 \
+  --policy-training-test-seeds 1 \
+  --turn-budget 80
+```
+
 To run the expanded TextArena benchmark set covering difficulty generalization, puzzle SLM games, social SLM games, and a real frozen-SLM TextArena suite:
 
 ```bash

@@ -1,0 +1,28 @@
+[
+  {
+    "accepted_updates": 0,
+    "average_reward": 0.09384835989309258,
+    "average_turns": 9.323076923076924,
+    "envs": 50,
+    "episodes": 195,
+    "fallback_envs": 31,
+    "invalid_move_rate": 0.517948717948718,
+    "method": "fixed_prompt",
+    "repeated_action_rate": 0.7487179487179487,
+    "success_rate": 0.18461538461538463,
+    "supported_envs": 19
+  },
+  {
+    "accepted_updates": 6,
+    "average_reward": 0.26108412682521576,
+    "average_turns": 8.502564102564103,
+    "envs": 50,
+    "episodes": 195,
+    "fallback_envs": 31,
+    "invalid_move_rate": 0.4512820512820513,
+    "method": "textgrad_policy_iteration",
+    "repeated_action_rate": 0.717948717948718,
+    "success_rate": 0.36923076923076925,
+    "supported_envs": 19
+  }
+]

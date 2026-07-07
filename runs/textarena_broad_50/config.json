@@ -1,0 +1,277 @@
+{
+  "benchmark": "textarena_broad",
+  "envs": [
+    {
+      "category": "puzzle",
+      "env_id": "2048-v0-ultra-easy",
+      "num_players": 1
+    },
+    {
+      "category": "puzzle",
+      "env_id": "2048-v0-mega-easy",
+      "num_players": 1
+    },
+    {
+      "category": "puzzle",
+      "env_id": "2048-v0-super-easy",
+      "num_players": 1
+    },
+    {
+      "category": "puzzle",
+      "env_id": "2048-v0-very-easy",
+      "num_players": 1
+    },
+    {
+      "category": "puzzle",
+      "env_id": "2048-v0-3x3",
+      "num_players": 1
+    },
+    {
+      "category": "stochastic_decision",
+      "env_id": "Bandit-v0",
+      "num_players": 1
+    },
+    {
+      "category": "stochastic_decision",
+      "env_id": "Bandit-v0-hard",
+      "num_players": 1
+    },
+    {
+      "category": "stochastic_decision",
+      "env_id": "Blackjack-v0",
+      "num_players": 1
+    },
+    {
+      "category": "stochastic_decision",
+      "env_id": "Blackjack-v0-long",
+      "num_players": 1
+    },
+    {
+      "category": "puzzle",
+      "env_id": "Countdown-v0",
+      "num_players": 1
+    },
+    {
+      "category": "language_puzzle",
+      "env_id": "Crosswords-v0",
+      "num_players": 1
+    },
+    {
+      "category": "symbolic_puzzle",
+      "env_id": "Cryptarithm-v0",
+      "num_players": 1
+    },
+    {
+      "category": "planning",
+      "env_id": "FrozenLake-v0",
+      "num_players": 1
+    },
+    {
+      "category": "planning",
+      "env_id": "FrozenLake-v0-random",
+      "num_players": 1
+    },
+    {
+      "category": "planning",
+      "env_id": "FrozenLake-v0-hardcore",
+      "num_players": 1
+    },
+    {
+      "category": "deduction",
+      "env_id": "GuessTheNumber-v0",
+      "num_players": 1
+    },
+    {
+      "category": "deduction",
+      "env_id": "GuessTheNumber-v0-hardcore",
+      "num_players": 1
+    },
+    {
+      "category": "language_puzzle",
+      "env_id": "Hangman-v0",
+      "num_players": 1
+    },
+    {
+      "category": "language_puzzle",
+      "env_id": "Hangman-v0-hardcore",
+      "num_players": 1
+    },
+    {
+      "category": "puzzle",
+      "env_id": "LightsOut-v0",
+      "num_players": 1
+    },
+    {
+      "category": "symbolic_puzzle",
+      "env_id": "LogicPuzzle-v0",
+      "num_players": 1
+    },
+    {
+      "category": "symbolic_puzzle",
+      "env_id": "LogicPuzzle-v0-hard",
+      "num_players": 1
+    },
+    {
+      "category": "deduction",
+      "env_id": "Mastermind-v0",
+      "num_players": 1
+    },
+    {
+      "category": "deduction",
+      "env_id": "Mastermind-v0-hard",
+      "num_players": 1
+    },
+    {
+      "category": "puzzle",
+      "env_id": "Minesweeper-v0-small",
+      "num_players": 1
+    },
+    {
+      "category": "puzzle",
+      "env_id": "PegJump-v0",
+      "num_players": 1
+    },
+    {
+      "category": "planning",
+      "env_id": "RushHour-v0",
+      "num_players": 1
+    },
+    {
+      "category": "stochastic_decision",
+      "env_id": "Secretary-v0",
+      "num_players": 1
+    },
+    {
+      "category": "stochastic_decision",
+      "env_id": "Secretary-v0-long",
+      "num_players": 1
+    },
+    {
+      "category": "symbolic_puzzle",
+      "env_id": "Sudoku-v0-very-easy",
+      "num_players": 1
+    },
+    {
+      "category": "planning",
+      "env_id": "TowerOfHanoi-v0",
+      "num_players": 1
+    },
+    {
+      "category": "planning",
+      "env_id": "TowerOfHanoi-v0-medium",
+      "num_players": 1
+    },
+    {
+      "category": "language_puzzle",
+      "env_id": "WordLadder-v0",
+      "num_players": 1
+    },
+    {
+      "category": "language_puzzle",
+      "env_id": "Wordle-v0",
+      "num_players": 1
+    },
+    {
+      "category": "language_puzzle",
+      "env_id": "WordSearch-v0",
+      "num_players": 1
+    },
+    {
+      "category": "board_game",
+      "env_id": "Alquerque-v0",
+      "num_players": 2
+    },
+    {
+      "category": "board_game",
+      "env_id": "Battleship-v0",
+      "num_players": 2
+    },
+    {
+      "category": "board_game",
+      "env_id": "Breakthrough-v0-tiny",
+      "num_players": 2
+    },
+    {
+      "category": "board_game",
+      "env_id": "Checkers-v0",
+      "num_players": 2
+    },
+    {
+      "category": "board_game",
+      "env_id": "Chopsticks-v0",
+      "num_players": 2
+    },
+    {
+      "category": "board_game",
+      "env_id": "ConnectFour-v0",
+      "num_players": 2
+    },
+    {
+      "category": "board_game",
+      "env_id": "ConnectFour-v0-blind",
+      "num_players": 2
+    },
+    {
+      "category": "social_game",
+      "env_id": "GameOfPureStrategy-v0",
+      "num_players": 2
+    },
+    {
+      "category": "card_game",
+      "env_id": "GermanWhist-v0",
+      "num_players": 2
+    },
+    {
+      "category": "social_game",
+      "env_id": "IteratedPrisonersDilemma-v0",
+      "num_players": 2
+    },
+    {
+      "category": "social_game",
+      "env_id": "IteratedRockPaperScissors-v0",
+      "num_players": 2
+    },
+    {
+      "category": "card_game",
+      "env_id": "KuhnPoker-v0-short",
+      "num_players": 2
+    },
+    {
+      "category": "board_game",
+      "env_id": "Nim-v0",
+      "num_players": 2
+    },
+    {
+      "category": "board_game",
+      "env_id": "Nim-v0-medium",
+      "num_players": 2
+    },
+    {
+      "category": "board_game",
+      "env_id": "ReverseTicTacToe-v0",
+      "num_players": 2
+    }
+  ],
+  "methods": [
+    "fixed_prompt",
+    "textgrad_policy_iteration"
+  ],
+  "policy_training_test_seeds": 1,
+  "seed": 17001,
+  "test_seeds": 3,
+  "train_envs": [
+    "Nim-v0",
+    "ConnectFour-v0",
+    "ReverseTicTacToe-v0",
+    "GuessTheNumber-v0",
+    "FrozenLake-v0",
+    "TowerOfHanoi-v0",
+    "LightsOut-v0",
+    "Mastermind-v0",
+    "Blackjack-v0",
+    "Bandit-v0"
+  ],
+  "train_seeds": 3,
+  "turn_budget": 80,
+  "val_seeds": 3
+}
