@@ -1,0 +1,35 @@
+[
+  {
+    "avg_reward": 0.6,
+    "avg_turns": 2.4,
+    "episodes": 30,
+    "invalid_browser_action_rate": 0.0,
+    "method": "fixed_actor",
+    "rejected_prompt_updates": 0,
+    "repeated_action_rate": 0.3,
+    "task_success_rate": 0.6,
+    "validation_gated_prompt_updates": 0
+  },
+  {
+    "avg_reward": 0.9,
+    "avg_turns": 1.6,
+    "episodes": 30,
+    "invalid_browser_action_rate": 0.0,
+    "method": "textgrad_rl",
+    "rejected_prompt_updates": 0,
+    "repeated_action_rate": 0.0,
+    "task_success_rate": 0.9,
+    "validation_gated_prompt_updates": 1
+  },
+  {
+    "avg_reward": 0.6,
+    "avg_turns": 2.4,
+    "episodes": 30,
+    "invalid_browser_action_rate": 0.0,
+    "method": "textgrad_rl_ppo",
+    "rejected_prompt_updates": 1,
+    "repeated_action_rate": 0.3,
+    "task_success_rate": 0.6,
+    "validation_gated_prompt_updates": 0
+  }
+]

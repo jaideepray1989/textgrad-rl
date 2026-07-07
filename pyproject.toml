@@ -23,6 +23,9 @@ dev = [
 textarena = [
   "textarena>=0.7",
 ]
+miniwob = [
+  "browsergym-miniwob==0.14.3",
+]
 
 [tool.setuptools.packages.find]
 include = ["textgrad_rl*"]

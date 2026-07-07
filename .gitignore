@@ -1,4 +1,5 @@
 .venv/
+.venv_miniwob/
 __pycache__/
 *.py[cod]
 *.egg-info/
@@ -9,4 +10,3 @@ dist/
 build/
 runs/
 .DS_Store
-

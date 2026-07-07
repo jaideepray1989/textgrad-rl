@@ -1,0 +1,37 @@
+{
+  "benchmark": "browsergym_miniwob",
+  "envs": [
+    "click-button",
+    "enter-text",
+    "focus-text",
+    "click-checkboxes",
+    "click-option",
+    "choose-list",
+    "click-test",
+    "click-dialog",
+    "click-tab",
+    "login-user"
+  ],
+  "max_steps": 5,
+  "methods": [
+    "fixed_actor",
+    "textgrad_rl",
+    "textgrad_rl_ppo"
+  ],
+  "miniwob_url": "file:///tmp/miniwob-plusplus/miniwob/html/miniwob/",
+  "test_seeds": [
+    0,
+    1,
+    2
+  ],
+  "train_envs": [
+    "click-button",
+    "enter-text",
+    "focus-text",
+    "click-checkboxes"
+  ],
+  "val_envs": [
+    "click-option",
+    "choose-list"
+  ]
+}
