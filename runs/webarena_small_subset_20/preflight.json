@@ -1,0 +1,58 @@
+{
+  "backend": "official",
+  "missing_auth_files": [
+    "/tmp/webarena_inspect/.auth/gitlab.reddit_state.json",
+    "/tmp/webarena_inspect/.auth/gitlab_state.json",
+    "/tmp/webarena_inspect/.auth/reddit_state.json",
+    "/tmp/webarena_inspect/.auth/shopping_admin_state.json",
+    "/tmp/webarena_inspect/.auth/shopping_state.json"
+  ],
+  "missing_commands": [
+    "docker"
+  ],
+  "missing_env_vars": [
+    "GITLAB",
+    "HOMEPAGE",
+    "MAP",
+    "REDDIT",
+    "SHOPPING",
+    "SHOPPING_ADMIN",
+    "WIKIPEDIA"
+  ],
+  "missing_generated_configs": [
+    "/tmp/webarena_inspect/config_files/0.json",
+    "/tmp/webarena_inspect/config_files/21.json",
+    "/tmp/webarena_inspect/config_files/22.json",
+    "/tmp/webarena_inspect/config_files/265.json",
+    "/tmp/webarena_inspect/config_files/27.json",
+    "/tmp/webarena_inspect/config_files/28.json",
+    "/tmp/webarena_inspect/config_files/44.json",
+    "/tmp/webarena_inspect/config_files/45.json",
+    "/tmp/webarena_inspect/config_files/552.json",
+    "/tmp/webarena_inspect/config_files/553.json",
+    "/tmp/webarena_inspect/config_files/556.json",
+    "/tmp/webarena_inspect/config_files/557.json",
+    "/tmp/webarena_inspect/config_files/671.json",
+    "/tmp/webarena_inspect/config_files/681.json",
+    "/tmp/webarena_inspect/config_files/682.json",
+    "/tmp/webarena_inspect/config_files/7.json",
+    "/tmp/webarena_inspect/config_files/759.json",
+    "/tmp/webarena_inspect/config_files/760.json",
+    "/tmp/webarena_inspect/config_files/8.json",
+    "/tmp/webarena_inspect/config_files/97.json"
+  ],
+  "missing_imports": [
+    "beartype",
+    "gymnasium",
+    "playwright",
+    "tiktoken"
+  ],
+  "notes": [
+    "Docker is required to self-host WebArena locally when remote site URLs are not set.",
+    "Preflight failed; no task scores were produced."
+  ],
+  "ok": false,
+  "selected_task_count": 20,
+  "task_config": "/tmp/webarena_inspect/config_files/test.raw.json",
+  "webarena_root": "/tmp/webarena_inspect"
+}

@@ -1,0 +1,23 @@
+[
+  {
+    "actor_policy": "frozen_prompt",
+    "method": "fixed_actor",
+    "ppo_clip_epsilon": null,
+    "ppo_target_kl": null,
+    "validation_gate": false
+  },
+  {
+    "actor_policy": "textgrad_policy_iteration",
+    "method": "textgrad_rl",
+    "ppo_clip_epsilon": null,
+    "ppo_target_kl": null,
+    "validation_gate": true
+  },
+  {
+    "actor_policy": "textgrad_policy_iteration_with_ppo_gate",
+    "method": "textgrad_rl_ppo",
+    "ppo_clip_epsilon": 0.2,
+    "ppo_target_kl": 0.2,
+    "validation_gate": true
+  }
+]

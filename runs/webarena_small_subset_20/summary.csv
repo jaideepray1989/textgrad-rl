@@ -1,0 +1,4 @@
+method,status,tasks_planned,task_success_rate,invalid_browser_action_rate,repeated_action_rate,avg_turns,validation_gated_prompt_updates
+fixed_actor,blocked,20,,,,,0
+textgrad_rl,blocked,20,,,,,0
+textgrad_rl_ppo,blocked,20,,,,,0

@@ -1,0 +1,22 @@
+{
+  "eval_distribution": {
+    "program_html": 9,
+    "string_match": 9,
+    "url_match": 5
+  },
+  "site_distribution": {
+    "gitlab": 2,
+    "gitlab+reddit": 2,
+    "gitlab+wikipedia": 2,
+    "map": 2,
+    "map+shopping_admin": 2,
+    "map+wikipedia": 1,
+    "reddit": 2,
+    "reddit+gitlab": 2,
+    "shopping": 2,
+    "shopping+reddit": 1,
+    "shopping_admin": 1,
+    "wikipedia+map": 1
+  },
+  "task_count": 20
+}
