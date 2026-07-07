@@ -1,0 +1,212 @@
+[
+  {
+    "avg_turns": 3.0,
+    "category": "clicking",
+    "envs": 8,
+    "episodes": 24,
+    "invalid_browser_action_rate": 0.0,
+    "method": "fixed_actor",
+    "repeated_action_rate": 0.5,
+    "task_success_rate": 0.5
+  },
+  {
+    "avg_turns": 3.888888888888889,
+    "category": "forms",
+    "envs": 6,
+    "episodes": 18,
+    "invalid_browser_action_rate": 0.16666666666666666,
+    "method": "fixed_actor",
+    "repeated_action_rate": 0.6111111111111112,
+    "task_success_rate": 0.2222222222222222
+  },
+  {
+    "avg_turns": 4.333333333333333,
+    "category": "menu_navigation",
+    "envs": 6,
+    "episodes": 18,
+    "invalid_browser_action_rate": 0.0,
+    "method": "fixed_actor",
+    "repeated_action_rate": 0.8333333333333334,
+    "task_success_rate": 0.16666666666666666
+  },
+  {
+    "avg_turns": 3.6666666666666665,
+    "category": "reading",
+    "envs": 3,
+    "episodes": 9,
+    "invalid_browser_action_rate": 0.0,
+    "method": "fixed_actor",
+    "repeated_action_rate": 0.6666666666666666,
+    "task_success_rate": 0.0
+  },
+  {
+    "avg_turns": 5.0,
+    "category": "selection",
+    "envs": 9,
+    "episodes": 27,
+    "invalid_browser_action_rate": 0.0,
+    "method": "fixed_actor",
+    "repeated_action_rate": 0.8888888888888888,
+    "task_success_rate": 0.0
+  },
+  {
+    "avg_turns": 5.0,
+    "category": "simulated_app",
+    "envs": 8,
+    "episodes": 24,
+    "invalid_browser_action_rate": 0.0,
+    "method": "fixed_actor",
+    "repeated_action_rate": 1.0,
+    "task_success_rate": 0.0
+  },
+  {
+    "avg_turns": 3.3,
+    "category": "text_entry",
+    "envs": 10,
+    "episodes": 30,
+    "invalid_browser_action_rate": 0.0,
+    "method": "fixed_actor",
+    "repeated_action_rate": 0.5,
+    "task_success_rate": 0.36666666666666664
+  },
+  {
+    "avg_turns": 3.0,
+    "category": "clicking",
+    "envs": 8,
+    "episodes": 24,
+    "invalid_browser_action_rate": 0.0,
+    "method": "textgrad_rl",
+    "repeated_action_rate": 0.5,
+    "task_success_rate": 0.5
+  },
+  {
+    "avg_turns": 3.888888888888889,
+    "category": "forms",
+    "envs": 6,
+    "episodes": 18,
+    "invalid_browser_action_rate": 0.16666666666666666,
+    "method": "textgrad_rl",
+    "repeated_action_rate": 0.6111111111111112,
+    "task_success_rate": 0.2222222222222222
+  },
+  {
+    "avg_turns": 4.333333333333333,
+    "category": "menu_navigation",
+    "envs": 6,
+    "episodes": 18,
+    "invalid_browser_action_rate": 0.0,
+    "method": "textgrad_rl",
+    "repeated_action_rate": 0.8333333333333334,
+    "task_success_rate": 0.16666666666666666
+  },
+  {
+    "avg_turns": 3.6666666666666665,
+    "category": "reading",
+    "envs": 3,
+    "episodes": 9,
+    "invalid_browser_action_rate": 0.0,
+    "method": "textgrad_rl",
+    "repeated_action_rate": 0.6666666666666666,
+    "task_success_rate": 0.0
+  },
+  {
+    "avg_turns": 3.962962962962963,
+    "category": "selection",
+    "envs": 9,
+    "episodes": 27,
+    "invalid_browser_action_rate": 0.0,
+    "method": "textgrad_rl",
+    "repeated_action_rate": 0.48148148148148145,
+    "task_success_rate": 0.4074074074074074
+  },
+  {
+    "avg_turns": 5.0,
+    "category": "simulated_app",
+    "envs": 8,
+    "episodes": 24,
+    "invalid_browser_action_rate": 0.0,
+    "method": "textgrad_rl",
+    "repeated_action_rate": 1.0,
+    "task_success_rate": 0.0
+  },
+  {
+    "avg_turns": 3.3,
+    "category": "text_entry",
+    "envs": 10,
+    "episodes": 30,
+    "invalid_browser_action_rate": 0.0,
+    "method": "textgrad_rl",
+    "repeated_action_rate": 0.5,
+    "task_success_rate": 0.36666666666666664
+  },
+  {
+    "avg_turns": 3.0,
+    "category": "clicking",
+    "envs": 8,
+    "episodes": 24,
+    "invalid_browser_action_rate": 0.0,
+    "method": "textgrad_rl_ppo",
+    "repeated_action_rate": 0.5,
+    "task_success_rate": 0.5
+  },
+  {
+    "avg_turns": 3.888888888888889,
+    "category": "forms",
+    "envs": 6,
+    "episodes": 18,
+    "invalid_browser_action_rate": 0.16666666666666666,
+    "method": "textgrad_rl_ppo",
+    "repeated_action_rate": 0.6111111111111112,
+    "task_success_rate": 0.2222222222222222
+  },
+  {
+    "avg_turns": 4.333333333333333,
+    "category": "menu_navigation",
+    "envs": 6,
+    "episodes": 18,
+    "invalid_browser_action_rate": 0.0,
+    "method": "textgrad_rl_ppo",
+    "repeated_action_rate": 0.8333333333333334,
+    "task_success_rate": 0.16666666666666666
+  },
+  {
+    "avg_turns": 3.6666666666666665,
+    "category": "reading",
+    "envs": 3,
+    "episodes": 9,
+    "invalid_browser_action_rate": 0.0,
+    "method": "textgrad_rl_ppo",
+    "repeated_action_rate": 0.6666666666666666,
+    "task_success_rate": 0.0
+  },
+  {
+    "avg_turns": 5.0,
+    "category": "selection",
+    "envs": 9,
+    "episodes": 27,
+    "invalid_browser_action_rate": 0.0,
+    "method": "textgrad_rl_ppo",
+    "repeated_action_rate": 0.8888888888888888,
+    "task_success_rate": 0.0
+  },
+  {
+    "avg_turns": 5.0,
+    "category": "simulated_app",
+    "envs": 8,
+    "episodes": 24,
+    "invalid_browser_action_rate": 0.0,
+    "method": "textgrad_rl_ppo",
+    "repeated_action_rate": 1.0,
+    "task_success_rate": 0.0
+  },
+  {
+    "avg_turns": 3.3,
+    "category": "text_entry",
+    "envs": 10,
+    "episodes": 30,
+    "invalid_browser_action_rate": 0.0,
+    "method": "textgrad_rl_ppo",
+    "repeated_action_rate": 0.5,
+    "task_success_rate": 0.36666666666666664
+  }
+]

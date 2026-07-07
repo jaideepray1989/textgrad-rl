@@ -1,8 +1,11 @@
 from textgrad_rl.benchmarks.miniwob_subset import (
+    FIFTY_TASK_ENVS,
     PromptAwareMiniWobAgent,
+    category_for_env,
     extract_elements,
     initial_miniwob_variables,
     prompt_has_submit_after_select_rule,
+    resolve_env_suite,
     select_targets,
 )
 
@@ -67,3 +70,21 @@ def test_extract_elements_keeps_clickable_and_form_controls() -> None:
     elements = extract_elements(obs)
 
     assert [element.bid for element in elements] == ["12"]
+
+
+def test_login_goal_fills_password_before_clicking_login() -> None:
+    agent = PromptAwareMiniWobAgent(initial_miniwob_variables())
+    obs = _obs(
+        'Enter the username "cierra" and the password "11L" into the text fields and press login.',
+        [_node("20", "button", "Login"), _node("16", "textbox", ""), _node("19", "textbox", "")],
+    )
+
+    assert agent.act(obs, ['fill("16", "cierra")']) == 'fill("19", "11L")'
+
+
+def test_resolve_50_task_suite_and_categories() -> None:
+    envs = resolve_env_suite("50")
+
+    assert len(envs) == 50
+    assert envs == FIFTY_TASK_ENVS
+    assert category_for_env("email-inbox") == "simulated_app"

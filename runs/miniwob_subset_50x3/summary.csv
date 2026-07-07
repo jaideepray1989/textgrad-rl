@@ -1,0 +1,4 @@
+method,episodes,task_success_rate,avg_reward,invalid_browser_action_rate,repeated_action_rate,avg_turns,validation_gated_prompt_updates,rejected_prompt_updates
+fixed_actor,150,0.2,0.2,0.02,0.7133333333333334,4.046666666666667,0,0
+textgrad_rl,150,0.2733333333333333,0.2733333333333333,0.02,0.64,3.86,1,0
+textgrad_rl_ppo,150,0.2,0.2,0.02,0.7133333333333334,4.046666666666667,0,1

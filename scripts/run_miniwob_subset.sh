@@ -10,5 +10,6 @@ fi
 
 "$PYTHON_BIN" -m textgrad_rl.benchmarks.miniwob_subset \
   --output-dir "$OUT" \
+  --envs "${MINIWOB_ENVS:-default}" \
   --test-seeds "${MINIWOB_TEST_SEEDS:-3}" \
   --max-steps "${MINIWOB_MAX_STEPS:-5}"

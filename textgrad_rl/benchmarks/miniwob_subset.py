@@ -37,6 +37,112 @@ DEFAULT_ENVS = [
     "login-user",
 ]
 
+FIFTY_TASK_ENVS = [
+    "click-button",
+    "click-button-sequence",
+    "click-checkboxes",
+    "click-checkboxes-large",
+    "click-checkboxes-soft",
+    "click-checkboxes-transfer",
+    "click-dialog",
+    "click-dialog-2",
+    "click-link",
+    "click-menu",
+    "click-menu-2",
+    "click-option",
+    "click-scroll-list",
+    "click-tab",
+    "click-tab-2",
+    "click-test",
+    "click-test-2",
+    "click-widget",
+    "choose-list",
+    "copy-paste",
+    "copy-paste-2",
+    "email-inbox",
+    "email-inbox-delete",
+    "email-inbox-forward",
+    "email-inbox-important",
+    "email-inbox-noscroll",
+    "email-inbox-reply",
+    "enter-date",
+    "enter-password",
+    "enter-text",
+    "enter-text-2",
+    "enter-text-dynamic",
+    "enter-time",
+    "find-word",
+    "focus-text",
+    "focus-text-2",
+    "form-sequence",
+    "form-sequence-2",
+    "form-sequence-3",
+    "login-user",
+    "login-user-popup",
+    "navigate-tree",
+    "number-checkboxes",
+    "read-table",
+    "read-table-2",
+    "search-engine",
+    "sign-agreement",
+    "social-media",
+    "use-autocomplete",
+    "use-autocomplete-nodelay",
+]
+
+MINIWOB_ENV_CATEGORIES = {
+    "click-button": "clicking",
+    "click-button-sequence": "clicking",
+    "click-checkboxes": "selection",
+    "click-checkboxes-large": "selection",
+    "click-checkboxes-soft": "selection",
+    "click-checkboxes-transfer": "selection",
+    "click-dialog": "clicking",
+    "click-dialog-2": "clicking",
+    "click-link": "clicking",
+    "click-menu": "menu_navigation",
+    "click-menu-2": "menu_navigation",
+    "click-option": "selection",
+    "click-scroll-list": "menu_navigation",
+    "click-tab": "menu_navigation",
+    "click-tab-2": "menu_navigation",
+    "click-test": "clicking",
+    "click-test-2": "clicking",
+    "click-widget": "clicking",
+    "choose-list": "selection",
+    "copy-paste": "text_entry",
+    "copy-paste-2": "text_entry",
+    "email-inbox": "simulated_app",
+    "email-inbox-delete": "simulated_app",
+    "email-inbox-forward": "simulated_app",
+    "email-inbox-important": "simulated_app",
+    "email-inbox-noscroll": "simulated_app",
+    "email-inbox-reply": "simulated_app",
+    "enter-date": "text_entry",
+    "enter-password": "text_entry",
+    "enter-text": "text_entry",
+    "enter-text-2": "text_entry",
+    "enter-text-dynamic": "text_entry",
+    "enter-time": "text_entry",
+    "find-word": "reading",
+    "focus-text": "text_entry",
+    "focus-text-2": "text_entry",
+    "form-sequence": "forms",
+    "form-sequence-2": "forms",
+    "form-sequence-3": "forms",
+    "login-user": "forms",
+    "login-user-popup": "forms",
+    "navigate-tree": "menu_navigation",
+    "number-checkboxes": "selection",
+    "read-table": "reading",
+    "read-table-2": "reading",
+    "search-engine": "simulated_app",
+    "sign-agreement": "forms",
+    "social-media": "simulated_app",
+    "use-autocomplete": "selection",
+    "use-autocomplete-nodelay": "selection",
+}
+
 DEFAULT_METHODS = ["fixed_actor", "textgrad_rl", "textgrad_rl_ppo"]
 
 
@@ -52,6 +158,7 @@ class MiniWobElement:
 class MiniWobRecord:
     benchmark: str
     env_id: str
+    category: str
     method: str
     split: str
     seed: int
@@ -183,11 +290,11 @@ class PromptAwareMiniWobAgent:
             if element:
                 return f'click("{element.bid}")'
 
-        if "enter" in lower_goal and "text field" in lower_goal and quoted:
-            return text_entry_action(elements, quoted[0], previous_actions)
-
         if "username" in lower_goal and "password" in lower_goal:
             return login_action(elements, quoted, previous_actions)
+
+        if "enter" in lower_goal and "text field" in lower_goal and quoted:
+            return text_entry_action(elements, quoted[0], previous_actions)
 
         if "select " in lower_goal and "submit" in lower_goal:
             return select_and_submit_action(elements, select_targets(goal), previous_actions, submit_after_select)
@@ -299,6 +406,10 @@ def escape_action_string(text: str) -> str:
     return text.replace("\\", "\\\\").replace('"', '\\"')
 
 
+def category_for_env(env_id: str) -> str:
+    return MINIWOB_ENV_CATEGORIES.get(env_id, "other")
+
+
 def miniwob_score(record: MiniWobRecord) -> float:
     return (
         record.reward
@@ -359,6 +470,7 @@ def run_miniwob_episode(
     return MiniWobRecord(
         benchmark="browsergym_miniwob",
         env_id=env_name,
+        category=category_for_env(env_name),
         method=method,
         split=split,
         seed=seed,
@@ -515,6 +627,30 @@ def summarize_method(method: str, records: list[MiniWobRecord], accepted_updates
     }
 
 
+def summarize_categories(records: list[MiniWobRecord]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for method in sorted({record.method for record in records}):
+        method_records = [record for record in records if record.method == method and record.split == "test"]
+        for category in sorted({record.category for record in method_records}):
+            group = [record for record in method_records if record.category == category]
+            count = len(group)
+            rows.append(
+                {
+                    "method": method,
+                    "category": category,
+                    "episodes": count,
+                    "envs": len({record.env_id for record in group}),
+                    "task_success_rate": sum(record.success for record in group) / count if count else 0.0,
+                    "invalid_browser_action_rate": (
+                        sum(record.invalid_browser_action for record in group) / count if count else 0.0
+                    ),
+                    "repeated_action_rate": sum(record.repeated_actions for record in group) / count if count else 0.0,
+                    "avg_turns": sum(record.turns for record in group) / count if count else 0.0,
+                }
+            )
+    return rows
+
+
 def write_summary_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as handle:
@@ -550,6 +686,29 @@ def write_markdown_report(path: Path, rows: list[dict[str, Any]], envs: list[str
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def write_category_markdown(path: Path, rows: list[dict[str, Any]]) -> None:
+    lines = [
+        "# BrowserGym MiniWoB++ Category Results",
+        "",
+        "| Method | Category | Envs | Episodes | Success | Invalid Action | Repeated Action | Avg Turns |",
+        "|---|---|---:|---:|---:|---:|---:|---:|",
+    ]
+    for row in rows:
+        lines.append(
+            "| {method} | {category} | {envs} | {episodes} | {success:.3f} | {invalid:.3f} | {repeated:.3f} | {turns:.2f} |".format(
+                method=row["method"],
+                category=row["category"],
+                envs=row["envs"],
+                episodes=row["episodes"],
+                success=row["task_success_rate"],
+                invalid=row["invalid_browser_action_rate"],
+                repeated=row["repeated_action_rate"],
+                turns=row["avg_turns"],
+            )
+        )
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
 def run(args: argparse.Namespace) -> int:
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -558,7 +717,7 @@ def run(args: argparse.Namespace) -> int:
         if path.exists():
             path.unlink()
 
-    envs = parse_csv(args.envs) or list(DEFAULT_ENVS)
+    envs = resolve_env_suite(args.envs)
     methods = parse_csv(args.methods) or list(DEFAULT_METHODS)
     method_configs = build_method_configs(methods)
     train_envs = envs[: args.train_envs]
@@ -571,6 +730,7 @@ def run(args: argparse.Namespace) -> int:
         {
             "benchmark": "browsergym_miniwob",
             "envs": envs,
+            "env_categories": {env: category_for_env(env) for env in envs},
             "methods": methods,
             "train_envs": train_envs,
             "val_envs": val_envs,
@@ -581,6 +741,7 @@ def run(args: argparse.Namespace) -> int:
     )
 
     summary_rows: list[dict[str, Any]] = []
+    all_records: list[MiniWobRecord] = []
     optimizer = TextualGradientDescent(max_prompt_chars=2200, max_rules_per_step=2)
     for config in method_configs:
         variables = initial_miniwob_variables()
@@ -596,6 +757,7 @@ def run(args: argparse.Namespace) -> int:
                 max_steps=args.max_steps,
                 output_dir=output_dir,
             )
+            all_records.extend(train_records)
             gradients = gradients_from_miniwob_records(train_records)
             candidate = optimizer.step(
                 variables,
@@ -611,6 +773,7 @@ def run(args: argparse.Namespace) -> int:
                 max_steps=args.max_steps,
                 output_dir=output_dir,
             )
+            all_records.extend(old_val)
             new_val = evaluate_records(
                 envs=val_envs,
                 seeds=[0],
@@ -620,6 +783,7 @@ def run(args: argparse.Namespace) -> int:
                 max_steps=args.max_steps,
                 output_dir=output_dir,
             )
+            all_records.extend(new_val)
             if config.method == "textgrad_rl_ppo":
                 accepted, gate_details = ppo_gate_accepts(old_val, new_val, variables, candidate, config)
             else:
@@ -664,11 +828,16 @@ def run(args: argparse.Namespace) -> int:
             max_steps=args.max_steps,
             output_dir=output_dir,
         )
+        all_records.extend(test_records)
         summary_rows.append(summarize_method(config.method, test_records, accepted_updates, rejected_updates))
 
+    category_rows = summarize_categories(all_records)
     write_json(output_dir / "summary.json", summary_rows)
     write_summary_csv(output_dir / "summary.csv", summary_rows)
     write_markdown_report(output_dir / "summary.md", summary_rows, envs, args)
+    write_json(output_dir / "category_summary.json", category_rows)
+    write_summary_csv(output_dir / "category_summary.csv", category_rows)
+    write_category_markdown(output_dir / "category_summary.md", category_rows)
     return 0
 
 
@@ -676,10 +845,18 @@ def parse_csv(value: str) -> list[str]:
     return [part.strip() for part in value.split(",") if part.strip()]
 
 
+def resolve_env_suite(value: str) -> list[str]:
+    if value == "default":
+        return list(DEFAULT_ENVS)
+    if value == "50":
+        return list(FIFTY_TASK_ENVS)
+    return parse_csv(value) or list(DEFAULT_ENVS)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run a BrowserGym MiniWoB++ TextGrad-RL subset.")
     parser.add_argument("--output-dir", default="runs/miniwob_subset")
-    parser.add_argument("--envs", default=",".join(DEFAULT_ENVS))
+    parser.add_argument("--envs", default=",".join(DEFAULT_ENVS), help="Comma-separated envs, or 'default', or '50'.")
     parser.add_argument("--methods", default=",".join(DEFAULT_METHODS))
     parser.add_argument("--train-envs", type=int, default=4)
     parser.add_argument("--val-envs", type=int, default=2)
