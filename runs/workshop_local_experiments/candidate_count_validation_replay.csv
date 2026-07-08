@@ -1,0 +1,19 @@
+candidate_count,suite,method,selected_candidate,accepted,candidate_rank_score,old_val_score,selected_val_score,val_score_delta,old_success,selected_success,old_invalid,selected_invalid,description
+1,puzzle,textgrad_rl_no_gate,candidate_000_textgrad,True,0.0065,-0.4703,-0.469,0.0013,0.0,0.0,1.0,1.0,Default TextGrad candidate from trajectory gradients.
+4,puzzle,textgrad_rl_no_gate,candidate_002_general_textarena_slm_policy,True,0.0088,-0.4703,-0.4658,0.0045,0.0,0.0,1.0,1.0,Track every action already attempted in the episode and never repeat an action after an invalid or no-progress response.
+8,puzzle,textgrad_rl_no_gate,candidate_006_hangman_slm_policy,True,0.0207,-0.4703,-0.454,0.0163,0.0,0.0,1.0,1.0,"For Hangman-v0, maintain episode state, avoid repeated guesses or moves, and prefer progress over exploration."
+1,puzzle,textgrad_rl_train_val,candidate_000_textgrad,False,0.0031,-0.4371,-0.4318,0.0053,0.0083,0.0083,0.9917,0.9917,Default TextGrad candidate from trajectory gradients.
+4,puzzle,textgrad_rl_train_val,candidate_001_general_textarena_slm_policy,False,0.0049,-0.4371,-0.43,0.0071,0.0083,0.0083,0.9917,0.9833,"Before choosing, copy the legal action schema from the latest observation, then output only that schema with no prose."
+8,puzzle,textgrad_rl_train_val,candidate_001_general_textarena_slm_policy,False,0.0049,-0.4371,-0.43,0.0071,0.0083,0.0083,0.9917,0.9833,"Before choosing, copy the legal action schema from the latest observation, then output only that schema with no prose."
+1,social,textgrad_rl_no_gate,candidate_000_textgrad,True,0.1301,-0.6192,-0.3793,0.2399,0.1556,0.2,0.2667,0.3222,Default TextGrad candidate from trajectory gradients.
+4,social,textgrad_rl_no_gate,candidate_000_textgrad,True,0.1301,-0.6192,-0.3793,0.2399,0.1556,0.2,0.2667,0.3222,Default TextGrad candidate from trajectory gradients.
+8,social,textgrad_rl_no_gate,candidate_007_kuhnpoker_short_slm_policy,True,0.2023,-0.6192,-0.4257,0.1936,0.1556,0.2667,0.2667,0.2333,"For KuhnPoker-v0-short, inspect the observation for the exact legal action format before every move."
+1,social,textgrad_rl_train_val,candidate_000_textgrad,False,0.0174,-0.5267,-0.4114,0.1153,0.2,0.1667,0.2111,0.2556,Default TextGrad candidate from trajectory gradients.
+4,social,textgrad_rl_train_val,candidate_003_general_textarena_slm_policy,False,0.1049,-0.5267,-0.3702,0.1566,0.2,0.2889,0.2111,0.2333,"When uncertain, choose the safest legal action explicitly supported by the observation instead of inventing a new format."
+8,social,textgrad_rl_train_val,candidate_007_kuhnpoker_short_slm_policy,True,0.4601,-0.5267,-0.1432,0.3835,0.2,0.3556,0.2111,0.1778,"For KuhnPoker-v0-short, inspect the observation for the exact legal action format before every move."
+1,real,textgrad_rl_no_gate,candidate_000_textgrad,True,-0.1421,0.18,0.1599,-0.0201,0.2267,0.2067,0.3267,0.3667,Default TextGrad candidate from trajectory gradients.
+4,real,textgrad_rl_no_gate,candidate_003_general_textarena_slm_policy,True,-0.0712,0.18,0.17,-0.01,0.2267,0.2,0.3267,0.3333,"When uncertain, choose the safest legal action explicitly supported by the observation instead of inventing a new format."
+8,real,textgrad_rl_no_gate,candidate_006_frozenlake_slm_policy,True,0.0418,0.18,0.3059,0.1259,0.2267,0.2667,0.3267,0.2533,"For FrozenLake-v0, use this task rule first: Plan a safe path to G while avoiding H; output one bracketed direction."
+1,real,textgrad_rl_train_val,candidate_000_textgrad,False,0.0575,0.1774,0.2478,0.0704,0.22,0.24,0.3,0.3067,Default TextGrad candidate from trajectory gradients.
+4,real,textgrad_rl_train_val,candidate_000_textgrad,False,0.0575,0.1774,0.2478,0.0704,0.22,0.24,0.3,0.3067,Default TextGrad candidate from trajectory gradients.
+8,real,textgrad_rl_train_val,candidate_006_frozenlake_slm_policy,True,0.0756,0.1774,0.2471,0.0697,0.22,0.26,0.3,0.2533,"For FrozenLake-v0, use this task rule first: Plan a safe path to G while avoiding H; output one bracketed direction."

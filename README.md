@@ -58,6 +58,9 @@ Paper-facing aggregate results by benchmark, policy, and model are in
 `COMPILED_RESULTS_BY_BENCHMARK_POLICY_MODEL.csv`.
 
 Per-benchmark experimental result tables are in `EXPERIMENTAL_RESULTS.md`.
+Workshop-focused local analyses with bootstrap confidence intervals, paired
+deltas, learned rules, gate decisions, temperature sensitivity, and
+candidate-count replay are in `WORKSHOP_LOCAL_EXPERIMENTS.md`.
 
 ## Running The Offline Demo
 
