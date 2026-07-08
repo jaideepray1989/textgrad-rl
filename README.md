@@ -225,6 +225,12 @@ Or use the convenience wrapper:
 bash scripts/run_textworld_express.sh
 ```
 
+To run the local Microsoft TextWorld 24-game generated suite:
+
+```bash
+bash scripts/run_textworld_24.sh
+```
+
 To run the expanded TextArena benchmark set covering difficulty generalization, puzzle SLM games, social SLM games, and a real frozen-SLM TextArena suite:
 
 ```bash
