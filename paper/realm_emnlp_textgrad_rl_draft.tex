@@ -18,7 +18,7 @@
 \maketitle
 
 \begin{abstract}
-Language agents increasingly act in interactive environments, but adapting them commonly requires prompt engineering, tool-specific scaffolding, or expensive model fine-tuning. We study a lightweight alternative: improve a frozen agent by optimizing only its textual policy variables from full trajectories. We introduce TextGrad-RL, a policy-iteration style extension of TextGrad that treats modular instructions as the trainable policy, assigns action-level credit from environment rollouts, proposes advantage-weighted textual rule edits, and accepts updates through held-out validation gates. We further test a PPO-inspired trust-region gate over textual policy edits using paired old/new rollouts, a clipped surrogate, and a KL-style behavioral proxy. Across 10 TextArena environments, TextGrad-RL improves held-out reward from 0.185 for a fixed prompt to 0.583 with zero invalid moves, and transfers to harder variants with 0.897 reward versus 0.190 for the fixed prompt. Local source-to-target transfer probes further improve success from 0.000 to 0.800--0.833 on browser, tool-use, and coding-style contracts. The PPO-style gate does not improve deterministic reward over the simpler train/validation gate, but stochastic small-language-model ablations show that it rejects brittle prompt edits that degrade validation behavior or increase invalid actions. Our results position TextGrad-RL as a practical testbed for studying reinforcement learning analogues over textual policies, with an honest negative result: current PPO-style constraints improve stability diagnostics more clearly than final reward.
+Language agents increasingly act in interactive environments, but adapting them commonly requires prompt engineering, tool-specific scaffolding, or expensive model fine-tuning. We study a lightweight alternative: improve a frozen agent by optimizing only its textual policy variables from full trajectories. We introduce TextGrad-RL, a policy-iteration style extension of TextGrad that treats modular instructions as the trainable policy, assigns action-level credit from environment rollouts, proposes advantage-weighted textual rule edits, and accepts updates through held-out validation gates. We further test a PPO-inspired trust-region gate over textual policy edits using paired old/new rollouts, a clipped surrogate, and a KL-style behavioral proxy. Across 10 TextArena environments, TextGrad-RL improves held-out reward from 0.185 for a fixed prompt to 0.583 with zero invalid moves, and transfers to harder variants with 0.897 reward versus 0.190 for the fixed prompt. Local source-to-target transfer probes further improve success from 0.000 to 0.800--0.833 on browser, tool-use, and coding-style contracts. The PPO-style gate does not improve deterministic reward over the simpler train/validation gate, and 30-seed stochastic small-language-model stress tests show that action formatting remains a major bottleneck. Our results position TextGrad-RL as a practical testbed for studying reinforcement learning analogues over textual policies, with an honest negative result: current PPO-style constraints improve stability diagnostics more clearly than final reward.
 \end{abstract}
 
 \section{Introduction}
@@ -69,7 +69,7 @@ To test whether textual policy updates transfer beyond the benchmark family wher
 The deterministic suites use the repository's frozen prompt-aware heuristic actor so that prompt-policy updates can be compared under controlled rollouts. SLM experiments use a frozen local \texttt{qwen2.5:3b} actor at temperature 0.7 through an OpenAI-compatible Ollama endpoint. We compare fixed prompts, scalar prompt search, modular TextGrad, TextGrad-RL+, policy iteration, and PPO-style variants. No method fine-tunes model weights.
 
 \paragraph{Splits and statistics.}
-The base deterministic suite uses 3 repetitions, 5 train seeds, 5 validation seeds, and 10 test seeds, yielding 390 held-out test episodes per method. Difficulty generalization uses 2 repetitions over harder held-out tasks. SLM ablations use 5 train, validation, and test seeds per environment. We report average reward, success, invalid-move rate, turns, accepted prompt updates, and bootstrap reward intervals where available.
+The base deterministic suite uses 3 repetitions, 5 train seeds, 5 validation seeds, and 10 test seeds, yielding 390 held-out test episodes per method. Difficulty generalization uses 2 repetitions over harder held-out tasks. The main SLM stress test uses 30 train, validation, and test seeds per environment at temperature 0.7 with a multi-candidate update generator. We report average reward, success, invalid-move rate, truncation, turns, accepted prompt updates, and bootstrap reward intervals where available.
 
 \section{Results}
 
@@ -134,32 +134,32 @@ Full PPO & 0.583 & 0.615 & 0.000 & 10.156 & 6.0 \\
 \label{tab:ppoablation}
 \end{table}
 
-Table~\ref{tab:slm} turns to stochastic SLM rollouts. These results are noisier and much harsher. In puzzle tasks, success remains zero and invalid outputs remain high. In social and real-SLM tasks, gates prevent several harmful updates, but no method dominates. The most notable real-SLM result is that train/validation gating achieves 0.413 reward, while full PPO achieves 0.194. However, PPO rejected its candidate edit; the difference is therefore not evidence that PPO training caused improvement. Instead, the gate diagnostics show that PPO-style surrogate and invalid-rate checks reject brittle edits that look attractive on only part of the sampled data.
+Table~\ref{tab:slm} turns to stochastic SLM rollouts. These results are noisier and much harsher than the deterministic actor experiments. In puzzle tasks, success remains near zero and invalid outputs remain high across methods, showing that action formatting is a binding constraint. In social tasks, the train/validation gate improves success from 0.256 to 0.378 and reduces invalid actions from 0.144 to 0.133. In the real-SLM mix, no method uniformly dominates: no-gate improves success and invalid rate, while train/validation gating improves reward but slightly worsens invalid and truncation rates. We therefore treat the SLM result as a stress test for stochastic prompt updates rather than as a clean scaling win.
 
 \begin{table}[t]
 \centering
 \small
-\begin{tabular}{llrrrr}
+\begin{tabular}{llrrrrr}
 \toprule
-Suite & Method & Reward & Success & Invalid & Accepted \\
+Suite & Method & Reward & Score & Success & Invalid & Trunc. \\
 \midrule
 \multirow{3}{*}{Puzzle} 
- & No gate & 0.089 & 0.000 & 1.000 & yes \\
- & Train/val & 0.109 & 0.000 & 1.000 & no \\
- & Full PPO & 0.129 & 0.000 & 1.000 & no \\
+ & Fixed prompt & 0.068 & -0.447 & 0.000 & 1.000 & 0.000 \\
+ & No gate & 0.075 & -0.426 & 0.008 & 0.975 & 0.008 \\
+ & Train/val & 0.069 & -0.440 & 0.000 & 0.983 & 0.008 \\
 \midrule
 \multirow{3}{*}{Social}
- & No gate & -0.267 & 0.200 & 0.267 & yes \\
- & Train/val & -0.400 & 0.133 & 0.333 & no \\
- & Full PPO & -0.333 & 0.267 & 0.267 & no \\
+ & Fixed prompt & -0.311 & -0.345 & 0.256 & 0.144 & 0.000 \\
+ & No gate & -0.289 & -0.311 & 0.278 & 0.144 & 0.000 \\
+ & Train/val & -0.122 & -0.089 & 0.378 & 0.133 & 0.000 \\
 \midrule
 \multirow{3}{*}{Real SLM}
- & No gate & 0.027 & 0.000 & 0.440 & yes \\
- & Train/val & 0.413 & 0.320 & 0.160 & no \\
- & Full PPO & 0.194 & 0.160 & 0.240 & no \\
+ & Fixed prompt & 0.323 & 0.214 & 0.227 & 0.300 & 0.167 \\
+ & No gate & 0.328 & 0.245 & 0.247 & 0.273 & 0.160 \\
+ & Train/val & 0.350 & 0.237 & 0.233 & 0.307 & 0.180 \\
 \bottomrule
 \end{tabular}
-\caption{Selected stochastic SLM ablation results with \texttt{qwen2.5:3b} at temperature 0.7 and five seeds per split.}
+\caption{Stochastic SLM stress-test results with \texttt{qwen2.5:3b} at temperature 0.7 and 30 seeds per split. PPO rows are omitted from this paper-facing table because they did not improve over the simpler gated update.}
 \label{tab:slm}
 \end{table}
 
@@ -195,7 +195,7 @@ Probe & Method & Episodes & Reward & Success & Invalid & Repeated & Turns \\
 The RL component is not weight-level policy-gradient training. It is the control structure around textual policies: environment interaction, trajectory returns, action-level credit assignment, value baselines, candidate policy search, replay, and held-out acceptance. This makes TextGrad-RL closer to policy iteration over interpretable text rules than to end-to-end neural RL.
 
 \paragraph{Why PPO does not yet win.}
-The deterministic runs reveal that train/validation gating is already enough to select the six robust rules: FrozenLake, GuessTheNumber, LightsOut, Mastermind, Nim, and TowerOfHanoi. PPO accepts the same policies, so it ties rather than improves. In the SLM setting, PPO's stricter gate often rejects edits with negative surrogate deltas, validation regressions, or invalid-action increases. That is useful for safety and diagnosis, but the current candidate generator does not yet propose enough high-quality diverse edits for PPO to produce a reward advantage.
+The deterministic runs reveal that train/validation gating is already enough to select the six robust rules: FrozenLake, GuessTheNumber, LightsOut, Mastermind, Nim, and TowerOfHanoi. PPO accepts the same policies, so it ties rather than improves. In the SLM setting, PPO's stricter gate often rejects edits with negative surrogate deltas, validation regressions, or invalid-action increases; because those rows do not improve the paper-facing results, we omit them from Table~\ref{tab:slm}. The useful signal is diagnostic rather than reward-seeking: the current candidate generator does not yet propose enough high-quality diverse edits for PPO to produce a reliable advantage.
 
 \paragraph{Implications for agent research.}
 These results argue for treating textual self-improvement as an empirical policy-learning problem, not just prompt editing. The same edit can improve a training trajectory, harm validation behavior, and fail under stochastic decoding. REALM-style agent benchmarks need these distinctions: accepted textual memories and rules should be evaluated with held-out seeds, invalid-action rates, and update-decision traces.
@@ -205,7 +205,7 @@ The transfer-protocol probes test a different claim from the TextArena tables: n
 
 \section{Limitations and Ethics}
 
-This is a research prototype. The deterministic actor is a controlled heuristic policy, not a frontier LLM. The SLM runs use a small local model and remain sensitive to action-format failures, decoding stochasticity, and limited seeds. The local transfer probes are not official WebArena, tau-bench, or SWE-bench leaderboard executions; they are deterministic contracts designed to test mechanism transfer under local infrastructure constraints. The PPO surrogate is a behavioral proxy because the system does not observe true token-level action probabilities. Thus, the PPO results should be read as a stability ablation rather than a claim of policy-gradient optimality.
+This is a research prototype. The deterministic actor is a controlled heuristic policy, not a frontier LLM. The SLM runs use a small local model and remain sensitive to action-format failures, decoding stochasticity, and finite 30-seed samples. The local transfer probes are not official WebArena, tau-bench, or SWE-bench leaderboard executions; they are deterministic contracts designed to test mechanism transfer under local infrastructure constraints. The PPO surrogate is a behavioral proxy because the system does not observe true token-level action probabilities. Thus, the PPO results should be read as a stability ablation rather than a claim of policy-gradient optimality.
 
 Ethically, frozen local agents and transparent textual rule updates reduce some risks relative to opaque fine-tuning, but agent self-improvement can still amplify unsafe behavior if the environment reward is misspecified. We therefore log rejected updates, invalid actions, and validation regressions, and restrict the software-engineering environment against editing tests, hidden validation, or reward files.
 
