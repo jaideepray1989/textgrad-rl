@@ -26,6 +26,9 @@ textarena = [
 miniwob = [
   "browsergym-miniwob==0.14.3",
 ]
+textworld = [
+  "textworld-express==1.1.0",
+]
 
 [tool.setuptools.packages.find]
 include = ["textgrad_rl*"]

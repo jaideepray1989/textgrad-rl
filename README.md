@@ -207,6 +207,24 @@ bash scripts/run_official_swebench_lite.sh --preflight
 
 The launch scripts default to preflight mode and require `--launch` before starting official WebArena/WorkArena, tau2-bench, or SWE-bench Lite executions. See `OFFICIAL_LEADERBOARD_EXECUTION.md` for the required environment variables and launch commands.
 
+To run the local TextWorldExpress benchmark without API keys or benchmark credentials:
+
+```bash
+.venv/bin/python -m pip install -e ".[textworld]"
+
+.venv/bin/python -m textgrad_rl.benchmarks.textworld_express_suite \
+  --train-seeds 3 \
+  --val-seeds 3 \
+  --test-seeds 3 \
+  --output-dir runs/textworld_express_suite
+```
+
+Or use the convenience wrapper:
+
+```bash
+bash scripts/run_textworld_express.sh
+```
+
 To run the expanded TextArena benchmark set covering difficulty generalization, puzzle SLM games, social SLM games, and a real frozen-SLM TextArena suite:
 
 ```bash
