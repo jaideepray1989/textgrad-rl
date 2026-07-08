@@ -18,7 +18,7 @@
 \maketitle
 
 \begin{abstract}
-Language agents increasingly act in interactive environments, but adapting them commonly requires prompt engineering, tool-specific scaffolding, or expensive model fine-tuning. We study a lightweight alternative: improve a frozen agent by optimizing only its textual policy variables from full trajectories. We introduce TextGrad-RL, a policy-iteration style extension of TextGrad that treats modular instructions as the trainable policy, assigns action-level credit from environment rollouts, proposes advantage-weighted textual rule edits, and accepts updates through held-out validation gates. We further test a PPO-inspired trust-region gate over textual policy edits using paired old/new rollouts, a clipped surrogate, and a KL-style behavioral proxy. Across 10 TextArena environments, TextGrad-RL improves held-out reward from 0.185 for a fixed prompt to 0.583 with zero invalid moves, and transfers to harder variants with 0.897 reward versus 0.190 for the fixed prompt. The PPO-style gate does not improve deterministic reward over the simpler train/validation gate, but stochastic small-language-model ablations show that it rejects brittle prompt edits that degrade validation behavior or increase invalid actions. Our results position TextGrad-RL as a practical testbed for studying reinforcement learning analogues over textual policies, with an honest negative result: current PPO-style constraints improve stability diagnostics more clearly than final reward.
+Language agents increasingly act in interactive environments, but adapting them commonly requires prompt engineering, tool-specific scaffolding, or expensive model fine-tuning. We study a lightweight alternative: improve a frozen agent by optimizing only its textual policy variables from full trajectories. We introduce TextGrad-RL, a policy-iteration style extension of TextGrad that treats modular instructions as the trainable policy, assigns action-level credit from environment rollouts, proposes advantage-weighted textual rule edits, and accepts updates through held-out validation gates. We further test a PPO-inspired trust-region gate over textual policy edits using paired old/new rollouts, a clipped surrogate, and a KL-style behavioral proxy. Across 10 TextArena environments, TextGrad-RL improves held-out reward from 0.185 for a fixed prompt to 0.583 with zero invalid moves, and transfers to harder variants with 0.897 reward versus 0.190 for the fixed prompt. Local source-to-target transfer probes further improve success from 0.000 to 0.800--0.833 on browser, tool-use, and coding-style contracts. The PPO-style gate does not improve deterministic reward over the simpler train/validation gate, but stochastic small-language-model ablations show that it rejects brittle prompt edits that degrade validation behavior or increase invalid actions. Our results position TextGrad-RL as a practical testbed for studying reinforcement learning analogues over textual policies, with an honest negative result: current PPO-style constraints improve stability diagnostics more clearly than final reward.
 \end{abstract}
 
 \section{Introduction}
@@ -33,6 +33,7 @@ This paper is intentionally framed as a short, mechanism-focused REALM submissio
     \item A policy-iteration variant with action credit, value baselines, advantage-weighted textual gradients, replay, and candidate policy search.
     \item A PPO-style ablation for textual policies using paired rollouts, a clipped surrogate, and a KL-style trust-region proxy.
     \item A broad TextArena evaluation, including deterministic games, difficulty generalization, and stochastic small-language-model (SLM) suites.
+    \item Local transfer-protocol probes that test whether learned textual rules transfer from browser, tool-use, and coding source tasks to held-out target-style tasks.
 \end{itemize}
 
 The empirical story is deliberately conservative. TextGrad-RL strongly outperforms fixed prompts and scalar-only prompt search on deterministic TextArena tasks. However, full TextGrad-RL-PPO does not beat the simpler train/validation gate in final deterministic reward. In stochastic SLM settings, PPO-style checks mainly serve as diagnostics and safeguards: they reject unstable updates, but do not yet produce a reliable reward lift.
@@ -60,6 +61,9 @@ The full TextGrad-RL-PPO gate accepts an edit only if it improves train/validati
 
 \paragraph{Benchmarks.}
 We evaluate on TextArena, an interactive collection of text-based games for language-agent training and evaluation \citep{guertler2025textarena}. The deterministic base suite covers 10 environments: Nim, ConnectFour, ReverseTicTacToe, GuessTheNumber, FrozenLake, TowerOfHanoi, LightsOut, Mastermind, Blackjack, and Bandit. The difficulty-generalization suite evaluates harder variants such as larger Nim, randomized or hardcore FrozenLake, and harder Mastermind. We also run stochastic SLM suites: puzzle games, social/multi-agent games, and a real-SLM mix of standard TextArena tasks.
+
+\paragraph{Transfer protocol probes.}
+To test whether textual policy updates transfer beyond the benchmark family where they are learned, we add three local source-to-target probes. A browser probe learns from MiniWoB-style trajectories and evaluates on WebArena/WorkArena-style target contracts; a tool-use probe learns from retail-service trajectories and evaluates on airline/banking-style contracts; and a coding probe learns from development-repair trajectories and evaluates on SWE-bench-Lite-style repair contracts. These probes are deterministic local contracts rather than official leaderboard executions. They are included to measure policy-rule transfer, invalid actions, repeated actions, turn efficiency, and validation-gated prompt updates without requiring hosted web services, private credentials, or Dockerized benchmark infrastructure.
 
 \paragraph{Models and baselines.}
 The deterministic suites use the repository's frozen prompt-aware heuristic actor so that prompt-policy updates can be compared under controlled rollouts. SLM experiments use a frozen local \texttt{qwen2.5:3b} actor at temperature 0.7 through an OpenAI-compatible Ollama endpoint. We compare fixed prompts, scalar prompt search, modular TextGrad, TextGrad-RL+, policy iteration, and PPO-style variants. No method fine-tunes model weights.
@@ -159,6 +163,32 @@ Suite & Method & Reward & Success & Invalid & Accepted \\
 \label{tab:slm}
 \end{table}
 
+Table~\ref{tab:transfer} reports the local transfer-protocol probes. In each case, the same pattern appears: the fixed policy fails the held-out target contracts because it repeats an action, skips a verification step, or violates an allowed-action constraint, while TextGrad-RL converts source-domain failures into compact rules that transfer to most target tasks. Browser transfer improves success from 0.000 to 0.833, tool-use transfer from 0.000 to 0.833, and coding transfer from 0.000 to 0.800. These results are not official WebArena, tau-bench, or SWE-bench scores; they are controlled local probes of whether textual policy edits can transfer across task families.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{llrrrrrr}
+\toprule
+Probe & Method & Episodes & Reward & Success & Invalid & Repeated & Turns \\
+\midrule
+\multirow{2}{*}{Browser}
+ & Fixed prompt & 6 & 0.250 & 0.000 & 1.000 & 0.167 & 10.17 \\
+ & Policy iteration & 6 & 0.944 & 0.833 & 0.000 & 0.000 & 6.83 \\
+\midrule
+\multirow{2}{*}{Tool use}
+ & Fixed prompt & 6 & 0.325 & 0.000 & 0.833 & 0.000 & 10.67 \\
+ & Policy iteration & 6 & 0.967 & 0.833 & 0.000 & 0.000 & 6.33 \\
+\midrule
+\multirow{2}{*}{Coding}
+ & Fixed prompt & 5 & 0.273 & 0.000 & 0.400 & 0.000 & 9.40 \\
+ & Policy iteration & 5 & 0.960 & 0.800 & 0.000 & 0.000 & 5.40 \\
+\bottomrule
+\end{tabular}
+\caption{Local source-to-target transfer protocol probes. Browser trains on MiniWoB-style trajectories and evaluates WebArena/WorkArena-style contracts; tool use trains on retail and evaluates airline/banking-style contracts; coding trains on development repair and evaluates SWE-bench-Lite-style contracts.}
+\label{tab:transfer}
+\end{table}
+
 \section{Analysis}
 
 \paragraph{Where is the RL?}
@@ -170,15 +200,18 @@ The deterministic runs reveal that train/validation gating is already enough to 
 \paragraph{Implications for agent research.}
 These results argue for treating textual self-improvement as an empirical policy-learning problem, not just prompt editing. The same edit can improve a training trajectory, harm validation behavior, and fail under stochastic decoding. REALM-style agent benchmarks need these distinctions: accepted textual memories and rules should be evaluated with held-out seeds, invalid-action rates, and update-decision traces.
 
+\paragraph{What the transfer probes add.}
+The transfer-protocol probes test a different claim from the TextArena tables: not whether TextGrad-RL solves more games, but whether a learned textual rule can survive a shift from source tasks to target-style contracts. The learned browser rules emphasize selecting then submitting, avoiding repeated browser actions, and searching before opening detail views. The tool-use rules emphasize identity verification, policy lookup, and final-state confirmation. The coding rules emphasize reproducing failures, preserving APIs, adding targeted tests, and tracing cross-file flow. The strong local gains suggest that textual policy iteration is promising as a transfer mechanism, while the local-contract setup keeps the evidence separate from official benchmark claims.
+
 \section{Limitations and Ethics}
 
-This is a research prototype. The deterministic actor is a controlled heuristic policy, not a frontier LLM. The SLM runs use a small local model and remain sensitive to action-format failures, decoding stochasticity, and limited seeds. The PPO surrogate is a behavioral proxy because the system does not observe true token-level action probabilities. Thus, the PPO results should be read as a stability ablation rather than a claim of policy-gradient optimality.
+This is a research prototype. The deterministic actor is a controlled heuristic policy, not a frontier LLM. The SLM runs use a small local model and remain sensitive to action-format failures, decoding stochasticity, and limited seeds. The local transfer probes are not official WebArena, tau-bench, or SWE-bench leaderboard executions; they are deterministic contracts designed to test mechanism transfer under local infrastructure constraints. The PPO surrogate is a behavioral proxy because the system does not observe true token-level action probabilities. Thus, the PPO results should be read as a stability ablation rather than a claim of policy-gradient optimality.
 
 Ethically, frozen local agents and transparent textual rule updates reduce some risks relative to opaque fine-tuning, but agent self-improvement can still amplify unsafe behavior if the environment reward is misspecified. We therefore log rejected updates, invalid actions, and validation regressions, and restrict the software-engineering environment against editing tests, hidden validation, or reward files.
 
 \section{Conclusion}
 
-TextGrad-RL offers a lightweight way to improve frozen language agents by optimizing modular text policies from trajectories. On TextArena, it substantially improves deterministic held-out reward and generalizes to harder variants. PPO-style gates do not yet improve final reward over train/validation gating, but they expose and reject brittle stochastic prompt edits. This makes TextGrad-RL a useful REALM benchmark substrate for studying how language agents can learn from interaction without updating model weights.
+TextGrad-RL offers a lightweight way to improve frozen language agents by optimizing modular text policies from trajectories. On TextArena, it substantially improves deterministic held-out reward and generalizes to harder variants. Local transfer-protocol probes suggest that the same textual rule updates can transfer across browser, tool-use, and coding-style task families. PPO-style gates do not yet improve final reward over train/validation gating, but they expose and reject brittle stochastic prompt edits. This makes TextGrad-RL a useful REALM benchmark substrate for studying how language agents can learn from interaction without updating model weights.
 
 \bibliographystyle{plainnat}
 \bibliography{references}
