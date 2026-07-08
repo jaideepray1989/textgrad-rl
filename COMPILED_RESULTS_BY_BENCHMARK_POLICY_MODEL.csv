@@ -1,0 +1,34 @@
+section,benchmark,suite,model,temperature,policy,envs_or_tasks,episodes,reward,score,success,invalid,repeated,truncated,turns,updates,source
+main,TextArena Broad 50,all,prompt-aware heuristic actor,n/a,fixed_prompt,50,195,0.094,,0.185,0.518,0.749,,9.32,0,BROAD_50_BENCHMARK_RESULTS.md
+main,TextArena Broad 50,all,prompt-aware heuristic actor,n/a,textgrad_policy_iteration,50,195,0.261,,0.369,0.451,0.718,,8.50,6,BROAD_50_BENCHMARK_RESULTS.md
+main,TextArena Difficulty Generalization,all,prompt-aware heuristic actor,n/a,fixed_prompt,,,0.190,,0.167,0.139,,,22.597,0,EXPANDED_TEXTARENA_RESULTS.md
+main,TextArena Difficulty Generalization,all,prompt-aware heuristic actor,n/a,textgrad_policy_iteration,,,0.897,,0.833,0.000,,,16.958,,EXPANDED_TEXTARENA_RESULTS.md
+main,BrowserGym MiniWoB++ 50,all,prompt-aware heuristic browser actor,n/a,fixed_prompt,50,150,0.200,,0.200,0.020,0.713,,4.05,0,MINIWOB_BROWSERGYM_RESULTS.md
+main,BrowserGym MiniWoB++ 50,all,prompt-aware heuristic browser actor,n/a,textgrad_policy_iteration,50,150,0.273,,0.273,0.020,0.640,,3.86,1,MINIWOB_BROWSERGYM_RESULTS.md
+main,BrowserGym MiniWoB++ 10,all,gpt-oss:20b,0.7,fixed_prompt,10,30,0.933,,0.933,0.000,0.333,,2.73,0,MINIWOB_BROWSERGYM_RESULTS.md
+main,BrowserGym MiniWoB++ 10,all,gpt-oss:20b,0.7,textgrad_policy_iteration,10,30,0.933,,0.933,0.000,0.300,,2.47,0,MINIWOB_BROWSERGYM_RESULTS.md
+main,TextWorldExpress 8,all,prompt-aware heuristic text-game actor,n/a,fixed_prompt,8,24,-0.261,,0.167,0.000,0.667,,37.12,0,TEXTWORLD_EXPRESS_RESULTS.md
+main,TextWorldExpress 8,all,prompt-aware heuristic text-game actor,n/a,textgrad_policy_iteration,8,24,0.792,,0.708,0.000,0.583,,28.17,1,TEXTWORLD_EXPRESS_RESULTS.md
+main,TextWorld 24,all,prompt-aware heuristic text-game actor,n/a,fixed_prompt,24,24,0.484,,0.292,0.000,0.750,,47.00,0,TEXTWORLD_24_RESULTS.md
+main,TextWorld 24,all,prompt-aware heuristic text-game actor,n/a,textgrad_policy_iteration,24,24,0.583,,0.542,0.000,0.792,,44.21,1,TEXTWORLD_24_RESULTS.md
+slm,TextArena SLM Candidate Pool 30-Seed,puzzle,qwen2.5:3b,0.7,fixed_prompt,4,120,0.068,-0.447,0.000,1.000,,0.000,3.058,0,runs/textarena_slm_candidate_pool_30seed/puzzle_slm/summary.md
+slm,TextArena SLM Candidate Pool 30-Seed,puzzle,qwen2.5:3b,0.7,textgrad_rl_no_gate,4,120,0.075,-0.426,0.008,0.975,,0.008,3.200,1,runs/textarena_slm_candidate_pool_30seed/puzzle_slm/summary.md
+slm,TextArena SLM Candidate Pool 30-Seed,puzzle,qwen2.5:3b,0.7,textgrad_rl_train_val,4,120,0.069,-0.440,0.000,0.983,,0.008,3.200,0,runs/textarena_slm_candidate_pool_30seed/puzzle_slm/summary.md
+slm,TextArena SLM Candidate Pool 30-Seed,social,qwen2.5:3b,0.7,fixed_prompt,3,90,-0.311,-0.345,0.256,0.144,,0.000,17.878,0,runs/textarena_slm_candidate_pool_30seed/social_slm/summary.md
+slm,TextArena SLM Candidate Pool 30-Seed,social,qwen2.5:3b,0.7,textgrad_rl_no_gate,3,90,-0.289,-0.311,0.278,0.144,,0.000,17.778,1,runs/textarena_slm_candidate_pool_30seed/social_slm/summary.md
+slm,TextArena SLM Candidate Pool 30-Seed,social,qwen2.5:3b,0.7,textgrad_rl_train_val,3,90,-0.122,-0.089,0.378,0.133,,0.000,17.867,1,runs/textarena_slm_candidate_pool_30seed/social_slm/summary.md
+slm,TextArena SLM Candidate Pool 30-Seed,real_slm,qwen2.5:3b,0.7,fixed_prompt,5,150,0.323,0.214,0.227,0.300,,0.167,6.207,0,runs/textarena_slm_candidate_pool_30seed/real_slm/summary.md
+slm,TextArena SLM Candidate Pool 30-Seed,real_slm,qwen2.5:3b,0.7,textgrad_rl_no_gate,5,150,0.328,0.245,0.247,0.273,,0.160,5.913,1,runs/textarena_slm_candidate_pool_30seed/real_slm/summary.md
+slm,TextArena SLM Candidate Pool 30-Seed,real_slm,qwen2.5:3b,0.7,textgrad_rl_train_val,5,150,0.350,0.237,0.233,0.307,,0.180,6.207,1,runs/textarena_slm_candidate_pool_30seed/real_slm/summary.md
+slm,TextArena SLM Single-Seed,puzzle,gpt-oss:20b,default,fixed_prompt,4,,0.025,-0.488,0.000,1.000,,0.000,2.500,,GPT_OSS_20B_SLM_RESULTS.md
+slm,TextArena SLM Single-Seed,puzzle,gpt-oss:20b,default,textgrad_policy_iteration,4,,0.050,-0.464,0.000,1.000,,0.000,2.750,,GPT_OSS_20B_SLM_RESULTS.md
+slm,TextArena SLM Single-Seed,social,gpt-oss:20b,default,fixed_prompt,3,,0.333,0.413,0.333,0.000,,0.000,17.333,,GPT_OSS_20B_SLM_RESULTS.md
+slm,TextArena SLM Single-Seed,social,gpt-oss:20b,default,textgrad_policy_iteration,3,,0.333,0.413,0.333,0.000,,0.000,17.333,,GPT_OSS_20B_SLM_RESULTS.md
+slm,TextArena SLM Single-Seed,real_slm,gpt-oss:20b,default,fixed_prompt,5,,-0.084,-0.598,0.000,1.000,,0.000,2.800,,GPT_OSS_20B_SLM_RESULTS.md
+slm,TextArena SLM Single-Seed,real_slm,gpt-oss:20b,default,textgrad_policy_iteration,5,,-0.084,-0.598,0.000,1.000,,0.000,2.800,,GPT_OSS_20B_SLM_RESULTS.md
+transfer,Local Transfer Protocol Probe,browser_transfer,deterministic protocol simulator,n/a,fixed_prompt,6,6,0.250,,0.000,1.000,0.167,,10.17,0,EXTERNAL_TRANSFER_PROTOCOL_RESULTS.md
+transfer,Local Transfer Protocol Probe,browser_transfer,deterministic protocol simulator,n/a,textgrad_policy_iteration,6,6,0.944,,0.833,0.000,0.000,,6.83,1,EXTERNAL_TRANSFER_PROTOCOL_RESULTS.md
+transfer,Local Transfer Protocol Probe,tau_transfer,deterministic protocol simulator,n/a,fixed_prompt,6,6,0.325,,0.000,0.833,0.000,,10.67,0,EXTERNAL_TRANSFER_PROTOCOL_RESULTS.md
+transfer,Local Transfer Protocol Probe,tau_transfer,deterministic protocol simulator,n/a,textgrad_policy_iteration,6,6,0.967,,0.833,0.000,0.000,,6.33,1,EXTERNAL_TRANSFER_PROTOCOL_RESULTS.md
+transfer,Local Transfer Protocol Probe,swe_transfer,deterministic protocol simulator,n/a,fixed_prompt,5,5,0.273,,0.000,0.400,0.000,,9.40,0,EXTERNAL_TRANSFER_PROTOCOL_RESULTS.md
+transfer,Local Transfer Protocol Probe,swe_transfer,deterministic protocol simulator,n/a,textgrad_policy_iteration,5,5,0.960,,0.800,0.000,0.000,,5.40,1,EXTERNAL_TRANSFER_PROTOCOL_RESULTS.md

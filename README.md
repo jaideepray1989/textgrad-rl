@@ -51,6 +51,12 @@ Or, when using the default virtual environment:
 .venv/bin/python -m pytest -q
 ```
 
+## Compiled Results
+
+Paper-facing aggregate results by benchmark, policy, and model are in
+`COMPILED_RESULTS_BY_BENCHMARK_POLICY_MODEL.md`, with a matching CSV at
+`COMPILED_RESULTS_BY_BENCHMARK_POLICY_MODEL.csv`.
+
 ## Running The Offline Demo
 
 ```bash
