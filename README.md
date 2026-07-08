@@ -197,6 +197,16 @@ To run local source-to-target transfer protocol probes for MiniWoB -> WebArena/W
   --output-dir runs/external_transfer_protocols
 ```
 
+To check whether the local machine is ready for official external leaderboard harnesses:
+
+```bash
+bash scripts/run_official_browser_benchmarks.sh --preflight
+bash scripts/run_official_taubench.sh --preflight
+bash scripts/run_official_swebench_lite.sh --preflight
+```
+
+The launch scripts default to preflight mode and require `--launch` before starting official WebArena/WorkArena, tau2-bench, or SWE-bench Lite executions. See `OFFICIAL_LEADERBOARD_EXECUTION.md` for the required environment variables and launch commands.
+
 To run the expanded TextArena benchmark set covering difficulty generalization, puzzle SLM games, social SLM games, and a real frozen-SLM TextArena suite:
 
 ```bash
