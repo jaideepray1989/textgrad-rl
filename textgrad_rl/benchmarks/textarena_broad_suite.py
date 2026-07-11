@@ -11,9 +11,10 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import re
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
 
@@ -21,10 +22,16 @@ from textgrad_rl.benchmarks.textarena_multienv_compare import (
     DEFAULT_ENVS,
     MultiEnvPromptAgent,
     canonical_env_id,
+    rule_for_env,
 )
-from textgrad_rl.benchmarks.textarena_paper_suite import initial_modular_variables
-from textgrad_rl.benchmarks.textarena_policy_iteration import run_policy_iteration_once
-from textgrad_rl.types import TextVariable
+from textgrad_rl.benchmarks.textarena_paper_suite import initial_modular_variables, slug_env
+from textgrad_rl.benchmarks.textarena_policy_iteration import (
+    run_policy_ablation_once,
+    run_policy_iteration_once,
+    TextPPOConfig,
+)
+from textgrad_rl.optim.textual_gradient_descent import TextualGradientDescent
+from textgrad_rl.types import TextualGradient, TextVariable
 from textgrad_rl.utils.json_utils import append_jsonl, write_json
 from textgrad_rl.utils.logging import environment_info
 
@@ -55,6 +62,8 @@ class BroadEpisodeRecord:
     reason: str
     actions: list[str]
     runtime_seconds: float
+    attempts: int = 1
+    total_turns: int = 0
 
 
 BROAD_TEXTARENA_ENVS = [
@@ -112,7 +121,12 @@ BROAD_TEXTARENA_ENVS = [
 
 
 SUPPORTED_POLICY_FAMILIES = set(DEFAULT_ENVS)
-METHODS = ["fixed_prompt", "textgrad_policy_iteration"]
+METHODS = [
+    "fixed_prompt",
+    "retry_with_diagnostics",
+    "ungated_persistent_rules",
+    "textgrad_policy_iteration",
+]
 
 
 class BroadTextArenaAgent:
@@ -332,6 +346,7 @@ def run_broad_episode(
         reason=reason,
         actions=actions,
         runtime_seconds=time.perf_counter() - start,
+        total_turns=turns,
     )
 
 
@@ -367,7 +382,94 @@ def run_broad_records(
     return records
 
 
-def summarize_records(method: str, records: list[BroadEpisodeRecord], accepted_updates: int) -> dict[str, Any]:
+def diagnostic_variables(env_id: str) -> tuple[dict[str, TextVariable], list[TextualGradient]]:
+    variables = initial_modular_variables()
+    base_env_id = canonical_env_id(env_id)
+    if base_env_id not in SUPPORTED_POLICY_FAMILIES:
+        return variables, []
+    gradient = TextualGradient(
+        target_variable_name=f"{slug_env(base_env_id)}_strategy_prompt",
+        failure_mode=f"{env_id} retry diagnostic",
+        evidence_from_trajectory=f"The first attempt on {env_id} did not reach the win threshold.",
+        gradient_text=f"Use the environment-specific repair rule for {env_id}.",
+        suggested_edit=f"Add a rule: {rule_for_env(base_env_id)}",
+        confidence=0.85,
+        forbidden_shortcuts=["hidden state", "environment mutation", "invalid action formats"],
+    )
+    updated = TextualGradientDescent(max_prompt_chars=8000, max_rules_per_step=1).step(
+        variables,
+        [gradient],
+        constraints=["must not use hidden state", "must not mutate the environment"],
+    )
+    return updated, [gradient]
+
+
+def run_retry_with_diagnostics(
+    *,
+    specs: list[BroadTextArenaEnv],
+    args: argparse.Namespace,
+    output_dir: Path,
+) -> tuple[list[BroadEpisodeRecord], int]:
+    method = "retry_with_diagnostics"
+    first_attempts = run_broad_records(
+        specs=specs,
+        method=method,
+        split="test_attempt_1",
+        seeds_per_env=args.test_seeds,
+        seed=args.seed + 100_000,
+        variables=initial_modular_variables(),
+        turn_budget=args.turn_budget,
+        output_jsonl=output_dir / f"{method}_attempt_1.jsonl",
+    )
+    retry_path = output_dir / f"{method}_attempt_2.jsonl"
+    final_path = output_dir / f"{method}_episodes.jsonl"
+    for path in (retry_path, final_path):
+        if path.exists():
+            path.unlink()
+    by_env = {spec.env_id: spec for spec in specs}
+    diagnostics: list[dict[str, Any]] = []
+    final_records: list[BroadEpisodeRecord] = []
+    for first in first_attempts:
+        if first.success:
+            final = replace(first, split="test")
+        else:
+            variables, gradients = diagnostic_variables(first.env_id)
+            diagnostics.append(
+                {
+                    "env_id": first.env_id,
+                    "seed": first.seed,
+                    "target_side": first.target_side,
+                    "gradients": gradients,
+                }
+            )
+            second = run_broad_episode(
+                spec=by_env[first.env_id],
+                method=method,
+                split="test_attempt_2",
+                seed=first.seed,
+                target_side=first.target_side,
+                variables=variables,
+                turn_budget=args.turn_budget,
+            )
+            append_jsonl(retry_path, second)
+            final = replace(
+                second,
+                split="test",
+                attempts=2,
+                total_turns=first.turns + second.turns,
+            )
+        final_records.append(final)
+        append_jsonl(final_path, final)
+    write_json(output_dir / f"{method}_diagnostics.json", diagnostics)
+    return final_records, 0
+
+
+def summarize_records(
+    method: str,
+    records: list[BroadEpisodeRecord],
+    accepted_updates: int,
+    optimization_actions: int,
+) -> dict[str, Any]:
     return {
         "method": method,
         "envs": len({record.env_id for record in records}),
@@ -377,6 +479,9 @@ def summarize_records(method: str, records: list[BroadEpisodeRecord], accepted_u
         "invalid_move_rate": mean([float(record.invalid_move) for record in records]),
         "repeated_action_rate": mean([float(record.repeated_actions) for record in records]),
         "average_turns": mean([record.turns for record in records]),
+        "average_attempts": mean([record.attempts for record in records]),
+        "average_test_actions": mean([record.total_turns for record in records]),
+        "optimization_actions": optimization_actions,
         "supported_envs": len(
             {record.env_id for record in records if record.support_group == "supported_policy_family"}
         ),
@@ -404,6 +509,8 @@ def summarize_groups(records: list[BroadEpisodeRecord]) -> list[dict[str, Any]]:
                         "invalid_move_rate": mean([float(record.invalid_move) for record in group]),
                         "repeated_action_rate": mean([float(record.repeated_actions) for record in group]),
                         "average_turns": mean([record.turns for record in group]),
+                        "average_attempts": mean([record.attempts for record in group]),
+                        "average_test_actions": mean([record.total_turns for record in group]),
                     }
                 )
     return rows
@@ -455,7 +562,11 @@ def write_summary_markdown(
     args: argparse.Namespace,
 ) -> None:
     lines = [
-        "# TextArena Broad 50-Environment Suite",
+        (
+            "# TextArena Supported 10-Environment Suite"
+            if args.supported_only
+            else "# TextArena Broad 50-Environment Suite"
+        ),
         "",
         f"Environments: {len(specs)}",
         f"Test seeds: {args.test_seeds}",
@@ -465,13 +576,14 @@ def write_summary_markdown(
         "",
         "## Overall Results",
         "",
-        "| Method | Envs | Episodes | Reward | Success | Invalid | Repeated | Turns | Updates |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
+        "| Method | Envs | Episodes | Reward | Success | Invalid | Attempts | Test Actions | Optimization Actions | Updates |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in summary_rows:
         lines.append(
             "| {method} | {envs} | {episodes} | {average_reward:.3f} | {success_rate:.3f} | "
-            "{invalid_move_rate:.3f} | {repeated_action_rate:.3f} | {average_turns:.2f} | {accepted_updates} |".format(
+            "{invalid_move_rate:.3f} | {average_attempts:.2f} | {average_test_actions:.2f} | "
+            "{optimization_actions} | {accepted_updates} |".format(
                 **row
             )
         )
@@ -506,15 +618,44 @@ def write_summary_markdown(
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def count_optimization_actions(path: Path) -> int:
+    turns = 0
+    for jsonl_path in path.rglob("*.jsonl"):
+        for line in jsonl_path.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            row = json.loads(line)
+            turns += int(row.get("turns", 0))
+    return turns
+
+
 def variables_for_method(
     method: str,
     *,
     args: argparse.Namespace,
     output_dir: Path,
-) -> tuple[dict[str, TextVariable], int]:
+) -> tuple[dict[str, TextVariable], int, int]:
     if method == "fixed_prompt":
-        return initial_modular_variables(), 0
+        return initial_modular_variables(), 0, 0
+    if method == "ungated_persistent_rules":
+        training_dir = output_dir / "ungated_policy_training"
+        rows, _test_records, variables = run_policy_ablation_once(
+            method="textgrad_rl_no_gate",
+            env_ids=list(DEFAULT_ENVS),
+            repetition=0,
+            train_seeds=args.train_seeds,
+            val_seeds=args.val_seeds,
+            test_seeds=args.policy_training_test_seeds,
+            seed=args.seed,
+            output_dir=training_dir,
+            min_mean_delta=args.min_mean_delta,
+            max_ci_low_regression=args.max_ci_low_regression,
+            ppo_config=TextPPOConfig(),
+        )
+        accepted = max((int(row.get("accepted_count", 0)) for row in rows), default=0)
+        return variables, accepted, count_optimization_actions(training_dir)
     if method == "textgrad_policy_iteration":
+        training_dir = output_dir / "policy_training"
         rows, _test_records, variables = run_policy_iteration_once(
             env_ids=list(DEFAULT_ENVS),
             repetition=0,
@@ -522,12 +663,12 @@ def variables_for_method(
             val_seeds=args.val_seeds,
             test_seeds=args.policy_training_test_seeds,
             seed=args.seed,
-            output_dir=output_dir / "policy_training",
+            output_dir=training_dir,
             min_mean_delta=args.min_mean_delta,
             max_ci_low_regression=args.max_ci_low_regression,
         )
         accepted = max((int(row.get("accepted_count", 0)) for row in rows), default=0)
-        return variables, accepted
+        return variables, accepted, count_optimization_actions(training_dir)
     raise ValueError(f"Unknown method: {method}")
 
 
@@ -544,6 +685,8 @@ def run(args: argparse.Namespace) -> Path:
     output_dir.mkdir(parents=True, exist_ok=True)
     methods = parse_methods(args.methods)
     specs = list(BROAD_TEXTARENA_ENVS)
+    if args.supported_only:
+        specs = [spec for spec in specs if spec.env_id in set(DEFAULT_ENVS)]
     write_json(
         output_dir / "config.json",
         {
@@ -557,26 +700,37 @@ def run(args: argparse.Namespace) -> Path:
             "policy_training_test_seeds": args.policy_training_test_seeds,
             "seed": args.seed,
             "turn_budget": args.turn_budget,
+            "supported_only": args.supported_only,
         },
     )
     write_json(output_dir / "environment_info.json", environment_info())
     all_records: list[BroadEpisodeRecord] = []
     summary_rows: list[dict[str, Any]] = []
     for method in methods:
-        variables, accepted_updates = variables_for_method(method, args=args, output_dir=output_dir)
-        write_json(output_dir / f"{method}_text_variables.json", variables)
-        records = run_broad_records(
-            specs=specs,
-            method=method,
-            split="test",
-            seeds_per_env=args.test_seeds,
-            seed=args.seed + 100_000,
-            variables=variables,
-            turn_budget=args.turn_budget,
-            output_jsonl=output_dir / f"{method}_episodes.jsonl",
-        )
+        if method == "retry_with_diagnostics":
+            records, optimization_actions = run_retry_with_diagnostics(
+                specs=specs,
+                args=args,
+                output_dir=output_dir,
+            )
+            accepted_updates = 0
+        else:
+            variables, accepted_updates, optimization_actions = variables_for_method(
+                method, args=args, output_dir=output_dir
+            )
+            write_json(output_dir / f"{method}_text_variables.json", variables)
+            records = run_broad_records(
+                specs=specs,
+                method=method,
+                split="test",
+                seeds_per_env=args.test_seeds,
+                seed=args.seed + 100_000,
+                variables=variables,
+                turn_budget=args.turn_budget,
+                output_jsonl=output_dir / f"{method}_episodes.jsonl",
+            )
         all_records.extend(records)
-        summary_rows.append(summarize_records(method, records, accepted_updates))
+        summary_rows.append(summarize_records(method, records, accepted_updates, optimization_actions))
     group_rows = summarize_groups(all_records)
     per_env_rows = summarize_per_env(all_records)
     write_json(output_dir / "summary.json", summary_rows)
@@ -600,6 +754,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--turn-budget", type=int, default=80)
     parser.add_argument("--min-mean-delta", type=float, default=0.001)
     parser.add_argument("--max-ci-low-regression", type=float, default=0.0)
+    parser.add_argument("--supported-only", action="store_true")
     parser.add_argument("--output-dir", default="runs/textarena_broad_50")
     return parser
 

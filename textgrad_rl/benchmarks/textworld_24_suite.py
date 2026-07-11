@@ -9,14 +9,13 @@ from __future__ import annotations
 
 import argparse
 import csv
-import math
 import re
 import shutil
 import subprocess
 import sys
 import time
 from collections import deque
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any
 
@@ -26,7 +25,12 @@ from textgrad_rl.utils.json_utils import append_jsonl, write_json
 from textgrad_rl.utils.logging import environment_info
 
 
-METHODS = ["fixed_prompt", "textgrad_policy_iteration", "textgrad_ppo"]
+METHODS = [
+    "fixed_prompt",
+    "retry_with_diagnostics",
+    "ungated_persistent_rules",
+    "textgrad_policy_iteration",
+]
 FAMILY_CATEGORIES = {
     "tw-simple": "objective_sequence",
     "tw-coin_collector": "navigation",
@@ -63,6 +67,8 @@ class TextWorldRecord:
     actions: list[str]
     failure_reason: str
     runtime_seconds: float
+    attempts: int = 1
+    total_turns: int = 0
 
 
 @dataclass
@@ -621,6 +627,7 @@ def run_episode(
         actions=actions,
         failure_reason=failure,
         runtime_seconds=time.perf_counter() - started,
+        total_turns=turns,
     )
 
 
@@ -659,6 +666,14 @@ def training_specs(specs: list[TextWorldSpec], offset: int) -> list[TextWorldSpe
     return selected
 
 
+def auxiliary_specs(seed: int, split: str) -> list[TextWorldSpec]:
+    """Create two separately seeded optimization games per family."""
+    return [
+        replace(spec, spec_id=f"{split}_{spec.spec_id}")
+        for spec in training_specs(default_specs(seed), 0)
+    ]
+
+
 def gradients_from_records(records: list[TextWorldRecord]) -> list[TextualGradient]:
     rules: set[str] = set()
     for record in records:
@@ -686,19 +701,113 @@ def gradients_from_records(records: list[TextWorldRecord]) -> list[TextualGradie
     return gradients
 
 
-def train_method(
+def variables_from_diagnostics(
+    records: list[TextWorldRecord],
+) -> tuple[dict[str, TextVariable], list[TextualGradient]]:
+    """Build a temporary policy edit from trajectory diagnostics."""
+    variables = initial_textworld_variables()
+    gradients = gradients_from_records(records)
+    updated = TextualGradientDescent(max_prompt_chars=2600, max_rules_per_step=4).step(
+        variables,
+        gradients,
+        constraints=["must not use oracle walkthrough", "must not use policy_commands", "must not inspect hidden labels"],
+    )
+    return updated, gradients
+
+
+def run_retry_with_diagnostics(
     *,
     specs: list[TextWorldSpec],
+    game_paths: dict[str, Path],
+    output_dir: Path,
+    args: argparse.Namespace,
+) -> tuple[list[TextWorldRecord], dict[str, Any]]:
+    """Retry failed test tasks once with a task-local diagnostic policy edit."""
+    method = "retry_with_diagnostics"
+    method_dir = output_dir / method
+    first_attempts = run_records(
+        specs=specs,
+        game_paths=game_paths,
+        method=method,
+        split="test_attempt_1",
+        variables=initial_textworld_variables(),
+        max_steps=args.max_steps,
+        output_jsonl=method_dir / "test_attempt_1.jsonl",
+    )
+    retry_path = method_dir / "test_attempt_2.jsonl"
+    final_path = method_dir / "test.jsonl"
+    for path in (retry_path, final_path):
+        if path.exists():
+            path.unlink()
+
+    final_records: list[TextWorldRecord] = []
+    diagnostics: list[dict[str, Any]] = []
+    total_gradients = 0
+    retries = 0
+    for spec, first in zip(specs, first_attempts):
+        first = replace(first, total_turns=first.turns)
+        if first.success:
+            final = replace(first, split="test_all_24")
+        else:
+            temporary_variables, gradients = variables_from_diagnostics([first])
+            total_gradients += len(gradients)
+            retries += 1
+            diagnostics.append(
+                {
+                    "spec_id": spec.spec_id,
+                    "first_attempt": first,
+                    "gradients": gradients,
+                    "temporary_rule_ids": sorted(learned_rule_ids(temporary_variables)),
+                }
+            )
+            second = run_episode(
+                spec=spec,
+                game_path=game_paths[spec.spec_id],
+                method=method,
+                split="test_attempt_2",
+                variables=temporary_variables,
+                max_steps=args.max_steps,
+            )
+            append_jsonl(retry_path, second)
+            final = replace(
+                second,
+                split="test_all_24",
+                attempts=2,
+                total_turns=first.turns + second.turns,
+            )
+        final_records.append(final)
+        append_jsonl(final_path, final)
+
+    gate: dict[str, Any] = {
+        "method": method,
+        "accepted": False,
+        "gradient_count": total_gradients,
+        "diagnosed_tasks": retries,
+        "retry_count": retries,
+        "maximum_attempts_per_task": 2,
+        "persistent_policy_update": False,
+        "validation_gate": False,
+        "optimization_episodes": 0,
+        "optimization_environment_turns": 0,
+    }
+    write_json(method_dir / "diagnostics.json", diagnostics)
+    write_json(method_dir / "gate_decision.json", gate)
+    write_json(method_dir / "text_variables.json", initial_textworld_variables())
+    return final_records, gate
+
+
+def train_method(
+    *,
+    train_specs: list[TextWorldSpec],
+    val_specs: list[TextWorldSpec],
     game_paths: dict[str, Path],
     method: str,
     output_dir: Path,
     args: argparse.Namespace,
 ) -> tuple[dict[str, TextVariable], dict[str, Any]]:
     base = initial_textworld_variables()
-    train = training_specs(specs, 0)
-    val = training_specs(specs, 2)
     train_records = run_records(
-        specs=train,
+        specs=train_specs,
         game_paths=game_paths,
         method=method,
         split="train",
@@ -712,27 +821,34 @@ def train_method(
         gradients,
         constraints=["must not use oracle walkthrough", "must not use policy_commands", "must not inspect hidden labels"],
     )
-    old_val = run_records(
-        specs=val,
-        game_paths=game_paths,
-        method=method,
-        split="validation",
-        variables=base,
-        max_steps=args.max_steps,
-        output_jsonl=output_dir / method / "val_base.jsonl",
-    )
-    new_val = run_records(
-        specs=val,
-        game_paths=game_paths,
-        method=method,
-        split="validation",
-        variables=candidate,
-        max_steps=args.max_steps,
-        output_jsonl=output_dir / method / "val_candidate.jsonl",
-    )
-    old_score = mean([textworld_score(record) for record in old_val])
-    new_score = mean([textworld_score(record) for record in new_val])
-    accepted = new_score >= old_score + args.min_mean_delta
+    old_val: list[TextWorldRecord] = []
+    new_val: list[TextWorldRecord] = []
+    if method == "ungated_persistent_rules":
+        old_score = None
+        new_score = None
+        accepted = bool(learned_rule_ids(candidate) - learned_rule_ids(base))
+    else:
+        old_val = run_records(
+            specs=val_specs,
+            game_paths=game_paths,
+            method=method,
+            split="validation",
+            variables=base,
+            max_steps=args.max_steps,
+            output_jsonl=output_dir / method / "val_base.jsonl",
+        )
+        new_val = run_records(
+            specs=val_specs,
+            game_paths=game_paths,
+            method=method,
+            split="validation",
+            variables=candidate,
+            max_steps=args.max_steps,
+            output_jsonl=output_dir / method / "val_candidate.jsonl",
+        )
+        old_score = mean([textworld_score(record) for record in old_val])
+        new_score = mean([textworld_score(record) for record in new_val])
+        accepted = new_score >= old_score + args.min_mean_delta
     gate: dict[str, Any] = {
         "method": method,
         "accepted": accepted,
@@ -740,57 +856,18 @@ def train_method(
         "new_val_score": new_score,
         "gradient_count": len(gradients),
         "learned_rule_ids": sorted(learned_rule_ids(candidate) - learned_rule_ids(base)),
+        "validation_gate": method != "ungated_persistent_rules",
+        "persistent_policy_update": True,
+        "optimization_episodes": len(train_records) + len(old_val) + len(new_val),
+        "optimization_environment_turns": sum(
+            record.turns for record in [*train_records, *old_val, *new_val]
+        ),
     }
-    if method == "textgrad_ppo":
-        ppo = ppo_gate_stats(old_val, new_val, args.ppo_clip_epsilon)
-        gate.update(ppo)
-        accepted = accepted and ppo["approx_kl"] <= args.ppo_target_kl and ppo["clipped_surrogate_delta"] >= 0.0
-        gate["accepted"] = accepted
     variables = candidate if accepted else base
     write_json(output_dir / method / "gradients.json", gradients)
     write_json(output_dir / method / "gate_decision.json", gate)
     write_json(output_dir / method / "text_variables.json", variables)
     return variables, gate
-
-
-def ppo_gate_stats(old_records: list[TextWorldRecord], new_records: list[TextWorldRecord], clip_epsilon: float) -> dict[str, Any]:
-    old_by_id = {record.spec_id: record for record in old_records}
-    ratios: list[float] = []
-    advantages: list[float] = []
-    distances: list[float] = []
-    for record in new_records:
-        old = old_by_id.get(record.spec_id)
-        if not old:
-            continue
-        advantage = textworld_score(record) - textworld_score(old)
-        distance = action_distance(old.actions, record.actions)
-        ratio = math.exp(max(-1.0, min(1.0, advantage)))
-        ratios.append(ratio)
-        advantages.append(advantage)
-        distances.append(distance)
-    unclipped = [ratio * adv for ratio, adv in zip(ratios, advantages)]
-    clipped = [
-        min(value, max(1 - clip_epsilon, min(1 + clip_epsilon, ratio)) * adv)
-        for value, ratio, adv in zip(unclipped, ratios, advantages)
-    ]
-    return {
-        "mean_behavior_ratio": mean(ratios),
-        "mean_action_distance": mean(distances),
-        "approx_kl": mean(distances),
-        "surrogate_delta": mean(unclipped),
-        "clipped_surrogate_delta": mean(clipped),
-    }
-
-
-def action_distance(old_actions: list[str], new_actions: list[str]) -> float:
-    length = max(len(old_actions), len(new_actions), 1)
-    changed = 0
-    for index in range(length):
-        old = old_actions[index] if index < len(old_actions) else "<missing>"
-        new = new_actions[index] if index < len(new_actions) else "<missing>"
-        if old != new:
-            changed += 1
-    return changed / length
 
 
 def summarize_records(method: str, records: list[TextWorldRecord], gate: dict[str, Any]) -> dict[str, Any]:
@@ -803,6 +880,8 @@ def summarize_records(method: str, records: list[TextWorldRecord], gate: dict[st
         "invalid_action_rate": mean([float(record.invalid_action) for record in records]),
         "repeated_action_rate": mean([float(record.repeated_actions) for record in records]),
         "average_turns": mean([record.turns for record in records]),
+        "average_attempts": mean([record.attempts for record in records]),
+        "average_environment_turns": mean([record.total_turns for record in records]),
         "accepted_updates": 1 if gate.get("accepted") else 0,
         "gradient_count": int(gate.get("gradient_count", 0)),
     }
@@ -827,6 +906,8 @@ def summarize_groups(records: list[TextWorldRecord]) -> list[dict[str, Any]]:
                         "invalid_action_rate": mean([float(record.invalid_action) for record in group]),
                         "repeated_action_rate": mean([float(record.repeated_actions) for record in group]),
                         "average_turns": mean([record.turns for record in group]),
+                        "average_attempts": mean([record.attempts for record in group]),
+                        "average_environment_turns": mean([record.total_turns for record in group]),
                     }
                 )
     return rows
@@ -855,27 +936,30 @@ def write_summary_markdown(
         "",
         "This suite generates 24 local Microsoft TextWorld `.z8` games from built-in challenge generators.",
         "It uses admissible commands and visible observations/objectives, without oracle walkthrough commands.",
+        "RulePI optimization uses separately seeded training and validation games that are disjoint from these 24 tests.",
         "",
         f"Games: 24",
         f"Step budget: {args.max_steps}",
         "",
         "## Overall Results",
         "",
-        "| Method | Games | Reward | Success | Invalid | Repeated | Turns | Updates | Gradients |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
+        "| Method | Games | Reward | Success | Invalid | Repeated | Final Turns | Attempts | Test Turns | Updates | Gradients |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in summary_rows:
         lines.append(
             "| {method} | {games} | {average_reward:.3f} | {success_rate:.3f} | {invalid_action_rate:.3f} | "
-            "{repeated_action_rate:.3f} | {average_turns:.2f} | {accepted_updates} | {gradient_count} |".format(
+            "{repeated_action_rate:.3f} | {average_turns:.2f} | {average_attempts:.2f} | "
+            "{average_environment_turns:.2f} | {accepted_updates} | {gradient_count} |".format(
                 **row
             )
         )
-    lines.extend(["", "## Family Results", "", "| Method | Family | Games | Reward | Success | Invalid | Repeated | Turns |", "|---|---|---:|---:|---:|---:|---:|---:|"])
+    lines.extend(["", "## Family Results", "", "| Method | Family | Games | Reward | Success | Invalid | Repeated | Final Turns | Attempts | Test Turns |", "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|"])
     for row in [row for row in group_rows if row["slice"] == "family"]:
         lines.append(
             "| {method} | {value} | {games} | {average_reward:.3f} | {success_rate:.3f} | "
-            "{invalid_action_rate:.3f} | {repeated_action_rate:.3f} | {average_turns:.2f} |".format(**row)
+            "{invalid_action_rate:.3f} | {repeated_action_rate:.3f} | {average_turns:.2f} | "
+            "{average_attempts:.2f} | {average_environment_turns:.2f} |".format(**row)
         )
     lines.extend(["", "## Gate Decisions", ""])
     for method, gate in gates.items():
@@ -899,36 +983,67 @@ def run(args: argparse.Namespace) -> Path:
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     specs = default_specs(args.seed)
+    train_specs = auxiliary_specs(args.seed + 10_000, "train")
+    val_specs = auxiliary_specs(args.seed + 20_000, "validation")
     methods = parse_methods(args.methods)
-    game_paths = ensure_games(specs, output_dir / "games", force=args.force_regenerate)
-    write_json(output_dir / "config.json", {"benchmark": "textworld_24", "specs": specs, "methods": methods})
+    game_paths = ensure_games(
+        [*specs, *train_specs, *val_specs],
+        output_dir / "games",
+        force=args.force_regenerate,
+    )
+    write_json(
+        output_dir / "config.json",
+        {
+            "benchmark": "textworld_24",
+            "methods": methods,
+            "specs": specs,
+            "test_specs": specs,
+            "train_specs": train_specs,
+            "validation_specs": val_specs,
+        },
+    )
     write_json(output_dir / "environment_info.json", environment_info())
     all_records: list[TextWorldRecord] = []
     summary_rows: list[dict[str, Any]] = []
     gates: dict[str, dict[str, Any]] = {}
     for method in methods:
-        if method == "fixed_prompt":
+        if method == "retry_with_diagnostics":
+            records, gate = run_retry_with_diagnostics(
+                specs=specs,
+                game_paths=game_paths,
+                output_dir=output_dir,
+                args=args,
+            )
+        elif method == "fixed_prompt":
             variables = initial_textworld_variables()
-            gate = {"method": method, "accepted": False, "gradient_count": 0}
+            gate = {
+                "method": method,
+                "accepted": False,
+                "gradient_count": 0,
+                "optimization_episodes": 0,
+                "optimization_environment_turns": 0,
+            }
             write_json(output_dir / method / "text_variables.json", variables)
         else:
             variables, gate = train_method(
-                specs=specs,
+                train_specs=train_specs,
+                val_specs=val_specs,
                 game_paths=game_paths,
                 method=method,
                 output_dir=output_dir,
                 args=args,
             )
         gates[method] = gate
-        records = run_records(
-            specs=specs,
-            game_paths=game_paths,
-            method=method,
-            split="test_all_24",
-            variables=variables,
-            max_steps=args.max_steps,
-            output_jsonl=output_dir / method / "test.jsonl",
-        )
+        if method != "retry_with_diagnostics":
+            records = run_records(
+                specs=specs,
+                game_paths=game_paths,
+                method=method,
+                split="test_all_24",
+                variables=variables,
+                max_steps=args.max_steps,
+                output_jsonl=output_dir / method / "test.jsonl",
+            )
         all_records.extend(records)
         summary_rows.append(summarize_records(method, records, gate))
     group_rows = summarize_groups(all_records)
@@ -947,8 +1062,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--seed", type=int, default=62001)
     parser.add_argument("--max-steps", type=int, default=80)
     parser.add_argument("--min-mean-delta", type=float, default=0.0)
-    parser.add_argument("--ppo-clip-epsilon", type=float, default=0.2)
-    parser.add_argument("--ppo-target-kl", type=float, default=0.65)
     parser.add_argument("--force-regenerate", action="store_true")
     parser.add_argument("--output-dir", default="runs/textworld_24_suite")
     return parser

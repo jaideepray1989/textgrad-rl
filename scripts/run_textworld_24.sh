@@ -9,5 +9,6 @@ fi
 
 "$PYTHON_BIN" -m textgrad_rl.benchmarks.textworld_24_suite \
   --max-steps "${TEXTWORLD_24_MAX_STEPS:-80}" \
+  --min-mean-delta "${TEXTWORLD_24_MIN_MEAN_DELTA:-0.001}" \
   --output-dir "${TEXTWORLD_24_OUTPUT_DIR:-$ROOT_DIR/runs/textworld_24_suite}" \
   "$@"

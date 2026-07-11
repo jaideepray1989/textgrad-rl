@@ -195,6 +195,7 @@ class MiniWobActorConfig:
     temperature: float
     max_tokens: int
     timeout: int
+    generation_seed_offset: int = 0
 
 
 def initial_miniwob_variables() -> dict[str, TextVariable]:
@@ -289,12 +290,14 @@ class OpenAICompatibleMiniWobModel:
         temperature: float,
         max_tokens: int,
         timeout: int,
+        seed: int | None = None,
     ) -> None:
         self.base_url = base_url.rstrip("/")
         self.model = model
         self.temperature = temperature
         self.max_tokens = max_tokens
         self.timeout = timeout
+        self.seed = seed
         self.api_key = os.getenv("TEXTGRAD_RL_LLM_API_KEY") or os.getenv("OPENAI_API_KEY") or "not-needed"
 
     def complete(self, prompt: str) -> str:
@@ -314,10 +317,17 @@ class OpenAICompatibleMiniWobModel:
             "temperature": self.temperature,
             "max_tokens": self.max_tokens,
         }
+        if self.seed is not None:
+            payload["seed"] = self.seed
+        headers = {"Content-Type": "application/json", "Authorization": f"Bearer {self.api_key}"}
+        modal_key = os.getenv("MODAL_PROXY_TOKEN_ID")
+        modal_secret = os.getenv("MODAL_PROXY_TOKEN_SECRET")
+        if modal_key and modal_secret:
+            headers.update({"Modal-Key": modal_key, "Modal-Secret": modal_secret})
         request = urllib.request.Request(
             f"{self.base_url}/chat/completions",
             data=json.dumps(payload).encode("utf-8"),
-            headers={"Content-Type": "application/json", "Authorization": f"Bearer {self.api_key}"},
+            headers=headers,
             method="POST",
         )
         try:
@@ -622,6 +632,7 @@ def run_miniwob_episode(
                 temperature=actor_config.temperature,
                 max_tokens=actor_config.max_tokens,
                 timeout=actor_config.timeout,
+                seed=actor_config.generation_seed_offset + seed,
             ),
         )
     else:

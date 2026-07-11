@@ -20,10 +20,10 @@
 An interactive agent can use a failure diagnosis to retry a task, but the lesson is discarded and the extra attempt increases deployment cost.
 We study a narrow alternative: convert recurring diagnostics into persistent textual rules that a frozen actor can reuse.
 RulePI performs one policy-iteration step over text: collect training trajectories, diagnose failure modes, propose reusable rules, and optionally retain an update only when held-out return improves.
-Across ten independently generated TextWorld-24 suites (240 paired games), persistent rules improve success from 33.8\% to 56.7\% (paired 95\% CI: +17.1 to +29.2 points).
-Across ten supported TextArena environments (130 paired episodes), success improves from 19.2\% to 61.5\% (CI: +18.0 to +72.0 points).
+Across ten independently generated TextWorld-24 suites (240 paired test instances), persistent rules improve success from 33.8\% to 56.7\% (paired 95\% CI: +17.1 to +29.2 points).
+Across ten supported TextArena environments (130 paired test instances), success improves from 19.2\% to 61.5\% (CI: +18.0 to +72.0 points).
 Persistent rules attain similar observed success to task-local diagnostic retry while using about half as many test actions.
-Two negative results define the boundary: validation gating does not improve success over ungated persistence, and a Qwen2.5-7B actor remains at 25.0\% success.
+Validation gating does not improve success over ungated persistence.
 Thus, the evidence supports reusable textual rules for structured actors, not generic language-model self-improvement.
 \end{abstract}
 
@@ -31,7 +31,7 @@ Thus, the evidence supports reusable textual rules for structured actors, not ge
 
 Interactive agents often receive useful feedback only after they fail.
 A common response is to append a diagnosis and retry the same task, as in verbal reinforcement and reflection methods \citep{shinn2023reflexion}.
-This can repair a local failure, but it spends another episode and does not answer whether the lesson transfers to later tasks.
+This can repair a local failure, but it requires another attempt and does not answer whether the lesson transfers to later tasks.
 At the other extreme, fine-tuning an actor may be expensive or unavailable.
 
 We examine the middle ground in which the actor is frozen and the policy is editable text.
@@ -46,7 +46,7 @@ We compare it with (i) a fixed policy, (ii) a strong retry baseline that sees a 
 Our contribution is a controlled mechanism study with two findings:
 \begin{itemize}
     \item Persistent rules improve success over a fixed policy on TextWorld and TextArena, with paired intervals above zero.
-    \item Persistence attains similar observed success to diagnostic retry with roughly half the test interaction, but validation gating adds no success benefit and does not improve a Qwen2.5-7B actor.
+    \item Persistence attains similar observed success to diagnostic retry with roughly half the test interaction, but validation gating adds no success benefit.
 \end{itemize}
 The second finding is important: the supported claim concerns rule reuse by structured actors, not reinforcement learning of model weights or general LLM self-improvement.
 
@@ -65,7 +65,7 @@ RulePI changes $x$, not the actor parameters.
 One iteration has four steps.
 
 \paragraph{1. Collect.}
-Run $\pi(\cdot\mid\cdot,x)$ on training tasks and record trajectories $\tau=(o_t,a_t,r_t)_{t=1}^{T}$, including success, invalid actions, repetition, and episode length.
+Run $\pi(\cdot\mid\cdot,x)$ on training tasks and record trajectories $\tau=(o_t,a_t,r_t)_{t=1}^{T}$, including success, invalid actions, repetition, and attempt length.
 
 \paragraph{2. Diagnose.}
 Map failed trajectories to a reusable failure mode, such as \texttt{graph\_exploration} or \texttt{objective\_sequence}.
@@ -74,10 +74,10 @@ For example, a repeated room loop yields: ``maintain a room graph, prefer unvisi
 
 \paragraph{3. Persist.}
 Append the candidate rules to form $x'$.
-Unlike diagnostic retry, $x'$ is shared by all later tasks rather than discarded after one episode.
+Unlike diagnostic retry, $x'$ is shared by all later tasks rather than discarded after one attempt.
 
 \paragraph{4. Gate (optional).}
-Evaluate old and new policies on disjoint validation games.
+Evaluate old and new policies on disjoint validation instances.
 RulePI accepts $x'$ when
 \begin{equation}
     \widehat{J}_{\mathrm{val}}(x')
@@ -97,14 +97,14 @@ RulePI is therefore textual policy selection under reward, not a policy-gradient
 \section{Experimental Setup}
 
 \paragraph{TextWorld-24.}
-TextWorld generates controlled text games with varied maps and quests \citep{cote2018textworld}.
-Each repetition contains six games from each of four families: simple objectives, coin collection, treasure hunting, and cooking.
-For every repetition, 8 training games, 8 validation games, and 24 test games use disjoint seeds.
-We run 10 independent repetitions, yielding 240 paired test games per method, with at most 80 actions per attempt.
+TextWorld generates controlled text environments with varied maps and quests \citep{cote2018textworld}.
+Each repetition contains six instances from each of four families: simple objectives, coin collection, treasure hunting, and cooking.
+For every repetition, 8 training instances, 8 validation instances, and 24 test instances use disjoint seeds.
+We run 10 independent repetitions, yielding 240 paired test instances per method, with at most 80 actions per attempt.
 
 \paragraph{TextArena-10.}
 We use ten environments for which the actor implements the corresponding rule interface: Nim, Connect Four, Reverse Tic-Tac-Toe, Guess the Number, Frozen Lake, Tower of Hanoi, Lights Out, Mastermind, Blackjack, and Bandit \citep{guertler2025textarena}.
-Three seeds per environment are used for training and validation; ten fresh test seeds and both player sides where applicable yield 130 paired test episodes per method.
+Three seeds per environment are used for training and validation; ten fresh test seeds and both player sides where applicable yield 130 paired test instances per method.
 
 \paragraph{Baselines.}
 \textsc{Fixed} uses the initial policy once.
@@ -113,8 +113,8 @@ Three seeds per environment are used for training and validation; ten fresh test
 \textsc{RulePI} applies the validation gate in Section~\ref{sec:method} and then freezes the policy for test.
 
 \paragraph{Statistics.}
-Methods are paired on identical games, seeds, and target sides.
-We report hierarchical paired-bootstrap 95\% intervals from 10,000 resamples, clustering by TextWorld generation or TextArena environment and resampling episodes within clusters.
+Methods are paired on identical test instances, including seeds and target sides.
+We report hierarchical paired-bootstrap 95\% intervals from 10,000 resamples, clustering by TextWorld generation or TextArena environment and resampling test instances within clusters.
 Optimization actions include environment steps used to produce and evaluate the policy; test actions include both attempts for \textsc{Retry+Diag}.
 
 \section{Results}
@@ -133,11 +133,11 @@ Diagnostic retry and persistent rules are close in success: RulePI is 1.25 point
 \toprule
 Benchmark & Fixed & Retry+Diag & Ungated & RulePI & RulePI $-$ Fixed (95\% CI) \\
 \midrule
-TextWorld-24 (240 games) & 33.8 & 55.4 & 56.7 & \textbf{56.7} & \textbf{+22.9 [17.1, 29.2]} \\
-TextArena-10 (130 episodes) & 19.2 & 61.5 & 61.5 & \textbf{61.5} & \textbf{+42.3 [18.0, 72.0]} \\
+TextWorld-24 (240 instances) & 33.8 & 55.4 & 56.7 & \textbf{56.7} & \textbf{+22.9 [17.1, 29.2]} \\
+TextArena-10 (130 instances) & 19.2 & 61.5 & 61.5 & \textbf{61.5} & \textbf{+42.3 [18.0, 72.0]} \\
 \bottomrule
 \end{tabular}
-\caption{Success rates (\%) for matched test episodes. Intervals are hierarchical paired-bootstrap intervals for RulePI minus the fixed policy.}
+\caption{Success rates (\%) for matched test instances. Intervals are hierarchical paired-bootstrap intervals for RulePI minus the fixed policy.}
 \label{tab:success}
 \end{table*}
 
@@ -151,7 +151,7 @@ Cooking and simple objectives remain difficult, which prevents the overall resul
 \small
 \begin{tabular}{lrrr}
 \toprule
-Family (60 games each) & Fixed & Retry & RulePI \\
+Family (60 instances each) & Fixed & Retry & RulePI \\
 \midrule
 Coin collection & 100.0 & 100.0 & 100.0 \\
 Cooking & 0.0 & 16.7 & 16.7 \\
@@ -159,7 +159,7 @@ Simple objective & 0.0 & 11.7 & 11.7 \\
 Treasure hunting & 35.0 & 93.3 & 98.3 \\
 \bottomrule
 \end{tabular}
-\caption{TextWorld success (\%) by game family.}
+\caption{TextWorld success (\%) by task family.}
 \label{tab:families}
 \end{table}
 
@@ -172,7 +172,7 @@ The paired reductions are 39.53 actions (CI: 34.17 to 44.95) and 10.48 actions (
 This is an amortization claim, not a free-compute claim.
 If $C_{\mathrm{opt}}$ is optimization interaction and $A_r-A_p$ is the per-task saving over retry, the break-even deployment count is
 $N^*=C_{\mathrm{opt}}/(A_r-A_p)$.
-RulePI crosses this point within the 240-game TextWorld study, but not within the 130-episode TextArena study.
+RulePI crosses this point within the 240-instance TextWorld study, but not within the 130-instance TextArena study.
 
 \begin{table}[t]
 \centering
@@ -192,10 +192,10 @@ TextArena & 20.68 & \textbf{10.19} & 7,921 & 756 \\
 
 \subsection{A Matched Example}
 
-Table~\ref{tab:example} traces one logged test game, \texttt{treasure\_level\_15}.
+Table~\ref{tab:example} traces one logged test instance, \texttt{treasure\_level\_15}.
 The fixed policy repeats the same four-direction loop until the 80-action horizon.
 Both improved methods then execute the same six-action route, but Retry+Diag first pays for the failed attempt.
-RulePI learned the reusable exploration rule only from disjoint training games and applies it on its first test attempt.
+RulePI learned the reusable exploration rule only from disjoint training instances and applies it on its first test attempt.
 
 \begin{table}[t]
 \centering
@@ -220,12 +220,6 @@ Gated and ungated persistence are identical on TextWorld success, reward, and te
 On TextArena they tie in success and test actions; gating retains 6 rather than 10 rules and changes mean reward only slightly (0.573 versus 0.564).
 Thus, persistence explains the observed success gain; validation is only a conservative diagnostic in these runs.
 
-\paragraph{The LLM boundary is negative.}
-We also run Qwen2.5-7B at temperature 0.7 on 24 TextWorld games with an 80-action horizon.
-The fixed and RulePI protocols both obtain 25.0\% success.
-The candidate is rejected because validation score decreases from 0.508 to 0.506, so the deployed RulePI policy remains the base policy.
-The structured-actor result therefore does not establish generic prompt optimization for small LLM agents.
-
 \section{Practical Guidance}
 
 RulePI is useful when (i) many future tasks share failure modes, (ii) the actor reliably executes written rules, and (iii) the policy will be reused enough to amortize evaluation.
@@ -244,13 +238,13 @@ The positive experiments use structured actors that detect human-authored rule c
 Candidate rules are selected from a predefined library keyed by benchmark failure modes; they are not freely generated from raw trajectories.
 Consequently, the study measures rule selection and reuse, not the acquisition of new skills or general natural-language instruction following.
 The task-local retry baseline receives the same diagnosed rule after its first failed test attempt, while persistent methods learn only from training data; this is intentionally a strong deployment-time baseline but uses a larger test budget.
-The Qwen2.5-7B boundary has only 24 games and no multi-seed confidence interval.
+We do not provide an adequately powered evaluation with a generative language-model actor, so the structured-actor results should not be interpreted as general LLM prompt optimization.
 TextWorld rejected some requested generation seeds; the runner deterministically advanced to the next valid seed and logged requested and actual seeds before evaluation.
 Finally, interaction counts measure environment actions, not wall-clock time, energy, or textual-optimizer inference cost.
 
 \section*{Ethical Considerations}
 
-The experiments use synthetic games and no personal or sensitive data.
+The experiments use synthetic environments and no personal or sensitive data.
 Persistent agent rules can nevertheless amplify misspecified rewards or unsafe behavior; deployments should log rule provenance, validation decisions, and regressions, and should restrict which rules can be activated in consequential environments.
 
 \bibliography{references}
@@ -258,10 +252,154 @@ Persistent agent rules can nevertheless amplify misspecified rewards or unsafe b
 \appendix
 \section{Reproducibility Details}
 
+\paragraph{Terminology.}
+\textbf{Game/environment} is the underlying task definition, such as a generated TextWorld world or TextArena's Nim environment.
+\textbf{Test instance} is a specific task determined by seed and, for two-player TextArena environments, target side.
+\textbf{Attempt/rollout} is one interaction from reset until success, failure, or the action limit.
+\textbf{Action/step} is one move within an attempt.
+For example, TextWorld \texttt{treasure\_level\_15} at one generation seed is one test instance; retrying it creates a second attempt, not a second instance.
+For TextArena, \texttt{Nim-v0} at one seed with target side 0 and target side 1 yields two test instances.
+We evaluate 240 matched TextWorld test instances and 130 matched TextArena test instances.
+An attempt is one rollout on an instance; retry methods may use two attempts.
+
 All four methods are evaluated on identical test instances.
 For TextWorld, requested outer seeds are spaced by 100,000; generator-invalid requests are advanced by one and recorded in a manifest.
 Within each repetition, training and validation seeds are offset by 10,000 and 20,000 from the test seed.
 The textual optimizer adds at most four rules in TextWorld and evaluates candidate policies under the same 80-action horizon used at test.
 The three reusable TextWorld rules cover ordered objective execution, graph exploration, and cookbook-based recipe completion.
+
+\section{Diagnosis and Rule Libraries}
+
+\paragraph{Automated diagnosis.}
+No LLM or human annotator labels trajectories during either experiment.
+TextWorld applies three deterministic predicates: a failed or repeated simple, coin, or treasure trajectory proposes \texttt{objective\_sequence}; a failed cooking trajectory proposes \texttt{cooking\_recipe}; and any repeated trajectory or attempt longer than 20 actions proposes \texttt{graph\_exploration}.
+TextArena groups training trajectories by environment and creates an assignment when reward is below 1, an action is invalid, or an action has negative estimated advantage.
+It labels the cause \texttt{invalid\_action}, \texttt{long\_horizon\_credit}, \texttt{repeated\_action}, or \texttt{environment\_strategy} using those logged fields, then retrieves the rule keyed by environment ID.
+These criteria are implemented without free-form text classification.
+
+\paragraph{Human involvement.}
+The human-authored assets are 3 TextWorld rule sentences (78 words, 581 characters) and 12 TextArena candidate sentences (175 words, 1,111 characters): 10 environment rules and 2 generic rules.
+The structured actors also contain three TextWorld rule-triggered routines and one strategy routine for each of the 10 TextArena environments.
+There is no per-trajectory annotation and no post-hoc manual selection.
+We did not record authoring time, so we cannot provide a defensible person-hour estimate; the reproducible unit of engineering effort is one rule sentence and one pre-existing strategy interface per supported capability.
+The two generic TextArena candidates do not activate an additional structured-actor branch.
+
+\paragraph{Complete library.}
+The exact TextWorld rules are:
+\begin{center}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{p{0.35\columnwidth}p{0.56\columnwidth}}
+\toprule
+Rule ID & Full rule text \\
+\midrule
+\texttt{objective\_sequence} & For TextWorld objective games, convert the visible objective into ordered subgoals: movement directions, open/unlock commands, take target objects, and put/place target objects on or in the requested destination. \\
+\texttt{graph\_exploration} & For TextWorld exploration, maintain a room graph, prefer unopened containers and unvisited exits, and avoid immediate backtracking unless no other admissible progress action exists. \\
+\texttt{cooking\_recipe} & For TextWorld cooking, search for the kitchen/cookbook, take and read the cookbook, collect listed ingredients, follow recipe directions for cutting/cooking, then prepare and eat the meal. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The exact TextArena rules are:
+\begin{center}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{p{0.27\columnwidth}p{0.65\columnwidth}}
+\toprule
+Rule ID & Full rule text \\
+\midrule
+Nim & For Nim, use the xor strategy: move to a zero nim-sum when possible. \\
+Connect Four & For Connect Four, take an immediate winning column and otherwise block an opponent immediate connect-four. \\
+Reverse Tic-Tac-Toe & For Reverse Tic Tac Toe, avoid moves that immediately complete your own three-in-a-row. \\
+Guess the Number & For Guess The Number, maintain lower and upper bounds from higher/lower hints and guess the midpoint. \\
+Frozen Lake & For Frozen Lake, plan a shortest safe path to the goal while avoiding holes. \\
+Tower of Hanoi & For Tower of Hanoi, follow the recursive optimal disk-moving plan from A to C. \\
+Lights Out & For Lights Out, solve the binary toggle system and press cells from a valid solution. \\
+Mastermind & For Mastermind, maintain all candidate codes and eliminate candidates inconsistent with black/white feedback. \\
+Blackjack & For Blackjack, use the basic threshold policy: hit below 17 and stand at 17 or higher. \\
+Bandit & For Bandit, explore every button once, track empirical reward, then exploit the best observed button. \\
+\midrule
+Generic validity & Use only legal bracketed actions from the current observation, and avoid actions that just produced invalid-move feedback. \\
+Generic state & Track the latest visible game state after every observation before choosing the next action. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\clearpage
+\section{Additional Controls}
+
+We evaluate controls on the same matched test instances as the main paper.
+\textsc{Always-on} enables the complete library before any trajectory is observed.
+\textsc{Random-6} averages 30 independently sampled sets of six TextArena environment rules; it matches RulePI's six active environment rules but ignores diagnostics.
+\textsc{Retry+Persist} processes tasks in the benchmark's fixed order, retries a failed task once with its diagnosed rule, and retains that rule for all later test tasks.
+
+\begin{center}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrr}
+\toprule
+TextWorld-24 & Success & Attempts & Actions \\
+\midrule
+RulePI & 56.7 & 1.00 & 42.25 \\
+Always-on (3) & 56.7 & 1.00 & 42.25 \\
+Retry+Persist & 56.7 & 1.48 & 78.94 \\
+\bottomrule
+\end{tabular}
+\par\smallskip
+\begin{tabular}{lrrr}
+\toprule
+TextArena-10 & Success & Attempts & Actions \\
+\midrule
+RulePI (6) & 61.5 & 1.00 & 10.19 \\
+Always-on (12) & 61.5 & 1.00 & 10.78 \\
+Random-6 & 42.8 & 1.00 & 11.19 \\
+Retry+Persist & 61.5 & 1.43 & 17.28 \\
+\bottomrule
+\end{tabular}
+\par\smallskip
+\textit{Control results; success is in percent.}
+\end{center}
+
+TextWorld's always-on result is identical to RulePI because every repetition diagnoses all three available rules; TextWorld therefore isolates the value of the rule-enabled controller, not trajectory-driven selection among rules.
+On TextArena, random selection is substantially worse than trajectory-selected RulePI, while always-on ties success but uses 0.59 more actions per task.
+Thus, TextArena supports a selection benefit; TextWorld does not.
+Retry+Persist reaches the same observed success but remains more expensive at deployment than a policy learned on disjoint training tasks.
+Random-6 ranges from 30.8\% to 53.8\% across 30 policies (SD 6.7 points); each policy reuses the same 130 test instances, so the resulting 3,900 one-attempt evaluations are not independent test instances.
+
+\section{Gate, LLM, and Iteration Diagnostics}
+
+\paragraph{Gate sensitivity.}
+We recompute TextWorld acceptance post hoc from the saved eight-instance validation trajectories.
+The default score is reward $+0.5$ success $-0.4$ invalid $-0.1$ repeated $-0.004$ actions.
+The deployed test result selects the saved candidate or fixed-policy trajectory according to each counterfactual gate.
+
+\begin{center}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrr}
+\toprule
+Gate & Accepted & Success & Actions \\
+\midrule
+Default, $\delta=0.001$ & 10/10 & 56.7 & 42.25 \\
+Default, $\delta=0.05$ & 9/10 & 54.2 & 42.39 \\
+Default, $\delta=0.20$ & 6/10 & 46.2 & 43.35 \\
+Success-only, $\delta=0.001$ & 10/10 & 56.7 & 42.25 \\
+Reward-only, $\delta=0.001$ & 9/10 & 54.2 & 42.39 \\
+Family-protected & 7/10 & 49.2 & 42.80 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The original gate prevents no update because all 10 candidates pass.
+A protected-regression variant requiring nonnegative validation change in every family rejects three updates, but whole-policy rejection also discards gains in other families and reduces aggregate test success to 49.2\%.
+We did not run larger validation sets, and these post-hoc comparisons are not fresh confirmatory experiments.
+They show that stricter gates change acceptance, not that gating improves held-out success.
+
+\paragraph{Further iterations and conflicts.}
+The experiment performs one iteration.
+With the fixed three-rule TextWorld library, a deterministic second pass proposes only normalized duplicates: the policy remains at three rules and version 1, so no behavioral improvement is possible without new candidates.
+Larger libraries and freely generated rules were not tested.
+Exact duplicates are suppressed; TextArena environment rules occupy separate variables; and validation chooses among candidate edits.
+There is no semantic conflict resolver beyond validation and prompt-length limits, so overfitting and contradictory-rule behavior remain open questions.
 
 \end{document}

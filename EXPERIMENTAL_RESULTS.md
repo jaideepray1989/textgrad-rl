@@ -55,12 +55,29 @@ Source: `TEXTWORLD_EXPRESS_RESULTS.md`.
 
 ## TextWorld 24
 
-| Policy | Model | Games | Episodes | Reward | Success | Invalid | Repeated | Turns | Updates |
-|---|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| fixed_prompt | prompt-aware heuristic text-game actor | 24 | 24 | 0.484 | 0.292 | 0.000 | 0.750 | 47.00 | 0 |
-| textgrad_policy_iteration | prompt-aware heuristic text-game actor | 24 | 24 | 0.583 | 0.542 | 0.000 | 0.792 | 44.21 | 1 |
+| Policy | Model | Test games | Success [95% CI] | Reward | Attempts/task | Test actions/task |
+|---|---|---:|---:|---:|---:|---:|
+| fixed_prompt | prompt-aware heuristic text-game actor | 240 | 33.8% [27.5, 40.0] | 0.528 | 1.00 | 44.15 |
+| retry_with_diagnostics | prompt-aware heuristic text-game actor | 240 | 55.4% [48.8, 62.5] | 0.604 | 1.66 | 81.78 |
+| ungated_persistent_rules | prompt-aware heuristic text-game actor | 240 | 56.7% [50.0, 62.9] | 0.617 | 1.00 | 42.25 |
+| textgrad_policy_iteration (RulePI) | prompt-aware heuristic text-game actor | 240 | 56.7% [50.0, 63.3] | 0.617 | 1.00 | 42.25 |
+
+Across 10 disjoint generations, RulePI improves success over fixed by 22.9 percentage points (paired 95% CI `[17.1, 29.2]`) and uses 39.5 fewer test actions per game than diagnostic retry (`[-45.0, -34.2]`). Gated and ungated persistence are tied, so the positive result is attributable to persistent rules rather than validation gating.
 
 Source: `TEXTWORLD_24_RESULTS.md`.
+
+## TextArena Supported 10
+
+| Policy | Model | Episodes | Success | Reward | Attempts/task | Test actions/task | Optimization actions |
+|---|---|---:|---:|---:|---:|---:|---:|
+| fixed_prompt | prompt-aware heuristic actor | 130 | 0.192 | 0.167 | 1.00 | 12.14 | 0 |
+| retry_with_diagnostics | prompt-aware heuristic actor | 130 | 0.615 | 0.550 | 1.81 | 20.68 | 0 |
+| ungated_persistent_rules | prompt-aware heuristic actor | 130 | 0.615 | 0.564 | 1.00 | 10.19 | 7,921 |
+| textgrad_policy_iteration (RulePI) | prompt-aware heuristic actor | 130 | 0.615 | 0.573 | 1.00 | 10.19 | 7,921 |
+
+RulePI improves paired success over fixed by 42.3 percentage points (hierarchical paired-bootstrap CI `[18.0, 72.0]`). All adaptive methods tie in success; persistent policies avoid the second test attempt required by diagnostic retry. RulePI and ungated persistence also tie in success, with only a small reward difference. At the observed action rates, RulePI needs about 756 deployments to amortize its 7,921 optimization actions; the 130-episode run therefore demonstrates deployment-time, not total-compute, efficiency.
+
+Source: `RULEPI_PAPER_EVIDENCE.md`.
 
 ## TextArena SLM Candidate Pool 30-Seed
 
@@ -108,4 +125,4 @@ Source: `EXTERNAL_TRANSFER_PROTOCOL_RESULTS.md`.
 
 ## Summary Readout
 
-TextGrad-RL is strongest where the actor can execute the learned textual rule: TextArena Broad 50 improves success from 0.185 to 0.369, TextWorldExpress from 0.167 to 0.708, TextWorld 24 from 0.292 to 0.542, and MiniWoB++ 50 from 0.200 to 0.273. The 30-seed qwen2.5:3b SLM run shows that stochastic action formatting remains a bottleneck, while train/validation gating helps social tasks and improves real-SLM reward. The transfer probes suggest that compact textual rules can transfer across browser, tool-use, and coding-style contracts, while remaining separate from official leaderboard claims.
+The strongest controlled evidence now comes from the matched baselines. Across 10 TextWorld generations, persistent rules improve success from 33.8% to 56.7% with a paired interval fully above zero. On the supported TextArena suite, success improves from 19.2% to 61.5%. Persistent policies match task-local diagnostic retry while using roughly half as many test actions. Validation gating does not improve success over ungated persistence in either benchmark. The qwen2.5:7b boundary run remains at 25.0% success and rejects its candidate update, so the positive claim is limited to prompt-aware structured actors.
