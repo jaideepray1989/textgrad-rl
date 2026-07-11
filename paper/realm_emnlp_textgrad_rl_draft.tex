@@ -1,221 +1,267 @@
-% Draft for REALM @ EMNLP short-paper submission.
-% Port this content to the official ACL 2026 style files before PDF submission.
 \documentclass[11pt]{article}
-\usepackage[margin=1in]{geometry}
-\usepackage{times}
-\usepackage{booktabs}
-\usepackage{tabularx}
-\usepackage{multirow}
-\usepackage{amsmath}
-\usepackage{natbib}
-\usepackage{hyperref}
 
-\title{TextGrad-RL: Trajectory-Level Textual Policy Iteration for Frozen Language Agents}
+\usepackage[review]{acl}
+\usepackage{times}
+\usepackage{latexsym}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{xurl}
+
+\title{RulePI: Textual Policy Iteration for Interactive Agents}
 \author{Anonymous REALM Submission}
-\date{}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-Language agents increasingly act in interactive environments, but adapting them commonly requires prompt engineering, tool-specific scaffolding, or expensive model fine-tuning. We study a lightweight alternative: improve a frozen agent by optimizing only its textual policy variables from full trajectories. We introduce TextGrad-RL, a policy-iteration style extension of TextGrad that treats modular instructions as the trainable policy, assigns action-level credit from environment rollouts, proposes advantage-weighted textual rule edits, and accepts updates through held-out validation gates. We further test a PPO-inspired trust-region gate over textual policy edits using paired old/new rollouts, a clipped surrogate, and a KL-style behavioral proxy. Across 10 TextArena environments, TextGrad-RL improves held-out reward from 0.185 for a fixed prompt to 0.583 with zero invalid moves, and transfers to harder variants with 0.897 reward versus 0.190 for the fixed prompt. Local source-to-target transfer probes further improve success from 0.000 to 0.800--0.833 on browser, tool-use, and coding-style contracts. The PPO-style gate does not improve deterministic reward over the simpler train/validation gate, and 30-seed stochastic small-language-model stress tests show that action formatting remains a major bottleneck. Our results position TextGrad-RL as a practical testbed for studying reinforcement learning analogues over textual policies, with an honest negative result: current PPO-style constraints improve stability diagnostics more clearly than final reward.
+An interactive agent can use a failure diagnosis to retry a task, but the lesson is discarded and the extra attempt increases deployment cost.
+We study a narrow alternative: convert recurring diagnostics into persistent textual rules that a frozen actor can reuse.
+RulePI performs one policy-iteration step over text: collect training trajectories, diagnose failure modes, propose reusable rules, and optionally retain an update only when held-out return improves.
+Across ten independently generated TextWorld-24 suites (240 paired games), persistent rules improve success from 33.8\% to 56.7\% (paired 95\% CI: +17.1 to +29.2 points).
+Across ten supported TextArena environments (130 paired episodes), success improves from 19.2\% to 61.5\% (CI: +18.0 to +72.0 points).
+Persistent rules attain similar observed success to task-local diagnostic retry while using about half as many test actions.
+Two negative results define the boundary: validation gating does not improve success over ungated persistence, and a Qwen2.5-7B actor remains at 25.0\% success.
+Thus, the evidence supports reusable textual rules for structured actors, not generic language-model self-improvement.
 \end{abstract}
 
 \section{Introduction}
 
-Language model agents now use tools, play games, write code, and interact with websites and software environments \citep{yao2023react,schick2023toolformer,zhou2023webarena,yang2024sweagent}. The REALM setting foregrounds a central question for these systems: how can agents improve from interaction while remaining reliable, inspectable, and cheap to run? Full model training is often impractical for local or domain-specific agents, while hand prompt engineering does not scale and is hard to evaluate systematically.
+Interactive agents often receive useful feedback only after they fail.
+A common response is to append a diagnosis and retry the same task, as in verbal reinforcement and reflection methods \citep{shinn2023reflexion}.
+This can repair a local failure, but it spends another episode and does not answer whether the lesson transfers to later tasks.
+At the other extreme, fine-tuning an actor may be expensive or unavailable.
 
-We study the middle ground where the base actor is frozen and only its textual policy is updated. This resembles verbal reinforcement learning \citep{shinn2023reflexion} and textual optimization \citep{yuksekgonul2024textgrad}, but we make the reinforcement-learning structure explicit. TextGrad-RL represents the policy as a set of modular text variables, runs the frozen agent in TextArena environments \citep{guertler2025textarena}, assigns credit to bad or good actions, asks a textual optimizer to propose rule edits, and accepts those edits only when validation rollouts improve.
+We examine the middle ground in which the actor is frozen and the policy is editable text.
+TextGrad showed that natural-language feedback can optimize prompts and compound AI systems \citep{yuksekgonul2025textgrad}.
+Our question is deliberately smaller and operational: \emph{when the same failure mode recurs, can a persistent textual rule replace repeated task-local diagnosis?}
 
-This paper is intentionally framed as a short, mechanism-focused REALM submission. Its contributions are:
+RulePI treats a collection of textual rules as a policy.
+It gathers trajectories, maps failures to candidate rules, and evaluates an updated rule set.
+The deployed policy is shared across test tasks and receives only one attempt per task.
+We compare it with (i) a fixed policy, (ii) a strong retry baseline that sees a task-local diagnosis after failure, and (iii) ungated persistence, which stores training-derived rules without validation.
+
+Our contribution is a controlled mechanism study with two findings:
 \begin{itemize}
-    \item A trajectory-level TextGrad-RL loop that updates only text variables while preserving a frozen actor.
-    \item A policy-iteration variant with action credit, value baselines, advantage-weighted textual gradients, replay, and candidate policy search.
-    \item A PPO-style ablation for textual policies using paired rollouts, a clipped surrogate, and a KL-style trust-region proxy.
-    \item A broad TextArena evaluation, including deterministic games, difficulty generalization, and stochastic small-language-model (SLM) suites.
-    \item Local transfer-protocol probes that test whether learned textual rules transfer from browser, tool-use, and coding source tasks to held-out target-style tasks.
+    \item Persistent rules improve success over a fixed policy on TextWorld and TextArena, with paired intervals above zero.
+    \item Persistence attains similar observed success to diagnostic retry with roughly half the test interaction, but validation gating adds no success benefit and does not improve a Qwen2.5-7B actor.
 \end{itemize}
+The second finding is important: the supported claim concerns rule reuse by structured actors, not reinforcement learning of model weights or general LLM self-improvement.
 
-The empirical story is deliberately conservative. TextGrad-RL strongly outperforms fixed prompts and scalar-only prompt search on deterministic TextArena tasks. However, full TextGrad-RL-PPO does not beat the simpler train/validation gate in final deterministic reward. In stochastic SLM settings, PPO-style checks mainly serve as diagnostics and safeguards: they reject unstable updates, but do not yet produce a reliable reward lift.
+\section{Related Work}
 
-\section{Method}
+ReAct interleaves language-model reasoning and actions \citep{yao2023react}, while Reflexion stores verbal feedback to improve subsequent attempts \citep{shinn2023reflexion}.
+ExpeL extracts natural-language insights from training experiences and recalls them on later tasks \citep{zhao2023expel}.
+ProTeGi uses textual critiques, prompt edits, and search to optimize instructions \citep{pryzant2023protegi}; TextGrad generalizes this idea to prompts and compound systems \citep{yuksekgonul2025textgrad}.
+RulePI is closest to ExpeL, but studies a narrower comparison: a reusable text policy versus a task-local diagnosed retry, with paired evaluation and both test-time and optimization interaction counted.
 
-\paragraph{Text variables as policies.}
-Let $\pi_{\theta}$ be a frozen language or prompt-aware agent. The trainable object is not $\theta$, but a collection of text variables $x = \{x_1,\ldots,x_k\}$, such as generic action-validity instructions, state-tracking rules, and environment-specific strategy notes. At episode time, the actor receives the current observation plus retrieved text variables and emits an action.
+\section{RulePI}
+\label{sec:method}
 
-\paragraph{Trajectory feedback.}
-For each environment, we collect trajectories $\tau=(o_t,a_t,r_t,m_t)_{t=1}^T$, where $m_t$ includes invalid-move flags, repeated actions, truncation, and turn-efficiency metadata. A trajectory critic summarizes which text variables caused failures or successes. Unlike scalar prompt search, this feedback is structured as textual gradients: edits such as ``when playing Nim, leave a multiple of four stones'' or ``in FrozenLake, avoid unsafe random wandering unless forced.''
+Let $x$ be a textual policy and let $\pi(a\mid o,x)$ be a frozen actor that selects action $a$ from observation $o$.
+RulePI changes $x$, not the actor parameters.
+One iteration has four steps.
 
-\paragraph{Policy iteration over text.}
-TextGrad-RL strengthens the basic TextGrad loop with reinforcement-learning bookkeeping. A tabular value critic estimates environment baselines, action-level credit assigns advantages to specific decisions, and candidate policy search evaluates multiple text edits per environment. Candidate rules are replayed on train and validation seeds. Accepted rules are stored in a learned rule library and retrieved at test time.
+\paragraph{1. Collect.}
+Run $\pi(\cdot\mid\cdot,x)$ on training tasks and record trajectories $\tau=(o_t,a_t,r_t)_{t=1}^{T}$, including success, invalid actions, repetition, and episode length.
 
-\paragraph{PPO-style gate over prompt edits.}
-We also test a textual analogue of proximal policy optimization \citep{schulman2017ppo}. Because prompt edits do not expose token-level action probabilities, we compute a behavioral proxy from paired old/new rollouts under identical seeds. For candidate text $x'$, we estimate a ratio-like score $r(x',x)$ from action agreement and score deltas, and evaluate a clipped surrogate,
-\[
-L_{\mathrm{clip}}(x') =
-\mathbb{E}\left[\min(r A,\mathrm{clip}(r,1-\epsilon,1+\epsilon)A)\right].
-\]
-The full TextGrad-RL-PPO gate accepts an edit only if it improves train/validation behavior, has positive clipped-surrogate delta, stays below a KL-style action-change threshold, and does not increase invalid or truncated episodes. We compare this full gate against four ablations: no gate, train/validation gate only, KL gate only, and clipped-surrogate gate only.
+\paragraph{2. Diagnose.}
+Map failed trajectories to a reusable failure mode, such as \texttt{graph\_exploration} or \texttt{objective\_sequence}.
+The current prototype retrieves a human-authored candidate rule for that mode.
+For example, a repeated room loop yields: ``maintain a room graph, prefer unvisited exits, and avoid immediate backtracking.''
+
+\paragraph{3. Persist.}
+Append the candidate rules to form $x'$.
+Unlike diagnostic retry, $x'$ is shared by all later tasks rather than discarded after one episode.
+
+\paragraph{4. Gate (optional).}
+Evaluate old and new policies on disjoint validation games.
+RulePI accepts $x'$ when
+\begin{equation}
+    \widehat{J}_{\mathrm{val}}(x')
+    \geq \widehat{J}_{\mathrm{val}}(x) + \delta,
+\end{equation}
+where $\widehat{J}$ combines task return, success, validity, and efficiency, and $\delta=0.001$.
+TextArena additionally requires the paired-bootstrap lower bound on improvement to be nonnegative.
+The ungated ablation always keeps the training-derived update.
+
+\paragraph{What is being optimized, and where is the RL?}
+The positive experiments use prompt-aware structured actors.
+They recognize rule content and activate existing routines for objective sequencing, graph exploration, recipe execution, or game strategy.
+This makes the experiment easy to inspect: the outer loop selects and reuses a capability; it does not invent that capability or train neural weights.
+The environment supplies trajectories and scalar return, and the validation comparison is a discrete policy-improvement step.
+RulePI is therefore textual policy selection under reward, not a policy-gradient or PPO algorithm.
 
 \section{Experimental Setup}
 
-\paragraph{Benchmarks.}
-We evaluate on TextArena, an interactive collection of text-based games for language-agent training and evaluation \citep{guertler2025textarena}. The deterministic base suite covers 10 environments: Nim, ConnectFour, ReverseTicTacToe, GuessTheNumber, FrozenLake, TowerOfHanoi, LightsOut, Mastermind, Blackjack, and Bandit. The difficulty-generalization suite evaluates harder variants such as larger Nim, randomized or hardcore FrozenLake, and harder Mastermind. We also run stochastic SLM suites: puzzle games, social/multi-agent games, and a real-SLM mix of standard TextArena tasks.
+\paragraph{TextWorld-24.}
+TextWorld generates controlled text games with varied maps and quests \citep{cote2018textworld}.
+Each repetition contains six games from each of four families: simple objectives, coin collection, treasure hunting, and cooking.
+For every repetition, 8 training games, 8 validation games, and 24 test games use disjoint seeds.
+We run 10 independent repetitions, yielding 240 paired test games per method, with at most 80 actions per attempt.
 
-\paragraph{Transfer protocol probes.}
-To test whether textual policy updates transfer beyond the benchmark family where they are learned, we add three local source-to-target probes. A browser probe learns from MiniWoB-style trajectories and evaluates on WebArena/WorkArena-style target contracts; a tool-use probe learns from retail-service trajectories and evaluates on airline/banking-style contracts; and a coding probe learns from development-repair trajectories and evaluates on SWE-bench-Lite-style repair contracts. These probes are deterministic local contracts rather than official leaderboard executions. They are included to measure policy-rule transfer, invalid actions, repeated actions, turn efficiency, and validation-gated prompt updates without requiring hosted web services, private credentials, or Dockerized benchmark infrastructure.
+\paragraph{TextArena-10.}
+We use ten environments for which the actor implements the corresponding rule interface: Nim, Connect Four, Reverse Tic-Tac-Toe, Guess the Number, Frozen Lake, Tower of Hanoi, Lights Out, Mastermind, Blackjack, and Bandit \citep{guertler2025textarena}.
+Three seeds per environment are used for training and validation; ten fresh test seeds and both player sides where applicable yield 130 paired test episodes per method.
 
-\paragraph{Models and baselines.}
-The deterministic suites use the repository's frozen prompt-aware heuristic actor so that prompt-policy updates can be compared under controlled rollouts. SLM experiments use a frozen local \texttt{qwen2.5:3b} actor at temperature 0.7 through an OpenAI-compatible Ollama endpoint. We compare fixed prompts, scalar prompt search, modular TextGrad, TextGrad-RL+, policy iteration, and PPO-style variants. No method fine-tunes model weights.
+\paragraph{Baselines.}
+\textsc{Fixed} uses the initial policy once.
+\textsc{Retry+Diag} first uses the fixed policy; after failure it receives the task's diagnosed rule and retries once, so its maximum test budget is 160 actions in TextWorld.
+\textsc{Ungated} learns persistent rules from training trajectories and retains them without validation.
+\textsc{RulePI} applies the validation gate in Section~\ref{sec:method} and then freezes the policy for test.
 
-\paragraph{Splits and statistics.}
-The base deterministic suite uses 3 repetitions, 5 train seeds, 5 validation seeds, and 10 test seeds, yielding 390 held-out test episodes per method. Difficulty generalization uses 2 repetitions over harder held-out tasks. The main SLM stress test uses 30 train, validation, and test seeds per environment at temperature 0.7 with a multi-candidate update generator. We report average reward, success, invalid-move rate, truncation, turns, accepted prompt updates, and bootstrap reward intervals where available.
+\paragraph{Statistics.}
+Methods are paired on identical games, seeds, and target sides.
+We report hierarchical paired-bootstrap 95\% intervals from 10,000 resamples, clustering by TextWorld generation or TextArena environment and resampling episodes within clusters.
+Optimization actions include environment steps used to produce and evaluate the policy; test actions include both attempts for \textsc{Retry+Diag}.
 
 \section{Results}
 
-Table~\ref{tab:base} shows the main deterministic comparison. TextGrad-RL variants sharply improve over fixed prompts and scalar search. The fixed prompt obtains 0.185 reward and 20.5\% success, while policy iteration obtains 0.583 reward and 61.5\% success with no invalid moves. TextGrad-RL+ and policy iteration preserve the same success rate but reduce average turns, suggesting more efficient rule execution.
+\subsection{Persistent Rules Improve Success}
 
-\begin{table}[t]
-\centering
-\small
-\begin{tabular}{lrrrr}
-\toprule
-Method & Reward & 95\% CI & Success & Invalid \\
-\midrule
-Fixed prompt & 0.185 & [0.118, 0.245] & 0.205 & 0.105 \\
-Scalar search & 0.185 & [0.124, 0.245] & 0.205 & 0.105 \\
-Modular TextGrad & 0.563 & [0.503, 0.623] & 0.615 & 0.000 \\
-TextGrad-RL+ & 0.583 & [0.524, 0.641] & 0.615 & 0.000 \\
-Policy iteration & 0.583 & [0.524, 0.638] & 0.615 & 0.000 \\
-TextGrad-RL-PPO & 0.583 & [0.521, 0.645] & 0.615 & 0.000 \\
-\bottomrule
-\end{tabular}
-\caption{Held-out base TextArena results over 390 test episodes per method.}
-\label{tab:base}
-\end{table}
+Table~\ref{tab:success} supports the first claim.
+On TextWorld, RulePI improves success by 22.9 percentage points over the fixed policy; the paired interval excludes zero.
+On TextArena, the gain is 42.3 points and again excludes zero.
+Diagnostic retry and persistent rules are close in success: RulePI is 1.25 points higher on TextWorld (CI: 0.0 to 3.3) and tied on TextArena.
 
-Table~\ref{tab:difficulty} evaluates transfer to harder TextArena variants. The fixed prompt degrades to 0.190 reward and 0.167 success. TextGrad policy iteration reaches 0.897 reward and 0.833 success, with zero invalid moves, indicating that learned textual rules transfer beyond the exact training seeds and task settings.
-
-\begin{table}[t]
-\centering
-\small
-\begin{tabular}{lrrrr}
-\toprule
-Method & Reward & Success & Invalid & Turns \\
-\midrule
-Fixed prompt & 0.190 & 0.167 & 0.139 & 22.597 \\
-Modular TextGrad & 0.830 & 0.792 & 0.000 & 18.236 \\
-TextGrad-RL+ & 0.880 & 0.792 & 0.000 & 17.250 \\
-Policy iteration & 0.897 & 0.833 & 0.000 & 16.958 \\
-TextGrad-RL-PPO & 0.897 & 0.833 & 0.000 & 16.958 \\
-\bottomrule
-\end{tabular}
-\caption{Difficulty generalization on harder held-out TextArena variants.}
-\label{tab:difficulty}
-\end{table}
-
-Table~\ref{tab:ppoablation} isolates the gate mechanism. The no-gate variant accepts all 10 average updates and underperforms the gated variants. A train/validation gate accounts for the main deterministic benefit. KL-only and clipped-surrogate-only gates are close but not better. The full PPO-style gate ties train/validation gating, suggesting that the current deterministic candidate distribution is already conservative enough that extra trust-region checks rarely change the final policy.
-
-\begin{table}[t]
+\begin{table*}[t]
 \centering
 \small
 \begin{tabular}{lrrrrr}
 \toprule
-Gate & Reward & Success & Invalid & Turns & Accepted \\
+Benchmark & Fixed & Retry+Diag & Ungated & RulePI & RulePI $-$ Fixed (95\% CI) \\
 \midrule
-No gate & 0.568 & 0.615 & 0.000 & 10.310 & 10.0 \\
-Train/val & 0.583 & 0.615 & 0.000 & 10.156 & 6.0 \\
-KL only & 0.581 & 0.615 & 0.000 & 10.156 & 6.3 \\
-Clipped only & 0.581 & 0.615 & 0.000 & 10.156 & 6.3 \\
-Full PPO & 0.583 & 0.615 & 0.000 & 10.156 & 6.0 \\
+TextWorld-24 (240 games) & 33.8 & 55.4 & 56.7 & \textbf{56.7} & \textbf{+22.9 [17.1, 29.2]} \\
+TextArena-10 (130 episodes) & 19.2 & 61.5 & 61.5 & \textbf{61.5} & \textbf{+42.3 [18.0, 72.0]} \\
 \bottomrule
 \end{tabular}
-\caption{PPO-style gate ablation on the deterministic policy suite.}
-\label{tab:ppoablation}
-\end{table}
+\caption{Success rates (\%) for matched test episodes. Intervals are hierarchical paired-bootstrap intervals for RulePI minus the fixed policy.}
+\label{tab:success}
+\end{table*}
 
-Table~\ref{tab:slm} turns to stochastic SLM rollouts. These results are noisier and much harsher than the deterministic actor experiments. In puzzle tasks, success remains near zero and invalid outputs remain high across methods, showing that action formatting is a binding constraint. In social tasks, the train/validation gate improves success from 0.256 to 0.378 and reduces invalid actions from 0.144 to 0.133. In the real-SLM mix, no method uniformly dominates: no-gate improves success and invalid rate, while train/validation gating improves reward but slightly worsens invalid and truncation rates. We therefore treat the SLM result as a stress test for stochastic prompt updates rather than as a clean scaling win.
+\paragraph{Where do the TextWorld gains occur?}
+Table~\ref{tab:families} shows that RulePI improves three families and leaves the already-solved coin family unchanged.
+The largest gain is on treasure hunting, where the exploration rule directly addresses repeated room loops.
+Cooking and simple objectives remain difficult, which prevents the overall result from being read as universal task solving.
 
 \begin{table}[t]
 \centering
 \small
-\begin{tabular}{llrrrrr}
+\begin{tabular}{lrrr}
 \toprule
-Suite & Method & Reward & Score & Success & Invalid & Trunc. \\
+Family (60 games each) & Fixed & Retry & RulePI \\
 \midrule
-\multirow{3}{*}{Puzzle} 
- & Fixed prompt & 0.068 & -0.447 & 0.000 & 1.000 & 0.000 \\
- & No gate & 0.075 & -0.426 & 0.008 & 0.975 & 0.008 \\
- & Train/val & 0.069 & -0.440 & 0.000 & 0.983 & 0.008 \\
-\midrule
-\multirow{3}{*}{Social}
- & Fixed prompt & -0.311 & -0.345 & 0.256 & 0.144 & 0.000 \\
- & No gate & -0.289 & -0.311 & 0.278 & 0.144 & 0.000 \\
- & Train/val & -0.122 & -0.089 & 0.378 & 0.133 & 0.000 \\
-\midrule
-\multirow{3}{*}{Real SLM}
- & Fixed prompt & 0.323 & 0.214 & 0.227 & 0.300 & 0.167 \\
- & No gate & 0.328 & 0.245 & 0.247 & 0.273 & 0.160 \\
- & Train/val & 0.350 & 0.237 & 0.233 & 0.307 & 0.180 \\
+Coin collection & 100.0 & 100.0 & 100.0 \\
+Cooking & 0.0 & 16.7 & 16.7 \\
+Simple objective & 0.0 & 11.7 & 11.7 \\
+Treasure hunting & 35.0 & 93.3 & 98.3 \\
 \bottomrule
 \end{tabular}
-\caption{Stochastic SLM stress-test results with \texttt{qwen2.5:3b} at temperature 0.7 and 30 seeds per split. PPO rows are omitted from this paper-facing table because they did not improve over the simpler gated update.}
-\label{tab:slm}
+\caption{TextWorld success (\%) by game family.}
+\label{tab:families}
 \end{table}
 
-We also run two local diagnostics for the SLM setting. First, a fixed-prompt temperature comparison shows that lowering \texttt{qwen2.5:3b} from $t=0.7$ to $t=0.0$ does not fix puzzle action formatting: puzzle success remains 0.000 and invalid actions remain 1.000. The deterministic temperature is worse on social tasks (success 0.167 vs. 0.256 at $t=0.7$) and lower-reward on the real-SLM mix (0.217 vs. 0.323), suggesting that moderate sampling helps some strategic tasks while leaving schema-following failures unsolved. Second, a retrospective candidate-count replay over the existing 30-seed candidate pool shows why candidate diversity matters. For the social train/validation gate, the selected validation-score delta rises from 0.115 with one candidate to 0.157 with four and 0.384 with eight; the eight-candidate rule is also the first accepted update. For the real-SLM no-gate setting, the selected validation-score delta moves from -0.020 with one candidate to +0.126 with eight. These diagnostics support the claim that the current bottleneck is not only gating, but also generating high-quality candidate textual edits.
+\subsection{Persistence Reduces Deployment Interaction}
 
-Table~\ref{tab:transfer} reports the local transfer-protocol probes. In each case, the same pattern appears: the fixed policy fails the held-out target contracts because it repeats an action, skips a verification step, or violates an allowed-action constraint, while TextGrad-RL converts source-domain failures into compact rules that transfer to most target tasks. Browser transfer improves success from 0.000 to 0.833, tool-use transfer from 0.000 to 0.833, and coding transfer from 0.000 to 0.800. These results are not official WebArena, tau-bench, or SWE-bench scores; they are controlled local probes of whether textual policy edits can transfer across task families.
+Table~\ref{tab:cost} supports the second claim.
+RulePI uses one test attempt and about half as many test actions as diagnostic retry: 42.25 versus 81.78 on TextWorld and 10.19 versus 20.68 on TextArena.
+The paired reductions are 39.53 actions (CI: 34.17 to 44.95) and 10.48 actions (CI: 7.35 to 14.19), respectively.
+
+This is an amortization claim, not a free-compute claim.
+If $C_{\mathrm{opt}}$ is optimization interaction and $A_r-A_p$ is the per-task saving over retry, the break-even deployment count is
+$N^*=C_{\mathrm{opt}}/(A_r-A_p)$.
+RulePI crosses this point within the 240-game TextWorld study, but not within the 130-episode TextArena study.
 
 \begin{table}[t]
 \centering
 \small
-\begin{tabular}{llrrrrrr}
+\begin{tabular}{lrrrr}
 \toprule
-Probe & Method & Episodes & Reward & Success & Invalid & Repeated & Turns \\
+ & \multicolumn{2}{c}{Test actions} & & \\
+Benchmark & Retry & RulePI & Opt. actions & $N^*$ \\
 \midrule
-\multirow{2}{*}{Browser}
- & Fixed prompt & 6 & 0.250 & 0.000 & 1.000 & 0.167 & 10.17 \\
- & Policy iteration & 6 & 0.944 & 0.833 & 0.000 & 0.000 & 6.83 \\
-\midrule
-\multirow{2}{*}{Tool use}
- & Fixed prompt & 6 & 0.325 & 0.000 & 0.833 & 0.000 & 10.67 \\
- & Policy iteration & 6 & 0.967 & 0.833 & 0.000 & 0.000 & 6.33 \\
-\midrule
-\multirow{2}{*}{Coding}
- & Fixed prompt & 5 & 0.273 & 0.000 & 0.400 & 0.000 & 9.40 \\
- & Policy iteration & 5 & 0.960 & 0.800 & 0.000 & 0.000 & 5.40 \\
+TextWorld & 81.78 & \textbf{42.25} & 7,965 & 202 \\
+TextArena & 20.68 & \textbf{10.19} & 7,921 & 756 \\
 \bottomrule
 \end{tabular}
-\caption{Local source-to-target transfer protocol probes. Browser trains on MiniWoB-style trajectories and evaluates WebArena/WorkArena-style contracts; tool use trains on retail and evaluates airline/banking-style contracts; coding trains on development repair and evaluates SWE-bench-Lite-style contracts.}
-\label{tab:transfer}
+\caption{Mean actions per deployed task, one-time RulePI optimization actions, and interaction break-even count $N^*$.}
+\label{tab:cost}
 \end{table}
 
-\section{Analysis}
+\subsection{A Matched Example}
 
-\paragraph{Where is the RL?}
-The RL component is not weight-level policy-gradient training. It is the control structure around textual policies: environment interaction, trajectory returns, action-level credit assignment, value baselines, candidate policy search, replay, and held-out acceptance. This makes TextGrad-RL closer to policy iteration over interpretable text rules than to end-to-end neural RL.
+Table~\ref{tab:example} traces one logged test game, \texttt{treasure\_level\_15}.
+The fixed policy repeats the same four-direction loop until the 80-action horizon.
+Both improved methods then execute the same six-action route, but Retry+Diag first pays for the failed attempt.
+RulePI learned the reusable exploration rule only from disjoint training games and applies it on its first test attempt.
 
-\paragraph{Why PPO does not yet win.}
-The deterministic runs reveal that train/validation gating is already enough to select the six robust rules: FrozenLake, GuessTheNumber, LightsOut, Mastermind, Nim, and TowerOfHanoi. PPO accepts the same policies, so it ties rather than improves. In the SLM setting, PPO's stricter gate often rejects edits with negative surrogate deltas, validation regressions, or invalid-action increases; because those rows do not improve the paper-facing results, we omit them from Table~\ref{tab:slm}. The useful signal is diagnostic rather than reward-seeking: the current candidate generator does not yet propose enough high-quality diverse edits for PPO to produce a reliable advantage.
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrrl}
+\toprule
+Method & Attempts & Actions & Outcome \\
+\midrule
+Fixed & 1 & 80 & loop; failure \\
+Retry+Diag & 2 & 86 & success \\
+RulePI & 1 & 6 & success \\
+\bottomrule
+\end{tabular}
+\caption{Matched test example. Retry+Diag uses 80 failed actions followed by the same six-action route as RulePI.}
+\label{tab:example}
+\end{table}
 
-\paragraph{Implications for agent research.}
-These results argue for treating textual self-improvement as an empirical policy-learning problem, not just prompt editing. The same edit can improve a training trajectory, harm validation behavior, and fail under stochastic decoding. REALM-style agent benchmarks need these distinctions: accepted textual memories and rules should be evaluated with held-out seeds, invalid-action rates, and update-decision traces.
+\subsection{What the Evidence Does Not Show}
 
-\paragraph{What the transfer probes add.}
-The transfer-protocol probes test a different claim from the TextArena tables: not whether TextGrad-RL solves more games, but whether a learned textual rule can survive a shift from source tasks to target-style contracts. The learned browser rules emphasize selecting then submitting, avoiding repeated browser actions, and searching before opening detail views. The tool-use rules emphasize identity verification, policy lookup, and final-state confirmation. The coding rules emphasize reproducing failures, preserving APIs, adding targeted tests, and tracing cross-file flow. The strong local gains suggest that textual policy iteration is promising as a transfer mechanism, while the local-contract setup keeps the evidence separate from official benchmark claims.
+\paragraph{The gate does not improve success.}
+Gated and ungated persistence are identical on TextWorld success, reward, and test actions.
+On TextArena they tie in success and test actions; gating retains 6 rather than 10 rules and changes mean reward only slightly (0.573 versus 0.564).
+Thus, persistence explains the observed success gain; validation is only a conservative diagnostic in these runs.
 
-\section{Limitations and Ethics}
+\paragraph{The LLM boundary is negative.}
+We also run Qwen2.5-7B at temperature 0.7 on 24 TextWorld games with an 80-action horizon.
+The fixed and RulePI protocols both obtain 25.0\% success.
+The candidate is rejected because validation score decreases from 0.508 to 0.506, so the deployed RulePI policy remains the base policy.
+The structured-actor result therefore does not establish generic prompt optimization for small LLM agents.
 
-This is a research prototype. The deterministic actor is a controlled heuristic policy, not a frontier LLM. The SLM runs use a small local model and remain sensitive to action-format failures, decoding stochasticity, and finite 30-seed samples. The local transfer probes are not official WebArena, tau-bench, or SWE-bench leaderboard executions; they are deterministic contracts designed to test mechanism transfer under local infrastructure constraints. The PPO surrogate is a behavioral proxy because the system does not observe true token-level action probabilities. Thus, the PPO results should be read as a stability ablation rather than a claim of policy-gradient optimality.
+\section{Practical Guidance}
 
-Ethically, frozen local agents and transparent textual rule updates reduce some risks relative to opaque fine-tuning, but agent self-improvement can still amplify unsafe behavior if the environment reward is misspecified. We therefore log rejected updates, invalid actions, and validation regressions, and restrict the software-engineering environment against editing tests, hidden validation, or reward files.
+RulePI is useful when (i) many future tasks share failure modes, (ii) the actor reliably executes written rules, and (iii) the policy will be reused enough to amortize evaluation.
+For a small number of tasks, diagnostic retry is simpler and can cost less overall.
+A practical deployment should first measure the action saving $A_r-A_p$, estimate $N^*$, and retain a gate only if rejected updates or validation regressions occur in practice.
 
 \section{Conclusion}
 
-TextGrad-RL offers a lightweight way to improve frozen language agents by optimizing modular text policies from trajectories. On TextArena, it substantially improves deterministic held-out reward and generalizes to harder variants. Local transfer-protocol probes suggest that the same textual rule updates can transfer across browser, tool-use, and coding-style task families. PPO-style gates do not yet improve final reward over train/validation gating, but they expose and reject brittle stochastic prompt edits. This makes TextGrad-RL a useful REALM benchmark substrate for studying how language agents can learn from interaction without updating model weights.
+Persistent textual rules improve two controlled interactive-agent suites and attain comparable observed success to task-local diagnostic retry with substantially less deployment interaction.
+The clean result is rule reuse, not a benefit from validation gating and not LLM self-improvement.
+This narrower conclusion makes RulePI an interpretable testbed for studying when trajectory lessons should become shared policies.
 
-\bibliographystyle{plainnat}
+\section*{Limitations}
+
+The positive experiments use structured actors that detect human-authored rule content and dispatch pre-existing routines.
+Candidate rules are selected from a predefined library keyed by benchmark failure modes; they are not freely generated from raw trajectories.
+Consequently, the study measures rule selection and reuse, not the acquisition of new skills or general natural-language instruction following.
+The task-local retry baseline receives the same diagnosed rule after its first failed test attempt, while persistent methods learn only from training data; this is intentionally a strong deployment-time baseline but uses a larger test budget.
+The Qwen2.5-7B boundary has only 24 games and no multi-seed confidence interval.
+TextWorld rejected some requested generation seeds; the runner deterministically advanced to the next valid seed and logged requested and actual seeds before evaluation.
+Finally, interaction counts measure environment actions, not wall-clock time, energy, or textual-optimizer inference cost.
+
+\section*{Ethical Considerations}
+
+The experiments use synthetic games and no personal or sensitive data.
+Persistent agent rules can nevertheless amplify misspecified rewards or unsafe behavior; deployments should log rule provenance, validation decisions, and regressions, and should restrict which rules can be activated in consequential environments.
+
 \bibliography{references}
+
+\appendix
+\section{Reproducibility Details}
+
+All four methods are evaluated on identical test instances.
+For TextWorld, requested outer seeds are spaced by 100,000; generator-invalid requests are advanced by one and recorded in a manifest.
+Within each repetition, training and validation seeds are offset by 10,000 and 20,000 from the test seed.
+The textual optimizer adds at most four rules in TextWorld and evaluates candidate policies under the same 80-action horizon used at test.
+The three reusable TextWorld rules cover ordered objective execution, graph exploration, and cookbook-based recipe completion.
 
 \end{document}
